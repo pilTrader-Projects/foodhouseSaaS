@@ -8,7 +8,7 @@ declare global {
     var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>
 }
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+const prisma = (global as any).prismaOverride || (globalThis.prismaGlobal ?? prismaClientSingleton())
 
 export default prisma
 
