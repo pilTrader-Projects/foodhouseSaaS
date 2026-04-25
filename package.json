@@ -9,7 +9,7 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "test": "vitest",
+    "tests": "vitest",
     "sanity": "ts-node tests/sanity_check.ts"
   },
   "dependencies": {
