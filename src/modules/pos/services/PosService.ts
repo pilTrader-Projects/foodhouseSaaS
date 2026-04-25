@@ -31,7 +31,7 @@ export class PosService extends BaseService {
                 data: {
                     tenantId: this.tenantId,
                     branchId: this.branchId!,
-                    userId: 'system-cashier', // Placeholder for actual user ID from session
+                    userId: 'user-admin', // Use the admin user created during seeding
                     totalAmount,
                     items: {
                         create: items.map((item) => ({

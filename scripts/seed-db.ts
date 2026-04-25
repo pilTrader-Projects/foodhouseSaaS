@@ -1,5 +1,15 @@
-import prisma from '../src/lib/prisma';
-import { DEMO_BRANCH, DEMO_INGREDIENTS, DEMO_PRODUCTS, INITIAL_STOCK } from '../src/lib/demo-data';
+import { loadEnvFile } from 'node:process';
+import { DEMO_BRANCH, DEMO_INGREDIENTS, DEMO_PRODUCTS, INITIAL_STOCK } from '../src/lib/demo-data.js';
+
+// Load environment variables from .env file (Native in Node 20.6+)
+try {
+    loadEnvFile();
+} catch (e) {
+    // .env might not exist if using system env vars
+}
+
+// Dynamically import prisma after env is loaded
+const { default: prisma } = await import('../src/lib/prisma.js');
 
 async function seed() {
     try {
