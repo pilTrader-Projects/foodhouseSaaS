@@ -20,12 +20,22 @@ export default function PosTerminalPage() {
     const [change, setChange] = useState<number>(0);
 
     useEffect(() => {
-        const savedMenu = localStorage.getItem('demo_menu');
-        if (savedMenu) {
-            setProducts(JSON.parse(savedMenu));
-        } else {
-            setProducts(DEMO_PRODUCTS);
+        const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
+        const branchId = 'branch-downtown';
+
+        async function fetchProducts() {
+            try {
+                const res = await fetch('/api/products', {
+                    headers: { 'x-tenant-id': tenantId }
+                });
+                const data = await res.json();
+                if (res.ok) setProducts(data);
+                else setProducts(DEMO_PRODUCTS);
+            } catch (e) {
+                setProducts(DEMO_PRODUCTS);
+            }
         }
+        fetchProducts();
     }, []);
 
     const openQuantityModal = (product: any) => {
@@ -63,25 +73,42 @@ export default function PosTerminalPage() {
 
     const handleCheckout = async () => {
         setIsCheckingOut(true);
-        
-        setTimeout(() => {
-            const newStock = { ...stock };
-            
-            cart.forEach(item => {
-                if (item.recipe) {
-                    item.recipe.forEach((ingredient: any) => {
-                        newStock[ingredient.ingredientId] -= (ingredient.amount * item.quantity);
-                    });
-                }
+        const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
+        const branchId = 'branch-downtown';
+
+        try {
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-tenant-id': tenantId,
+                    'x-branch-id': branchId
+                },
+                body: JSON.stringify({
+                    items: cart.map(item => ({
+                        productId: item.id,
+                        quantity: item.quantity,
+                        price: item.price
+                    }))
+                }),
             });
 
-            setStock(newStock);
-            setCart([]);
-            setShowPaymentModal(false);
-            setAmountTendered('');
+            if (res.ok) {
+                setCart([]);
+                setShowPaymentModal(false);
+                setAmountTendered('');
+                alert(`Order Successful!\nTotal: ₱${total.toFixed(2)}\nPayment: ${paymentType}\nChange: ₱${change.toFixed(2)}`);
+                // Force reload or update inventory here if needed
+                window.location.reload(); 
+            } else {
+                const error = await res.json();
+                alert(`Checkout failed: ${error.error}`);
+            }
+        } catch (e) {
+            alert("Connection error during checkout");
+        } finally {
             setIsCheckingOut(false);
-            alert(`Order Successful!\nTotal: ₱${total.toFixed(2)}\nPayment: ${paymentType}\nChange: ₱${change.toFixed(2)}`);
-        }, 800);
+        }
     };
 
     return (

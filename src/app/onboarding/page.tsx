@@ -13,19 +13,28 @@ export default function OnboardingPage() {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulation of TenantService.createTenant
-        setTimeout(() => {
-            const tenantData = {
-                id: `tenant-${Math.floor(Math.random() * 1000)}`,
-                name: businessName,
-                plan: plan,
-            };
+        try {
+            const res = await fetch('/api/onboarding', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: businessName, plan }),
+            });
 
-            // Persist for demo
-            localStorage.setItem('demo_tenant', JSON.stringify(tenantData));
+            const data = await res.json();
+            
+            if (res.ok) {
+                // Store tenant ID in localStorage for demo session tracking
+                localStorage.setItem('tenantId', data.tenantId);
+                router.push('/');
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        } catch (e) {
+            console.error("Signup failed", e);
+            alert("Connection error. Is the server running?");
+        } finally {
             setIsLoading(false);
-            router.push('/');
-        }, 1000);
+        }
     };
 
     return (

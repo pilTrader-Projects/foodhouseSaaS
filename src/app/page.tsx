@@ -15,9 +15,10 @@ export default function DashboardPage() {
 
         // Simulation of fetching data from the API we just built
         async function fetchData() {
+            const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
             try {
                 const res = await fetch('/api/analytics/global-sales', {
-                    headers: { 'x-tenant-id': 'tenant-1' }
+                    headers: { 'x-tenant-id': tenantId }
                 });
                 const data = await res.json();
                 setSales(data.totalSales || 0);

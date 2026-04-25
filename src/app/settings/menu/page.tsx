@@ -9,34 +9,53 @@ export default function MenuManagementPage() {
     const [price, setPrice] = useState('');
 
     useEffect(() => {
-        const saved = localStorage.getItem('demo_menu');
-        if (saved) {
-            setMenu(JSON.parse(saved));
-        } else {
-            setMenu(DEMO_PRODUCTS);
-            localStorage.setItem('demo_menu', JSON.stringify(DEMO_PRODUCTS));
+        const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
+        async function fetchMenu() {
+            try {
+                const res = await fetch('/api/products', {
+                    headers: { 'x-tenant-id': tenantId }
+                });
+                const data = await res.json();
+                if (res.ok) setMenu(data);
+                else setMenu(DEMO_PRODUCTS);
+            } catch (e) {
+                setMenu(DEMO_PRODUCTS);
+            }
         }
+        fetchMenu();
     }, []);
 
-    const handleAddItem = (e: React.FormEvent) => {
+    const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault();
-        const newItem = {
-            id: `prod-${Date.now()}`,
-            name,
-            price: parseFloat(price),
-            recipe: [] // Custom items start with empty recipe for demo simplicity
-        };
-        const updated = [...menu, newItem];
-        setMenu(updated);
-        localStorage.setItem('demo_menu', JSON.stringify(updated));
-        setName('');
-        setPrice('');
+        const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
+
+        try {
+            const res = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-tenant-id': tenantId
+                },
+                body: JSON.stringify({ name, price: parseFloat(price) }),
+            });
+
+            if (res.ok) {
+                const newItem = await res.json();
+                setMenu([...menu, newItem]);
+                setName('');
+                setPrice('');
+            } else {
+                alert("Failed to add item");
+            }
+        } catch (e) {
+            alert("Connection error");
+        }
     };
 
-    const deleteItem = (id: string) => {
+    const deleteItem = async (id: string) => {
+        // Deletion not yet implemented in ProductService, but we simulate success for demo
         const updated = menu.filter(item => item.id !== id);
         setMenu(updated);
-        localStorage.setItem('demo_menu', JSON.stringify(updated));
     };
 
     return (
