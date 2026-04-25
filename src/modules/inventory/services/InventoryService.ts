@@ -38,12 +38,12 @@ export class InventoryService extends BaseService {
                     tenantId: this.tenantId,
                     branchId: this.branchId,
                     ingredientId: recipeItem.ingredientId,
-                } as any,
+                },
                 data: {
                     quantity: {
                         decrement: amountToDeduct,
                     },
-                },
+                } as any,
             })
         }
     }

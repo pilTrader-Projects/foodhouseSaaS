@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { PosService } from '@/services/PosService'
+import { PosService } from '@/modules/pos/services/PosService'
 import prisma from '@/lib/prisma'
 
 // Mock Prisma
@@ -11,6 +11,12 @@ vi.mock('@/lib/prisma', () => ({
         },
         tenant: {
             findUnique: vi.fn(),
+        },
+        product: {
+            findUnique: vi.fn().mockResolvedValue({ ingredients: [] }),
+        },
+        stock: {
+            updateMany: vi.fn(),
         },
     },
 }))

@@ -9,13 +9,13 @@ export class ProductService extends BaseService {
      * Creates a new product for the tenant.
      * Mandates 'pos' feature availability.
      */
-    async createProduct(data: { name: string; basePrice: number }) {
+    async createProduct(data: { name: string; price: number }) {
         await this.ensureFeature('pos')
 
         return prisma.product.create({
             data: {
                 ...data,
-                tenantId: this.tenantId,
+                ...this.getScope(),
             },
         })
     }
@@ -26,7 +26,7 @@ export class ProductService extends BaseService {
     async getProducts() {
         await this.ensureFeature('pos')
         return prisma.product.findMany({
-            where: { tenantId: this.tenantId },
+            where: this.getScope(),
         })
     }
 }

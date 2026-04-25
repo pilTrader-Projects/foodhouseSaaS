@@ -9,6 +9,9 @@ vi.mock('@/lib/prisma', () => ({
             findMany: vi.fn().mockResolvedValue([]),
             create: vi.fn().mockResolvedValue({}),
         },
+        tenant: {
+            findUnique: vi.fn().mockResolvedValue({ plan: 'basic', features: [] }),
+        },
     },
 }))
 

@@ -11,6 +11,9 @@ vi.mock('@/lib/prisma', () => ({
         stock: {
             updateMany: vi.fn(),
         },
+        tenant: {
+            findUnique: vi.fn().mockResolvedValue({ plan: 'basic', features: [] }),
+        },
     },
 }))
 

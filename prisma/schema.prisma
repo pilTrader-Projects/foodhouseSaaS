@@ -22,6 +22,12 @@ model Tenant {
   // Subscription related (modular SaaS)
   plan      String   @default("basic") // basic, pro, enterprise
   features  String[] // feature flags
+
+  // Relations
+  products    Product[]
+  ingredients Ingredient[]
+  stocks      Stock[]
+  orders      Order[]
 }
 
 model Branch {
@@ -32,6 +38,10 @@ model Branch {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   users     User[]
+
+  // Relations
+  stocks    Stock[]
+  orders    Order[]
 }
 
 model User {
@@ -47,6 +57,7 @@ model User {
   role      Role     @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    Order[]
 }
 
 model Role {
@@ -69,13 +80,77 @@ model Permission {
   updatedAt   DateTime @updatedAt
 }
 
-// Example Business Entity with Mandatory tenant_id and branch_id
 model Product {
   id          String   @id @default(cuid())
   name        String
   price       Float
   tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
   branchId    String?  // Nullable if the product is global to the tenant
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  ingredients RecipeItem[]
+  orderItems  OrderItem[]
+}
+
+model Ingredient {
+  id          String   @id @default(cuid())
+  name        String
+  unit        String   // kg, l, pc, etc.
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recipeItems RecipeItem[]
+  stocks      Stock[]
+}
+
+model RecipeItem {
+  id           String     @id @default(cuid())
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id])
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  amount       Float      // Amount required per product unit
+}
+
+model Stock {
+  id           String     @id @default(cuid())
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  branchId     String
+  branch       Branch     @relation(fields: [branchId], references: [id])
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  quantity     Float      @default(0)
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([branchId, ingredientId])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  branchId    String
+  branch      Branch      @relation(fields: [branchId], references: [id])
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  totalAmount Float
+  status      String      @default("COMPLETED") // COMPLETED, CANCELLED, PENDING
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  pricePaid Float
 }
