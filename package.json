@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "tests": "vitest",
+    "coverage": "vitest run --coverage",
     "sanity": "ts-node tests/sanity_check.ts"
   },
   "dependencies": {
@@ -27,6 +28,7 @@
     "prisma": "^5.13.0",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0",
+    "@vitest/coverage-v8": "^1.6.0",
     "ts-node": "^10.9.2"
   }
 }

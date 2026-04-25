@@ -1,12 +1,17 @@
 import { describe, it, expect, vi } from 'vitest'
-import { AuthService } from '../services/AuthService'
-import prisma from '../lib/prisma'
+import { AuthService } from '@/services/AuthService'
+import prisma from '@/lib/prisma'
 
 // Mock Prisma
-vi.mock('../lib/prisma', () => ({
+vi.mock('@/lib/prisma', () => ({
     default: {
         user: {
-            findUnique: vi.fn(),
+            findUnique: vi.fn().mockResolvedValue({
+                id: 'user-1',
+                role: {
+                    permissions: [],
+                },
+            }),
         },
     },
 }))

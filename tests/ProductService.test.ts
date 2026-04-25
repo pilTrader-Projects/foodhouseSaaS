@@ -6,8 +6,8 @@ import prisma from '@/lib/prisma'
 vi.mock('@/lib/prisma', () => ({
     default: {
         product: {
-            findMany: vi.fn(),
-            create: vi.fn(),
+            findMany: vi.fn().mockResolvedValue([]),
+            create: vi.fn().mockResolvedValue({}),
         },
     },
 }))
