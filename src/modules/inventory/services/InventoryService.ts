@@ -11,7 +11,10 @@ export class InventoryService extends BaseService {
      * This is a "destructive" operation that updates stock levels.
      */
     async consumeIngredients(productId: string, quantity: number) {
-        // 1. Fetch the product recipe (ingredients and their required amounts)
+        // 1. Feature Gate
+        await this.ensureFeature('inventory')
+
+        // 2. Fetch the product recipe (ingredients and their required amounts)
         const product = await prisma.product.findUnique({
             where: { id: productId },
             include: {

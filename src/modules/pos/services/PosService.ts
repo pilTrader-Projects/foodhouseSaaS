@@ -20,6 +20,9 @@ export class PosService extends BaseService {
      * that inventory is only deducted if the order is successfully created.
      */
     async createOrder(items: { productId: string; quantity: number; price: number }[]) {
+        // 1. Feature Gate
+        await this.ensureFeature('pos')
+
         return await prisma.$transaction(async (tx) => {
             // 1. Calculate total and create the order
             const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
