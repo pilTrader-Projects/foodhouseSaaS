@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { FeatureService } from '@/services/FeatureService'
+import { FeatureService } from '@/services/feature-service'
 import prisma from '@/lib/prisma'
 
 // Mock Prisma

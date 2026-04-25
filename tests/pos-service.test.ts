@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { PosService } from '@/modules/pos/services/PosService'
+import { PosService } from '@/modules/pos/services/pos-service'
 import prisma from '@/lib/prisma'
-import { InventoryService } from '@/modules/inventory/services/InventoryService'
+import { InventoryService } from '@/modules/inventory/services/inventory-service'
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -17,7 +17,7 @@ vi.mock('@/lib/prisma', () => ({
 }))
 
 // Mock InventoryService
-vi.mock('@/modules/inventory/services/InventoryService')
+vi.mock('@/modules/inventory/services/inventory-service')
 
 describe('PosService (TDD)', () => {
     const tenantId = 'tenant-1'

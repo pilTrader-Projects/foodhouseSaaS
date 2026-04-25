@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { OrderService } from '@/modules/orders/services/OrderService'
+import { OrderService } from '@/modules/orders/services/order-service'
 import prisma from '@/lib/prisma'
 
 // Mock Prisma

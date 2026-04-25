@@ -1,4 +1,4 @@
-import { BaseService } from '@/services/BaseService'
+import { BaseService } from '@/services/base-service'
 import prisma from '@/lib/prisma'
 
 /**

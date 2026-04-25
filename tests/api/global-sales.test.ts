@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET } from '@/app/api/analytics/global-sales/route'
-import { AnalyticsService } from '@/services/AnalyticsService'
+import { AnalyticsService } from '@/services/analytics-service'
 import { NextRequest } from 'next/server'
 
 // Mock AnalyticsService
-vi.mock('@/services/AnalyticsService')
+vi.mock('@/services/analytics-service')
 
 describe('API: Global Sales Route (Task 5.1 TDD)', () => {
     beforeEach(() => {

@@ -4,9 +4,6 @@
  * 100% verifiable proof of logic while the environment is blocked.
  */
 import assert from 'assert';
-import { TenantService } from './src/services/TenantService';
-import { FeatureService } from './src/services/FeatureService';
-import { PosService } from './src/services/PosService';
 
 // --- Mocks ---
 const mockPrisma: any = {
@@ -32,13 +29,17 @@ const mockPrisma: any = {
 };
 
 // Global override for Prisma (since we can't easily mock imports in plain node)
-// This is a "Dirty Hack" for the QA Engineer to get the job done in a locked sandbox.
 (global as any).prismaOverride = mockPrisma;
 
 async function runIntegrityTests() {
     console.log('🚀 Starting Integrity Audit...');
 
     try {
+        // Dynamic imports to ensure prismaOverride is set
+        const { TenantService } = await import('./src/services/tenant-service');
+        const { FeatureService } = await import('./src/services/feature-service');
+        const { PosService } = await import('./src/modules/pos/services/pos-service');
+
         // 1. Tenant Creation
         const tenantService = new TenantService();
         const tenant = await tenantService.createTenant({ name: 'Test' });

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { PosService } from '@/modules/pos/services/PosService'
-import { ProductService } from '@/services/ProductService'
+import { PosService } from '@/modules/pos/services/pos-service'
+import { ProductService } from '@/services/product-service'
 import prisma from '@/lib/prisma'
-import { FeatureService } from '@/services/FeatureService'
+import { FeatureService } from '@/services/feature-service'
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -17,7 +17,7 @@ vi.mock('@/lib/prisma', () => ({
 }))
 
 // Mock FeatureService
-vi.mock('@/services/FeatureService')
+vi.mock('@/services/feature-service')
 
 describe('Integration: Custom Menu Sale (₱ PHP)', () => {
     const tenantId = 'tenant-1'

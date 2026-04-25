@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import { FeatureService } from './FeatureService'
+import { FeatureService } from './feature-service'
 
 /**
  * BaseService ensures that every database query is scoped to the correct tenant and branch,

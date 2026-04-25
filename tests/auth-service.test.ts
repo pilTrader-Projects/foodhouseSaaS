@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { AuthService } from '@/services/AuthService'
+import { AuthService } from '@/services/auth-service'
 import prisma from '@/lib/prisma'
 
 // Mock Prisma

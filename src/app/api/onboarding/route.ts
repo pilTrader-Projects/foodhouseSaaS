@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { TenantService } from '@/services/TenantService';
-import { FeatureService } from '@/services/FeatureService';
+import { TenantService } from '@/services/tenant-service';
+import { FeatureService } from '@/services/feature-service';
 
 export async function POST(request: Request) {
     try {
@@ -10,17 +10,12 @@ export async function POST(request: Request) {
         // In a real app, we'd get a user ID from session or create one here
         const adminUserId = 'user-admin'; // Placeholder
 
-        const tenantService = new TenantService(null as any); // Static context for creation
-        const tenant = await tenantService.createTenant(name, plan);
+        const tenantService = new TenantService(); 
+        const tenant = await tenantService.createTenant({ name, plan });
 
-        // Auto-enable features based on plan
-        const featureService = new FeatureService(tenant.id);
-        await featureService.enableFeature('pos');
-        await featureService.enableFeature('inventory');
-
-        if (plan === 'pro') {
-            await featureService.enableFeature('dashboard');
-        }
+        // Features are automatically enabled based on the plan in FeatureService
+        // No need to manually enable 'pos' and 'inventory' as they are in 'basic' plan
+        // 'dashboard' is in 'pro' plan.
 
         return NextResponse.json({
             message: 'Tenant created successfully',

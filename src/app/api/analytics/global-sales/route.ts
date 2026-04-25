@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { AnalyticsService } from '@/services/AnalyticsService'
+import { AnalyticsService } from '@/services/analytics-service'
 
 export async function GET(req: NextRequest) {
     const tenantId = req.headers.get('x-tenant-id')

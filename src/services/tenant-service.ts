@@ -8,11 +8,11 @@ export class TenantService {
     /**
      * Creates a new business tenant with initial configuration.
      */
-    async createTenant(data: { name: string }) {
+    async createTenant(data: { name: string; plan?: string }) {
         return prisma.tenant.create({
             data: {
                 name: data.name,
-                plan: 'basic',
+                plan: data.plan || 'basic',
                 features: [],
             },
         })

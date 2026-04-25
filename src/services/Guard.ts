@@ -1,4 +1,4 @@
-import { AuthService } from './AuthService'
+import { AuthService } from './auth-service'
 
 /**
  * rbacGuard is a high-level helper to enforce permissions at the service or API level.

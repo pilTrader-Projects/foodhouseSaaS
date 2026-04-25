@@ -1,6 +1,6 @@
-import { BaseService } from '@/services/BaseService'
+import { BaseService } from '@/services/base-service'
 import prisma from '@/lib/prisma'
-import { InventoryService } from '../../inventory/services/InventoryService'
+import { InventoryService } from '../../inventory/services/inventory-service'
 
 /**
  * PosService handles order creation and coordinates with the 

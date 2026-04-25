@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import { FeatureService } from './FeatureService'
+import { FeatureService } from './feature-service'
 
 export interface Session {
     userId: string

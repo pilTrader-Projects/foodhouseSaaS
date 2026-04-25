@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { RecipeService } from '@/modules/inventory/services/RecipeService'
+import { RecipeService } from '@/modules/inventory/services/recipe-service'
 import prisma from '@/lib/prisma'
-import { FeatureService } from '@/services/FeatureService'
+import { FeatureService } from '@/services/feature-service'
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -15,7 +15,7 @@ vi.mock('@/lib/prisma', () => ({
 }))
 
 // Mock FeatureService
-vi.mock('@/services/FeatureService')
+vi.mock('@/services/feature-service')
 
 describe('RecipeService (Phase 3 TDD)', () => {
     const tenantId = 'tenant-1'
