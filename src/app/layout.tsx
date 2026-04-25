@@ -21,8 +21,8 @@ export default function RootLayout({
               <ul className="nav-links">
                 <li><a href="/" className="nav-item">Dashboard</a></li>
                 <li><a href="/pos" className="nav-item">POS Terminal</a></li>
-                <li><a href="#" className="nav-item">Inventory</a></li>
-                <li><a href="#" className="nav-item">Suppliers</a></li>
+                <li><a href="/settings/menu" className="nav-item">Menu Management</a></li>
+                <li><a href="/settings/team" className="nav-item">Manage Team</a></li>
               </ul>
             </nav>
           </aside>

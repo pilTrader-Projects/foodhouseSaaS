@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 export default function DashboardPage() {
     const [sales, setSales] = useState<number>(0);
     const [loading, setLoading] = useState(true);
@@ -57,12 +58,12 @@ export default function DashboardPage() {
                 <h1>Welcome back, {tenant?.name || 'Store Owner'}</h1>
                 <p style={{ color: 'var(--text-muted)' }}>Here is what's happening across your business.</p>
             </div>
+            
             <div className="stats-grid">
-...
                 <div className="card">
                     <h3>Total Global Sales</h3>
                     <div className="value">
-                        {loading ? '...' : `$${sales.toLocaleString()}`}
+                        {loading ? '...' : `₱${sales.toLocaleString()}`}
                     </div>
                 </div>
                 <div className="card">
@@ -81,15 +82,15 @@ export default function DashboardPage() {
                     <div style={{ marginTop: '1rem' }}>
                         <div style={{ padding: '0.75rem 0', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
                             <span>Branch Downtown</span>
-                            <strong>$2,450.00</strong>
+                            <strong>₱2,450.00</strong>
                         </div>
                         <div style={{ padding: '0.75rem 0', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
                             <span>Branch Uptown</span>
-                            <strong>$1,820.00</strong>
+                            <strong>₱1,820.00</strong>
                         </div>
                         <div style={{ padding: '0.75rem 0', display: 'flex', justifyContent: 'space-between' }}>
                             <span>Branch Suburbs</span>
-                            <strong>$730.00</strong>
+                            <strong>₱730.00</strong>
                         </div>
                     </div>
                 </div>

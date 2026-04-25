@@ -1,25 +1,22 @@
-# Project: FoodHouse SaaS - Phase 7 (Onboarding & Team Setup)
+# Project: FoodHouse SaaS - Phase 8 (Custom Menu & Localization)
 
 ## Status: COMPLETED
 **Persona in Charge:** Senior Lead
 
 ## Objective
-Implement the "Business Setup" workflow: Tenant signup, plan selection, branch creation, and employee role assignment.
+Localize the app to PHP and implement Menu Management so customers can input their actual products, prices, and recipes.
 
 ## Task List
-- [x] **Task 7.1: Tenant Onboarding UI (Developer)**
-  - Created `/onboarding` for business name and plan selection.
-- [x] **Task 7.2: Plan-based UI Logic (Developer)**
-  - Dashboard is now gated based on Basic/Pro plan.
-- [x] **Task 7.3: Employee Management & Roles (Developer)**
-  - Created `/settings/team` for adding employees and assigning roles.
-- [x] **Task 7.4: Subscription Feature Gates (Architect)**
-  - Verified logic via `tests/SubscriptionFlow.test.ts`.
-- [x] **Task 7.5: Persistence Layer (Senior Lead)**
-  - Implemented `localStorage` persistence for a seamless demo session.
+- [x] **Task 8.1: PHP Currency Conversion (Developer)**
+  - Updated Dashboard and POS Terminal to use `₱` symbol.
+- [x] **Task 8.2: Menu Management UI (Developer)**
+  - Created `/settings/menu` where users can add/delete their actual menu items.
+- [x] **Task 8.3: Custom Pricing TDD (Developer)**
+  - Verified logic for custom product creation via `tests/MenuService.test.ts`.
+- [x] **Task 8.4: POS Integration Test (QA)**
+  - Verified end-to-end flow (Custom Item -> PHP Sale) via `tests/CustomMenuPOS.test.ts`.
 
 ## Success Criteria
-- [x] User can "sign up" and see their business name in the dashboard.
-- [x] "Basic" plan correctly restricts dashboard access.
-- [x] Admin can assign roles (Cashier, Manager, Accountant, Owner).
-- [x] All 35 tests pass (3 new integration tests added).
+- [x] Currency is displayed as ₱ throughout the app.
+- [x] User can add a new item (e.g., "Adobo Rice") and see it appear in the POS.
+- [x] 100% TDD compliance: All new logic covered by unit and integration tests.
