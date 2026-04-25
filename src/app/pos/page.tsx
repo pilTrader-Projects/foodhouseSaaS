@@ -13,6 +13,12 @@ export default function PosTerminalPage() {
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [quantityInput, setQuantityInput] = useState(1);
 
+    // Payment Modal State
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [paymentType, setPaymentType] = useState('Cash');
+    const [amountTendered, setAmountTendered] = useState<string>('');
+    const [change, setChange] = useState<number>(0);
+
     useEffect(() => {
         const savedMenu = localStorage.getItem('demo_menu');
         if (savedMenu) {
@@ -45,6 +51,16 @@ export default function PosTerminalPage() {
 
     const total = cart.reduce((sum, item) => sum + item.displayPrice, 0);
 
+    // Calculate change in real-time
+    useEffect(() => {
+        const tendered = parseFloat(amountTendered) || 0;
+        if (tendered >= total) {
+            setChange(tendered - total);
+        } else {
+            setChange(0);
+        }
+    }, [amountTendered, total]);
+
     const handleCheckout = async () => {
         setIsCheckingOut(true);
         
@@ -52,7 +68,6 @@ export default function PosTerminalPage() {
             const newStock = { ...stock };
             
             cart.forEach(item => {
-                // If the product has a recipe, deduct based on quantity
                 if (item.recipe) {
                     item.recipe.forEach((ingredient: any) => {
                         newStock[ingredient.ingredientId] -= (ingredient.amount * item.quantity);
@@ -62,50 +77,95 @@ export default function PosTerminalPage() {
 
             setStock(newStock);
             setCart([]);
+            setShowPaymentModal(false);
+            setAmountTendered('');
             setIsCheckingOut(false);
-            alert("Order Successful! Inventory updated.");
+            alert(`Order Successful!\nTotal: ₱${total.toFixed(2)}\nPayment: ${paymentType}\nChange: ₱${change.toFixed(2)}`);
         }, 800);
     };
 
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', height: 'calc(100vh - 150px)', position: 'relative' }}>
             
-            {/* Quantity Modal Overlay */}
-            {selectedProduct && (
+            {/* Modal Overlay Helper */}
+            {(selectedProduct || showPaymentModal) && (
                 <div style={{
                     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                     backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
                     justifyContent: 'center', zIndex: 100, borderRadius: '1rem'
                 }}>
-                    <div className="card" style={{ width: '300px', textAlign: 'center' }}>
-                        <h3>{selectedProduct.name}</h3>
-                        <p style={{ margin: '1rem 0' }}>Enter Quantity:</p>
-                        <input 
-                            type="number" 
-                            min="1"
-                            value={quantityInput}
-                            onChange={(e) => setQuantityInput(parseInt(e.target.value) || 1)}
-                            style={{ 
-                                width: '100%', padding: '1rem', fontSize: '1.5rem', 
-                                textAlign: 'center', marginBottom: '1.5rem', borderRadius: '0.5rem',
-                                border: '1px solid var(--border)'
-                            }}
-                        />
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button 
-                                onClick={() => setSelectedProduct(null)}
-                                style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--border)', background: 'white', borderRadius: '0.5rem', cursor: 'pointer' }}
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                onClick={confirmAddToCart}
-                                style={{ flex: 1, padding: '0.75rem', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}
-                            >
-                                Add
-                            </button>
+                    {/* Quantity Modal */}
+                    {selectedProduct && (
+                        <div className="card" style={{ width: '300px', textAlign: 'center' }}>
+                            <h3>{selectedProduct.name}</h3>
+                            <p style={{ margin: '1rem 0' }}>Enter Quantity:</p>
+                            <input 
+                                type="number" min="1" autoFocus
+                                value={quantityInput}
+                                onChange={(e) => setQuantityInput(parseInt(e.target.value) || 1)}
+                                style={{ width: '100%', padding: '1rem', fontSize: '1.5rem', textAlign: 'center', marginBottom: '1.5rem', borderRadius: '0.5rem', border: '1px solid var(--border)' }}
+                            />
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => setSelectedProduct(null)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--border)', background: 'white', borderRadius: '0.5rem', cursor: 'pointer' }}>Cancel</button>
+                                <button onClick={confirmAddToCart} style={{ flex: 1, padding: '0.75rem', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>Add to Order</button>
+                            </div>
                         </div>
-                    </div>
+                    )}
+
+                    {/* Payment Modal */}
+                    {showPaymentModal && (
+                        <div className="card" style={{ width: '400px' }}>
+                            <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Checkout & Payment</h2>
+                            
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.25rem' }}>
+                                <span>Total Amount:</span>
+                                <strong>₱{total.toFixed(2)}</strong>
+                            </div>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Payment Method</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                    <button 
+                                        onClick={() => setPaymentType('Cash')}
+                                        style={{ padding: '0.75rem', borderRadius: '0.5rem', border: `2px solid ${paymentType === 'Cash' ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: paymentType === 'Cash' ? '#eff6ff' : 'white', cursor: 'pointer' }}
+                                    >Cash</button>
+                                    <button 
+                                        onClick={() => setPaymentType('Digital')}
+                                        style={{ padding: '0.75rem', borderRadius: '0.5rem', border: `2px solid ${paymentType === 'Digital' ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: paymentType === 'Digital' ? '#eff6ff' : 'white', cursor: 'pointer' }}
+                                    >GCash / Card</button>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Amount Tendered (₱)</label>
+                                <input 
+                                    type="number" autoFocus
+                                    placeholder="0.00"
+                                    value={amountTendered}
+                                    onChange={(e) => setAmountTendered(e.target.value)}
+                                    style={{ width: '100%', padding: '1rem', fontSize: '1.25rem', borderRadius: '0.5rem', border: '1px solid var(--border)' }}
+                                />
+                            </div>
+
+                            {paymentType === 'Cash' && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', padding: '1rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem' }}>
+                                    <span style={{ fontWeight: 'bold', color: '#166534' }}>Change:</span>
+                                    <strong style={{ fontSize: '1.25rem', color: '#166534' }}>₱{change.toFixed(2)}</strong>
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => setShowPaymentModal(false)} style={{ flex: 1, padding: '1rem', border: '1px solid var(--border)', background: 'white', borderRadius: '0.5rem', cursor: 'pointer' }}>Back</button>
+                                <button 
+                                    onClick={handleCheckout}
+                                    disabled={parseFloat(amountTendered) < total || isCheckingOut}
+                                    style={{ flex: 1, padding: '1rem', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer', opacity: parseFloat(amountTendered) < total ? 0.5 : 1 }}
+                                >
+                                    {isCheckingOut ? 'Processing...' : 'Complete Sale'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -154,10 +214,7 @@ export default function PosTerminalPage() {
                     {cart.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '2rem' }}>Cart is empty</p>}
                     {cart.map(item => (
                         <div key={item.cartId} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.875rem' }}>
-                            <span>
-                                {item.name} 
-                                <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>x{item.quantity}</span>
-                            </span>
+                            <span>{item.name} <span style={{ color: 'var(--text-muted)' }}>x{item.quantity}</span></span>
                             <div>
                                 <strong>₱{item.displayPrice.toFixed(2)}</strong>
                                 <button onClick={() => removeFromCart(item.cartId)} style={{ marginLeft: '0.5rem', color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>×</button>
@@ -171,21 +228,11 @@ export default function PosTerminalPage() {
                         <span>₱{total.toFixed(2)}</span>
                     </div>
                     <button 
-                        onClick={handleCheckout}
-                        disabled={cart.length === 0 || isCheckingOut}
-                        style={{ 
-                            width: '100%', 
-                            padding: '1rem', 
-                            backgroundColor: 'var(--primary)', 
-                            color: 'white', 
-                            border: 'none', 
-                            borderRadius: '0.5rem', 
-                            fontWeight: 'bold',
-                            cursor: cart.length === 0 ? 'not-allowed' : 'pointer',
-                            opacity: cart.length === 0 || isCheckingOut ? 0.6 : 1
-                        }}
+                        onClick={() => setShowPaymentModal(true)}
+                        disabled={cart.length === 0}
+                        style={{ width: '100%', padding: '1rem', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: cart.length === 0 ? 'not-allowed' : 'pointer', opacity: cart.length === 0 ? 0.6 : 1 }}
                     >
-                        {isCheckingOut ? 'Processing...' : 'Complete Sale'}
+                        Proceed to Payment
                     </button>
                 </div>
             </div>
