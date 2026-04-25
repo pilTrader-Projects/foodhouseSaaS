@@ -1,25 +1,32 @@
-import { BaseService } from './BaseService'
+import { BaseService } from '@/services/BaseService'
 import prisma from '@/lib/prisma'
 
+/**
+ * ProductService manages the catalog of sellable items for a tenant.
+ */
 export class ProductService extends BaseService {
     /**
-     * Fetches all products scoped to the current tenant and branch.
+     * Creates a new product for the tenant.
+     * Mandates 'pos' feature availability.
      */
-    async getProducts() {
-        return prisma.product.findMany({
-            where: this.getScope(),
+    async createProduct(data: { name: string; basePrice: number }) {
+        await this.ensureFeature('pos')
+
+        return prisma.product.create({
+            data: {
+                ...data,
+                tenantId: this.tenantId,
+            },
         })
     }
 
     /**
-     * Creates a product with enforced tenant and branch IDs.
+     * Fetches all products for the tenant.
      */
-    async createProduct(data: { name: string; price: number }) {
-        return prisma.product.create({
-            data: {
-                ...data,
-                ...this.getScope(),
-            },
+    async getProducts() {
+        await this.ensureFeature('pos')
+        return prisma.product.findMany({
+            where: { tenantId: this.tenantId },
         })
     }
 }
