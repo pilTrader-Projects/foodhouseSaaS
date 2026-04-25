@@ -40,3 +40,6 @@ next-env.d.ts
 # local temporary folders used for workarounds
 /.tmp
 /.prisma-cache
+
+# local symlink to artifacts
+/brain
