@@ -11,6 +11,7 @@ vi.mock('@/lib/prisma', () => ({
         },
         branch: {
             create: vi.fn(),
+            count: vi.fn(),
         },
     },
 }))
@@ -41,6 +42,8 @@ describe('TenantService (TDD)', () => {
 
     it('should create a branch for a tenant', async () => {
         const branchData = { name: 'Main Street Branch', tenantId: 'tenant-1' }
+            ; (prisma.tenant.findUnique as any).mockResolvedValue({ id: 'tenant-1', plan: 'basic', features: [] })
+            ; (prisma.branch.count as any).mockResolvedValue(0)
             ; (prisma.branch.create as any).mockResolvedValue({ id: 'branch-1', ...branchData })
 
         const branch = await service.createBranch(branchData)
