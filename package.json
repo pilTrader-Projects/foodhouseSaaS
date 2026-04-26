@@ -12,7 +12,7 @@
     "prisma:migrate": "prisma migrate dev",
     "tests": "vitest",
     "coverage": "vitest run --coverage",
-    "sanity": "NODE_OPTIONS='--loader ts-node/esm' ts-node tests/sanity_check.ts"
+    "sanity": "NODE_OPTIONS='--loader ts-node/esm' ts-node tests/sanity-check.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.13.0",
