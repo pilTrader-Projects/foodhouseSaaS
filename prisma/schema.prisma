@@ -28,6 +28,8 @@ model Tenant {
   ingredients Ingredient[]
   stocks      Stock[]
   orders      Order[]
+  suppliers   Supplier[]
+  purchases   PurchaseRecord[]
 }
 
 model Branch {
@@ -105,6 +107,9 @@ model Ingredient {
 
   recipeItems RecipeItem[]
   stocks      Stock[]
+  supplierId  String?
+  supplier    Supplier?        @relation(fields: [supplierId], references: [id])
+  purchases   PurchaseRecord[]
 }
 
 model RecipeItem {
@@ -128,6 +133,34 @@ model Stock {
   updatedAt    DateTime   @updatedAt
 
   @@unique([branchId, ingredientId])
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  contact     String?
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  ingredients Ingredient[]
+  purchases   PurchaseRecord[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PurchaseRecord {
+  id           String     @id @default(cuid())
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  branchId     String
+  branch       Branch     @relation(fields: [branchId], references: [id])
+  supplierId   String
+  supplier     Supplier   @relation(fields: [supplierId], references: [id])
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  quantity     Float
+  unitCost     Float
+  totalCost    Float
+  createdAt    DateTime   @default(now())
 }
 
 model Order {

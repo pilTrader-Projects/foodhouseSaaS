@@ -35,7 +35,8 @@ This list defines the order of building blocks to ensure zero technical debt and
 *   **[I-2] Automated Ingredient Deduction** (✅ DONE)
 *   **[S-5] Subscription Limits Enforcement** (✅ **DONE**)
     *   *Rationale*: Prevents abuse of plan tiers (e.g., branch count) before scaling to reporting features.
-*   **[I-3] Supplier Linkage & Procurement** (📅 PLANNED)
+*   **[I-3] Supplier Linkage & Procurement** (✅ **DONE**)
+    *   *Rationale*: Completes the operational data chain (Procurement -> Inventory -> Sale).
 
 ### **III. Operational Visibility (Reporting Layer)**
 *   **[A-1] Cross-Branch Data Aggregation Logic** (📅 PLANNED)
@@ -57,7 +58,7 @@ This list defines the order of building blocks to ensure zero technical debt and
 | **1** | **Design** | System Design (DB Schema, RBAC Model) | ✅ **Completed** | 2026-04-27 |
 | **2** | **Core** | SaaS Core (Auth, Tenant, RBAC, Feature Flags) | ✅ **Completed** | 2026-04-27 |
 | **3** | **Vertical** | POS-lite (Products, Orders, Sales) | 🔄 **In Progress** | 2026-04-27 |
-| **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking) | 🔄 **In Progress** | 2026-04-27 |
+| **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking, Suppliers) | ✅ **Completed** | 2026-04-27 |
 | **5** | **Scale** | Aggregation Logic (Cross-branch reporting) | 📅 **Planned** | - |
 | **6** | **UI** | Dashboard (Owner view, KPIs) | 📅 **Planned** | - |
 | **7** | **SaaS** | Subscription System (Limits, Plan Enforcement) | ✅ **Completed** | 2026-04-27 |
@@ -111,3 +112,4 @@ This list defines the order of building blocks to ensure zero technical debt and
 | 2026-04-27 | POS | Service Refactor | Grouped order creation and inventory deduction in transactions. |
 | 2026-04-27 | SaaS | Feature Gating | Implemented `PLAN_FEATURES` system in `FeatureService`. |
 | 2026-04-27 | SaaS | Limit Enforcement | Implemented `max_branches` enforcement in `TenantService`. |
+| 2026-04-27 | Inventory | Supplier & Procurement | Implemented `Supplier` model, `SupplierService`, and `PurchaseRecord`. |
