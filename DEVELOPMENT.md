@@ -16,7 +16,41 @@ This document tracks the evolution of the FoodHouse SaaS platform, ensuring all 
 
 ---
 
-## 🛤️ Roadmap & Progress Status
+## � Critical Path Sequence (Dependency-Aware)
+
+This list defines the order of building blocks to ensure zero technical debt and logical data flow. Items are prioritized based on their foundational importance to the SaaS platform.
+
+### **I. SaaS Infrastructure (Foundation Layer)**
+*   **[S-1] Multi-Tenant DB Schema** (✅ DONE)
+*   **[S-2] Auth & Context Resolution** (✅ DONE)
+    *   *Rationale*: Prevents cross-tenant data leaks before any feature code is written.
+*   **[S-3] RBAC: Initial Roles & Permissions** (✅ DONE)
+*   **[S-4] Feature Gating System** (✅ DONE)
+    *   *Rationale*: Sets the stage for monetization through plans (Basic, Pro, etc.).
+
+### **II. Operational Engine (Vertical Slices)**
+*   **[P-1] Product Management** (✅ DONE)
+*   **[P-2] Order & Sale Transaction Flow** (✅ DONE)
+*   **[I-1] Raw Material Registry** (✅ DONE)
+*   **[I-2] Automated Ingredient Deduction** (✅ DONE)
+*   **[S-5] Subscription Limits Enforcement** (🟡 **IN PROGRESS**)
+    *   *Rationale*: Before building multi-branch dashboards ([A-1]), we must enforce `max_branches` and `max_users` to protect plan value.
+*   **[I-3] Supplier Linkage & Procurement** (📅 PLANNED)
+
+### **III. Operational Visibility (Reporting Layer)**
+*   **[A-1] Cross-Branch Data Aggregation Logic** (📅 PLANNED)
+    *   *Rationale*: Depends on [S-2] (Context) and [P-2] (Sales Data).
+*   **[U-1] Executive Dashboard (Owner View)** (📅 PLANNED)
+    *   *Rationale*: Consumes the logic from [A-1].
+
+### **IV. Commercial Expansion (Monetization Layer)**
+*   **[M-1] Billing Integration (Stripe / PayMongo)** (📅 PLANNED)
+*   **[S-6] Global SaaS Admin Panel** (📅 PLANNED)
+    *   *Rationale*: The final layer for platform operators to manage all tenants globally.
+
+---
+
+## �🛤️ Roadmap & Progress Status
 
 | Step | phase | Description | Status | Updated |
 | :--- | :--- | :--- | :--- | :--- |
