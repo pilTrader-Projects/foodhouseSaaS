@@ -8,7 +8,7 @@ import { FeatureService } from './feature-service'
 export class BaseService {
     protected tenantId: string
     protected branchId?: string
-    private featureService: FeatureService
+    protected featureService: FeatureService
 
     constructor(tenantId: string, branchId?: string) {
         if (!tenantId) {

@@ -38,11 +38,13 @@ This list defines the order of building blocks to ensure zero technical debt and
 *   **[I-3] Supplier Linkage & Procurement** (✅ **DONE**)
     *   *Rationale*: Completes the operational data chain (Procurement -> Inventory -> Sale).
 
-### **III. Operational Visibility (Reporting Layer)**
-*   **[A-1] Cross-Branch Data Aggregation Logic** (✅ **DONE**)
-    *   *Rationale*: Powering consolidated views across all branches.
-*   **[U-1] Executive Dashboard (Owner View)** (✅ **DONE**)
-    *   *Rationale*: Delivers real-time operational insights via premium UI.
+### **III. Branch Operational Context (Refinement Layer)**
+*   **[S-7] Team Management & Branch Assignment** (✅ **DONE**)
+    *   *Rationale*: Allows owners to delegate operations to staff (Cashiers, Managers, Chefs) with strict role isolation.
+*   **[S-8] UI-Level RBAC Enforcement** (✅ **DONE**)
+    *   *Rationale*: Ensures staff only access modules relevant to their role and branch.
+*   **[P-3] Branch-Specific Menus & Overrides** (📅 PLANNED)
+*   **[I-4] Stock Transfers & Branch Logistics** (📅 PLANNED)
 
 ### **IV. Commercial Expansion (Monetization Layer)**
 *   **[M-1] Billing Integration (Stripe / PayMongo)** (📅 PLANNED)
@@ -61,9 +63,10 @@ This list defines the order of building blocks to ensure zero technical debt and
 | **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking, Suppliers) | ✅ **Completed** | 2026-04-27 |
 | **5** | **Scale** | Aggregation Logic (Cross-branch reporting) | ✅ **Completed** | 2026-04-27 |
 | **6** | **UI** | Dashboard (Owner view, KPIs) | ✅ **Completed** | 2026-04-27 |
-| **7** | **SaaS** | Subscription System (Limits, Plan Enforcement) | ✅ **Completed** | 2026-04-27 |
-| **8** | **Fin** | Billing Integration (Payments) | 📅 **Planned** | - |
-| **9** | **Admin** | SaaS Global Admin Panel | 📅 **Planned** | - |
+| **7** | **Team** | Personnel Management (Roles, Branch Assignment) | ✅ **Completed** | 2026-04-27 |
+| **8** | **SaaS** | Subscription System (Limits, Plan Enforcement) | ✅ **Completed** | 2026-04-27 |
+| **9** | **Fin** | Billing Integration (Payments) | 📅 **Planned** | - |
+| **10** | **Admin** | SaaS Global Admin Panel | 📅 **Planned** | - |
 
 ---
 
@@ -115,3 +118,5 @@ This list defines the order of building blocks to ensure zero technical debt and
 | 2026-04-27 | Inventory | Supplier & Procurement | Implemented `Supplier` model, `SupplierService`, and `PurchaseRecord`. |
 | 2026-04-27 | Analytics | Aggregation Logic | Exposed cross-branch sales and stock analytics via API routes. |
 | 2026-04-27 | UI | Executive Dashboard | Built a premium, data-driven dashboard using Lucide React and Glassmorphism. |
+| 2026-04-27 | Team | Personnel & RBAC | Implemented `UserService`, `/api/auth/me`, and guarded `Sidebar` with `RoleSwitcher`. |
+| 2026-04-27 | Core | Visibility Fix | Changed `featureService` visibility to `protected` in `BaseService` to support sub-services. |
