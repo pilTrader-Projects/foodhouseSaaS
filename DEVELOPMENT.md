@@ -39,10 +39,10 @@ This list defines the order of building blocks to ensure zero technical debt and
     *   *Rationale*: Completes the operational data chain (Procurement -> Inventory -> Sale).
 
 ### **III. Operational Visibility (Reporting Layer)**
-*   **[A-1] Cross-Branch Data Aggregation Logic** (📅 PLANNED)
-    *   *Rationale*: Depends on [S-2] (Context) and [P-2] (Sales Data).
-*   **[U-1] Executive Dashboard (Owner View)** (📅 PLANNED)
-    *   *Rationale*: Consumes the logic from [A-1].
+*   **[A-1] Cross-Branch Data Aggregation Logic** (✅ **DONE**)
+    *   *Rationale*: Powering consolidated views across all branches.
+*   **[U-1] Executive Dashboard (Owner View)** (✅ **DONE**)
+    *   *Rationale*: Delivers real-time operational insights via premium UI.
 
 ### **IV. Commercial Expansion (Monetization Layer)**
 *   **[M-1] Billing Integration (Stripe / PayMongo)** (📅 PLANNED)
@@ -59,8 +59,8 @@ This list defines the order of building blocks to ensure zero technical debt and
 | **2** | **Core** | SaaS Core (Auth, Tenant, RBAC, Feature Flags) | ✅ **Completed** | 2026-04-27 |
 | **3** | **Vertical** | POS-lite (Products, Orders, Sales) | 🔄 **In Progress** | 2026-04-27 |
 | **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking, Suppliers) | ✅ **Completed** | 2026-04-27 |
-| **5** | **Scale** | Aggregation Logic (Cross-branch reporting) | 📅 **Planned** | - |
-| **6** | **UI** | Dashboard (Owner view, KPIs) | 📅 **Planned** | - |
+| **5** | **Scale** | Aggregation Logic (Cross-branch reporting) | ✅ **Completed** | 2026-04-27 |
+| **6** | **UI** | Dashboard (Owner view, KPIs) | ✅ **Completed** | 2026-04-27 |
 | **7** | **SaaS** | Subscription System (Limits, Plan Enforcement) | ✅ **Completed** | 2026-04-27 |
 | **8** | **Fin** | Billing Integration (Payments) | 📅 **Planned** | - |
 | **9** | **Admin** | SaaS Global Admin Panel | 📅 **Planned** | - |
@@ -113,3 +113,5 @@ This list defines the order of building blocks to ensure zero technical debt and
 | 2026-04-27 | SaaS | Feature Gating | Implemented `PLAN_FEATURES` system in `FeatureService`. |
 | 2026-04-27 | SaaS | Limit Enforcement | Implemented `max_branches` enforcement in `TenantService`. |
 | 2026-04-27 | Inventory | Supplier & Procurement | Implemented `Supplier` model, `SupplierService`, and `PurchaseRecord`. |
+| 2026-04-27 | Analytics | Aggregation Logic | Exposed cross-branch sales and stock analytics via API routes. |
+| 2026-04-27 | UI | Executive Dashboard | Built a premium, data-driven dashboard using Lucide React and Glassmorphism. |
