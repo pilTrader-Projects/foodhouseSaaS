@@ -33,8 +33,8 @@ This list defines the order of building blocks to ensure zero technical debt and
 *   **[P-2] Order & Sale Transaction Flow** (✅ DONE)
 *   **[I-1] Raw Material Registry** (✅ DONE)
 *   **[I-2] Automated Ingredient Deduction** (✅ DONE)
-*   **[S-5] Subscription Limits Enforcement** (🟡 **IN PROGRESS**)
-    *   *Rationale*: Before building multi-branch dashboards ([A-1]), we must enforce `max_branches` and `max_users` to protect plan value.
+*   **[S-5] Subscription Limits Enforcement** (✅ **DONE**)
+    *   *Rationale*: Prevents abuse of plan tiers (e.g., branch count) before scaling to reporting features.
 *   **[I-3] Supplier Linkage & Procurement** (📅 PLANNED)
 
 ### **III. Operational Visibility (Reporting Layer)**
@@ -60,7 +60,7 @@ This list defines the order of building blocks to ensure zero technical debt and
 | **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking) | 🔄 **In Progress** | 2026-04-27 |
 | **5** | **Scale** | Aggregation Logic (Cross-branch reporting) | 📅 **Planned** | - |
 | **6** | **UI** | Dashboard (Owner view, KPIs) | 📅 **Planned** | - |
-| **7** | **SaaS** | Subscription System (Limits, Plan Enforcement) | 🟡 **Partial** | 2026-04-27 |
+| **7** | **SaaS** | Subscription System (Limits, Plan Enforcement) | ✅ **Completed** | 2026-04-27 |
 | **8** | **Fin** | Billing Integration (Payments) | 📅 **Planned** | - |
 | **9** | **Admin** | SaaS Global Admin Panel | 📅 **Planned** | - |
 
@@ -110,3 +110,4 @@ This list defines the order of building blocks to ensure zero technical debt and
 | 2026-04-27 | Global | Architecture Audit | Verified compliance with "SaaS-First" directives. |
 | 2026-04-27 | POS | Service Refactor | Grouped order creation and inventory deduction in transactions. |
 | 2026-04-27 | SaaS | Feature Gating | Implemented `PLAN_FEATURES` system in `FeatureService`. |
+| 2026-04-27 | SaaS | Limit Enforcement | Implemented `max_branches` enforcement in `TenantService`. |
