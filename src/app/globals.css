@@ -1,11 +1,11 @@
 :root {
-  --primary: #2563eb;
-  --bg: #f8fafc;
-  --sidebar-bg: #1e293b;
-  --sidebar-text: #f1f5f9;
+  --primary: #006AFF;
+  --bg: #ffffff;
+  --sidebar-bg: #020617;
+  --sidebar-text: #94a3b8;
   --card-bg: #ffffff;
-  --border: #e2e8f0;
-  --text-main: #0f172a;
+  --border: #f1f5f9;
+  --text-main: #020617;
   --text-muted: #64748b;
   --danger: #ef4444;
 }
@@ -61,7 +61,8 @@ body {
   text-decoration: none;
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item:hover,
+.nav-item.active {
   background-color: rgba(255, 255, 255, 0.1);
   color: white;
 }
@@ -99,7 +100,7 @@ body {
   border: 1px solid var(--border);
   padding: 1.5rem;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .card h3 {

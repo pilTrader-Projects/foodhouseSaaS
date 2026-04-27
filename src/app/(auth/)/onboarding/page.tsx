@@ -73,72 +73,34 @@ export default function OnboardingPage() {
     };
 
     const steps = [
-        { id: 1, title: 'Account', icon: User, desc: 'Your owner profile' },
-        { id: 2, title: 'Business', icon: Store, desc: 'Brand & Subscription' },
-        { id: 3, title: 'Outlet', icon: MapPin, desc: 'Your first branch' }
+        { id: 1, title: 'Account' },
+        { id: 2, title: 'Business' },
+        { id: 3, title: 'Outlet' }
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 flex-col items-center flex-center p-4">
+        <div className="min-h-screen bg-white flex-col flex-center p-4 animate-fade-in">
             <div className="max-w-xl w-full">
-                {/* Header / Logo */}
-                <div className="flex-center gap-3 mb-10">
-                    <div className="p-2 bg-blue-600 rounded-xl text-white shadow-blue">
-                        <ShieldCheck style={{ width: '2rem', height: '2rem' }} />
-                    </div>
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">FoodHouse SaaS</h1>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="flex gap-4 mb-10" style={{ overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                {/* Progress Indicators */}
+                <div className="flex gap-10 mb-20 border-b pb-4">
                     {steps.map((s) => (
                         <div 
                             key={s.id} 
                             style={{ 
                               display: 'flex', 
-                              flexDirection: 'column', 
+                              alignItems: 'center', 
                               gap: '0.5rem', 
-                              minWidth: '120px', 
-                              opacity: step >= s.id ? 1 : 0.4,
-                              transform: step === s.id ? 'scale(1)' : 'scale(0.95)',
+                              opacity: step >= s.id ? 1 : 0.3,
                               transition: 'all 0.5s'
                             }}
                         >
-                            <div className="flex items-center gap-2">
-                                <div style={{ 
-                                  width: '2rem', 
-                                  height: '2rem', 
-                                  borderRadius: '50%', 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
-                                  justifyContent: 'center', 
-                                  fontSize: '0.75rem', 
-                                  fontWeight: 'bold',
-                                  background: step > s.id ? '#10b981' : step === s.id ? '#2563eb' : '#e2e8f0',
-                                  color: 'white',
-                                  boxShadow: step === s.id ? '0 10px 20px rgba(37, 99, 235, 0.3)' : 'none'
-                                }}>
-                                    {step > s.id ? <CheckCircle2 style={{ width: '1.25rem', height: '1.25rem' }} /> : s.id}
-                                </div>
-                                <span className="text-xs font-black uppercase tracking-widest" style={{ color: step === s.id ? 'var(--slate-900)' : 'var(--slate-500)' }}>{s.title}</span>
-                            </div>
+                            <span className="text-xs font-black uppercase tracking-widest">{s.title}</span>
+                            {step === s.id && <div style={{ width: '4px', height: '4px', background: 'var(--primary)', borderRadius: '50%' }} />}
                         </div>
                     ))}
                 </div>
 
-                <div className="card-premium relative" style={{ overflow: 'hidden' }}>
-                    {error && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: -10 }} 
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-rose-50 text-rose-600 p-4 rounded-2xl mb-6 text-sm font-bold flex items-center gap-3"
-                            style={{ border: '1px solid #ffe4e6' }}
-                        >
-                            <div className="bg-rose-500 rounded-full animate-pulse" style={{ width: '0.4rem', height: '0.4rem' }} />
-                            {error}
-                        </motion.div>
-                    )}
-
+                <div className="flex-col gap-10">
                     <AnimatePresence mode="wait">
                         {step === 1 && (
                             <motion.div 
@@ -146,45 +108,36 @@ export default function OnboardingPage() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="flex-col gap-6"
+                                className="flex-col gap-8"
                             >
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 mb-2">Create Owner Account</h2>
-                                    <p className="text-slate-500 font-medium">Let's get started with your personal details.</p>
+                                    <h2 className="font-serif text-5xl font-black text-slate-900 tracking-tight">Identity</h2>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-4">Personal Owner Credentials</p>
                                 </div>
                                 
                                 <div className="flex-col gap-4">
-                                    <div className="flex-col gap-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
-                                        <input 
-                                            autoFocus
-                                            type="text" 
-                                            placeholder="Juan Dela Cruz"
-                                            className="input-premium"
-                                            value={formData.user.name}
-                                            onChange={(e) => updateFormData('user', 'name', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="flex-col gap-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
-                                        <input 
-                                            type="email" 
-                                            placeholder="juan@foodhouse.ph"
-                                            className="input-premium"
-                                            value={formData.user.email}
-                                            onChange={(e) => updateFormData('user', 'email', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="flex-col gap-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
-                                        <input 
-                                            type="password" 
-                                            placeholder="••••••••"
-                                            className="input-premium"
-                                            value={formData.user.password}
-                                            onChange={(e) => updateFormData('user', 'password', e.target.value)}
-                                        />
-                                    </div>
+                                    <input 
+                                        autoFocus
+                                        type="text" 
+                                        placeholder="Full Name"
+                                        className="input-minimal"
+                                        value={formData.user.name}
+                                        onChange={(e) => updateFormData('user', 'name', e.target.value)}
+                                    />
+                                    <input 
+                                        type="email" 
+                                        placeholder="Business Email"
+                                        className="input-minimal"
+                                        value={formData.user.email}
+                                        onChange={(e) => updateFormData('user', 'email', e.target.value)}
+                                    />
+                                    <input 
+                                        type="password" 
+                                        placeholder="Secure Password"
+                                        className="input-minimal"
+                                        value={formData.user.password}
+                                        onChange={(e) => updateFormData('user', 'password', e.target.value)}
+                                    />
                                 </div>
                             </motion.div>
                         )}
@@ -195,58 +148,51 @@ export default function OnboardingPage() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="flex-col gap-6"
+                                className="flex-col gap-8"
                             >
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 mb-2">Business Identity</h2>
-                                    <p className="text-slate-500 font-medium">Tell us about your organization.</p>
+                                    <h2 className="font-serif text-5xl font-black text-slate-900 tracking-tight">Organization</h2>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-4">Brand & Infrastructure Selection</p>
                                 </div>
                                 
                                 <div className="flex-col gap-6">
-                                    <div className="flex-col gap-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Business Name</label>
-                                        <input 
-                                            autoFocus
-                                            type="text" 
-                                            placeholder="e.g. Mario's Pizza"
-                                            className="input-premium"
-                                            value={formData.business.name}
-                                            onChange={(e) => updateFormData('business', 'name', e.target.value)}
-                                        />
-                                    </div>
+                                    <input 
+                                        autoFocus
+                                        type="text" 
+                                        placeholder="Organization Name"
+                                        className="input-minimal"
+                                        value={formData.business.name}
+                                        onChange={(e) => updateFormData('business', 'name', e.target.value)}
+                                    />
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div 
                                             onClick={() => updateFormData('business', 'plan', 'basic')}
-                                            className="p-5 rounded-3xl border transition-all"
                                             style={{ 
                                               cursor: 'pointer',
-                                              borderColor: formData.business.plan === 'basic' ? '#2563eb' : '#f1f5f9',
+                                              padding: '2rem',
+                                              border: '1px solid',
+                                              borderColor: formData.business.plan === 'basic' ? 'var(--primary)' : 'var(--border-light)',
                                               background: formData.business.plan === 'basic' ? '#eff6ff' : 'white',
-                                              borderWidth: '2px'
+                                              transition: 'all 0.3s'
                                             }}
                                         >
-                                            <div className="flex-center mb-3 rounded-full" style={{ width: '2rem', height: '2rem', background: formData.business.plan === 'basic' ? '#2563eb' : '#f1f5f9', color: formData.business.plan === 'basic' ? 'white' : '#94a3b8' }}>
-                                                <CheckCircle2 style={{ width: '1.25rem', height: '1.25rem' }} />
-                                            </div>
-                                            <h3 className="font-black text-slate-900">Basic</h3>
-                                            <p className="text-xs font-bold text-slate-400 uppercase mt-1">1 Outlet Only</p>
+                                            <h3 className="text-xs font-black uppercase tracking-widest">Standard</h3>
+                                            <p className="text-xs text-slate-500 mt-2">Single branch context initialization.</p>
                                         </div>
                                         <div 
                                             onClick={() => updateFormData('business', 'plan', 'pro')}
-                                            className="p-5 rounded-3xl border transition-all"
                                             style={{ 
                                               cursor: 'pointer',
-                                              borderColor: formData.business.plan === 'pro' ? '#2563eb' : '#f1f5f9',
+                                              padding: '2rem',
+                                              border: '1px solid',
+                                              borderColor: formData.business.plan === 'pro' ? 'var(--primary)' : 'var(--border-light)',
                                               background: formData.business.plan === 'pro' ? '#eff6ff' : 'white',
-                                              borderWidth: '2px'
+                                              transition: 'all 0.3s'
                                             }}
                                         >
-                                            <div className="flex-center mb-3 rounded-full" style={{ width: '2rem', height: '2rem', background: formData.business.plan === 'pro' ? '#2563eb' : '#f1f5f9', color: formData.business.plan === 'pro' ? 'white' : '#94a3b8' }}>
-                                                <Store style={{ width: '1.25rem', height: '1.25rem' }} />
-                                            </div>
-                                            <h3 className="font-black text-slate-900">Pro</h3>
-                                            <p className="text-xs font-bold text-slate-400 uppercase mt-1">Unlimited Outlets</p>
+                                            <h3 className="text-xs font-black uppercase tracking-widest">Scale</h3>
+                                            <p className="text-xs text-slate-500 mt-2">Multi-tenant management enabled.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -259,33 +205,30 @@ export default function OnboardingPage() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="flex-col gap-6"
+                                className="flex-col gap-8"
                             >
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 mb-2">First Outlet Setup</h2>
-                                    <p className="text-slate-500 font-medium">Create your primary operational branch.</p>
+                                    <h2 className="font-serif text-5xl font-black text-slate-900 tracking-tight">Deployment</h2>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-4">Primary Branch Configuration</p>
                                 </div>
                                 
                                 <div className="flex-col gap-4">
-                                    <div className="flex-col gap-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Outlet / Branch Name</label>
-                                        <input 
-                                            autoFocus
-                                            type="text" 
-                                            placeholder="e.g. Greenhills Branch"
-                                            className="input-premium"
-                                            value={formData.branch.name}
-                                            onChange={(e) => updateFormData('branch', 'name', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="p-6 bg-slate-50 rounded-3xl flex gap-4">
-                                        <div className="p-3 bg-white rounded-xl shadow-sm" style={{ height: 'fit-content' }}>
-                                            <MapPin style={{ width: '1.5rem', height: '1.5rem', color: '#2563eb' }} />
+                                    <input 
+                                        autoFocus
+                                        type="text" 
+                                        placeholder="Branch Name (e.g. Headquarters)"
+                                        className="input-minimal"
+                                        value={formData.branch.name}
+                                        onChange={(e) => updateFormData('branch', 'name', e.target.value)}
+                                    />
+                                    <div className="p-10 border flex-col gap-4 items-center text-center">
+                                        <div className="text-accent">
+                                            <CheckCircle2 style={{ width: '2rem', height: '2rem' }} />
                                         </div>
                                         <div>
-                                            <h4 className="text-sm font-black text-slate-900">Live Context Initialization</h4>
-                                            <p className="text-xs text-slate-500 mt-1 font-medium leading-relaxed">
-                                                We'll set up standard roles and operational settings for this branch automatically.
+                                            <h4 className="text-xs font-black uppercase tracking-widest">Automated Setup</h4>
+                                            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                                                The system will provision standard roles, inventory structures, and security protocols for your new branch.
                                             </p>
                                         </div>
                                     </div>
@@ -294,45 +237,32 @@ export default function OnboardingPage() {
                         )}
                     </AnimatePresence>
 
-                    {/* Navigation Buttons */}
-                    <div className="flex-between gap-4" style={{ marginTop: '3rem' }}>
-                        {step > 1 ? (
-                            <button 
-                                onClick={prevStep}
-                                className="text-xs font-black text-slate-400 uppercase tracking-widest hover-nav"
-                                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                            >
-                                Back
-                            </button>
-                        ) : <div />}
-
+                    {/* Navigation */}
+                    <div className="flex gap-4 items-center">
                         <button 
                             disabled={isLoading}
                             onClick={nextStep}
-                            className="btn-premium btn-primary"
+                            className="btn-minimal btn-accent px-10"
                         >
-                            {isLoading ? (
-                                <><Loader2 className="animate-spin" style={{ width: '1.25rem', height: '1.25rem' }} /> Finalizing...</>
-                            ) : (
-                                <>
-                                    {step === 3 ? 'Launch SaaS' : 'Continue'}
-                                    <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
-                                </>
-                            )}
+                            {isLoading ? 'Finalizing...' : step === 3 ? 'Deploy SaaS' : 'Next Phase'}
                         </button>
+                        {step > 1 && (
+                            <button 
+                                onClick={prevStep}
+                                className="btn-minimal btn-outline px-6"
+                            >
+                                Back
+                            </button>
+                        )}
                     </div>
 
-                    <div style={{ position: 'absolute', bottom: '-2.5rem', right: '-2.5rem', width: '10rem', height: '10rem', background: '#eff6ff', borderRadius: '10rem', filter: 'blur(3rem)', zIndex: -1 }} />
+                    {error && (
+                        <div className="text-rose-600 text-xs font-black uppercase tracking-widest mt-6">
+                           Error: {error}
+                        </div>
+                    )}
                 </div>
-
-                <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mt-8">
-                    Step {step} of 3 &bull; Fully Managed AI Infrastructure
-                </p>
             </div>
-            <style jsx>{`
-              .hover-nav:hover { color: var(--slate-900); }
-              .scrollbar-hide::-webkit-scrollbar { display: none; }
-            `}</style>
         </div>
     );
 }

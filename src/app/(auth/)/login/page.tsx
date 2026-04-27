@@ -49,94 +49,86 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex-col items-center flex-center p-4">
+        <div className="min-h-screen bg-white flex-col flex-center p-4 animate-fade-in">
             <Link 
                 href="/" 
-                className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 hover-nav"
+                className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 hover-black"
                 style={{ position: 'absolute', top: '2.5rem', left: '2.5rem', textDecoration: 'none' }}
             >
-                <ChevronLeft style={{ width: '1rem', height: '1rem' }} /> Back to home
+                <ChevronLeft style={{ width: '1rem', height: '1rem' }} /> Back
             </Link>
 
             <div className="max-w-md w-full flex-col gap-10">
-                <div className="flex-col items-center text-center">
-                    <div className="p-4 bg-blue-600 rounded-card-premium text-white shadow-blue mb-6" style={{ width: 'fit-content', margin: '0 auto' }}>
-                        <ShieldCheck style={{ width: '2.5rem', height: '2.5rem' }} />
+                <div className="flex-col items-center text-center gap-4">
+                    <div className="p-4 bg-black text-white" style={{ borderRadius: '4px', width: 'fit-content' }}>
+                        <ShieldCheck style={{ width: '1.5rem', height: '1.5rem' }} />
                     </div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Welcome Back</h1>
-                    <p className="text-slate-500 font-semibold mt-2">Access your branch dashboard</p>
+                    <div>
+                      <h1 className="font-serif text-4xl font-black text-slate-900 tracking-tight">Access Dashboard</h1>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">Precision management starts here</p>
+                    </div>
                 </div>
 
-                <div className="card-premium relative" style={{ overflow: 'hidden' }}>
+                <div className="card-minimal">
                     {error && (
-                        <div className="bg-rose-50 text-rose-600 p-4 rounded-2xl mb-6 text-sm font-bold flex items-center gap-2">
-                            <span className="bg-rose-600 rounded-full" style={{ width: '0.4rem', height: '0.4rem' }} />
+                        <div className="text-rose-600 mb-6 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                            <span className="bg-rose-600" style={{ width: '4px', height: '4px' }} />
                             {error}
                         </div>
                     )}
 
                     <form onSubmit={handleLogin} className="flex-col gap-6">
                         <div className="flex-col gap-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
-                            <div style={{ position: 'relative' }}>
-                                <Mail style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', width: '1.25rem', height: '1.25rem', color: 'var(--slate-400)' }} />
-                                <input 
-                                    autoFocus
-                                    type="email" 
-                                    required
-                                    placeholder="juan@foodhouse.ph"
-                                    className="input-premium"
-                                    style={{ paddingLeft: '3.5rem' }}
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                            </div>
+                            <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Email</label>
+                            <input 
+                                autoFocus
+                                type="email" 
+                                required
+                                placeholder="name@organization.com"
+                                className="input-minimal"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
                         </div>
 
                         <div className="flex-col gap-2">
                             <div className="flex-between ml-1">
                                 <label className="text-xs font-black uppercase tracking-widest text-slate-400">Password</label>
-                                <a href="#" className="text-xs font-black uppercase tracking-widest text-blue-600" style={{ textDecoration: 'none' }}>Forgot?</a>
+                                <a href="#" className="text-xs font-black uppercase tracking-widest text-accent" style={{ textDecoration: 'none' }}>Reset</a>
                             </div>
-                            <div style={{ position: 'relative' }}>
-                                <Lock style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', width: '1.25rem', height: '1.25rem', color: 'var(--slate-400)' }} />
-                                <input 
-                                    type="password" 
-                                    required
-                                    placeholder="••••••••"
-                                    className="input-premium"
-                                    style={{ paddingLeft: '3.5rem' }}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                            </div>
+                            <input 
+                                type="password" 
+                                required
+                                placeholder="••••••••"
+                                className="input-minimal"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
                         </div>
 
                         <button 
                             disabled={isLoading}
                             type="submit"
-                            className="btn-premium btn-secondary w-full"
+                            className="btn-minimal btn-accent w-full"
                         >
                             {isLoading ? (
-                                <Loader2 className="animate-spin" style={{ width: '1.5rem', height: '1.5rem' }} />
+                                <Loader2 className="animate-spin" style={{ width: '1rem', height: '1rem' }} />
                             ) : (
-                                <>Sign In <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} /></>
+                                <>Sign In <ArrowRight style={{ width: '1rem', height: '1rem' }} /></>
                             )}
                         </button>
                     </form>
-
-                    <div style={{ position: 'absolute', top: 0, right: 0, marginRight: '-1.5rem', marginTop: '-1.5rem', width: '5rem', height: '5rem', background: '#eff6ff', borderRadius: '5rem', filter: 'blur(2rem)', zIndex: -1 }} />
                 </div>
 
                 <div className="text-center">
-                    <p className="text-sm font-bold text-slate-400">
-                        Don't have an account? {' '}
-                        <Link href="/onboarding" className="text-blue-600" style={{ textDecoration: 'none' }}>Create Business</Link>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                        New Organization? {' '}
+                        <Link href="/onboarding" className="text-accent" style={{ textDecoration: 'none' }}>Create Account</Link>
                     </p>
                 </div>
             </div>
             <style jsx>{`
-              .hover-nav:hover { color: var(--slate-900); }
+              .hover-black:hover { color: var(--text-primary); }
             `}</style>
         </div>
     );
