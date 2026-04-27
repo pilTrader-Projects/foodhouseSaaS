@@ -16,27 +16,40 @@ export async function POST() {
             }
         });
 
-        // 2. Create Default Role & User
-        const role = await prisma.role.upsert({
-            where: { id: 'role-admin' },
-            update: {},
-            create: {
-                id: 'role-admin',
-                name: 'Admin',
-                tenantId: tenant.id
-            }
-        });
+        // 2. Create Default Roles
+        const devRoles = [
+            { id: 'role-admin', name: 'Owner' },
+            { id: 'role-manager', name: 'Manager' },
+            { id: 'role-cashier', name: 'Cashier' },
+            { id: 'role-chef', name: 'Chef' }
+        ];
+
+        for (const r of devRoles) {
+            await prisma.role.upsert({
+                where: { id: r.id },
+                update: { name: r.name },
+                create: {
+                    id: r.id,
+                    name: r.name,
+                    tenantId: tenant.id
+                }
+            });
+        }
+
+        const adminRole = await prisma.role.findUnique({ where: { id: 'role-admin' } });
 
         const user = await prisma.user.upsert({
             where: { email: 'admin@demo.com' },
-            update: {},
+            update: {
+                roleId: adminRole!.id
+            },
             create: {
                 id: 'user-admin',
                 email: 'admin@demo.com',
                 name: 'Demo Admin',
-                password: 'password123', // In real app, this would be hashed
+                password: 'password123',
                 tenantId: tenant.id,
-                roleId: role.id
+                roleId: adminRole!.id
             }
         });
 
@@ -87,14 +100,16 @@ export async function POST() {
             const product = await prisma.product.upsert({
                 where: { id: prod.id },
                 update: {
-                    price: prod.price
+                    price: prod.price,
+                    deductionModel: prod.id === 'p1' ? 'ON_PRODUCTION' : 'ON_ORDER' // p1 is Fried Chicken
                 },
                 create: {
                     id: prod.id,
                     name: prod.name,
                     price: prod.price,
                     tenantId: tenant.id,
-                    branchId: branch.id
+                    branchId: branch.id,
+                    deductionModel: prod.id === 'p1' ? 'ON_PRODUCTION' : 'ON_ORDER'
                 }
             });
 

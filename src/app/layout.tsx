@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Sidebar } from '@/components/layout/sidebar'
+import { RoleSwitcher } from '@/components/layout/role-switcher'
+import { ToastProvider } from '@/components/ui/toast'
 
 export const metadata: Metadata = {
   title: 'FoodHouse SaaS | Dashboard',
@@ -13,34 +16,30 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <div className="dashboard-container">
-          <aside className="sidebar">
-            <h2>FoodHouse</h2>
-            <nav>
-              <ul className="nav-links">
-                <li><a href="/" className="nav-item">Dashboard</a></li>
-                <li><a href="/pos" className="nav-item">POS Terminal</a></li>
-                <li><a href="/settings/menu" className="nav-item">Menu Management</a></li>
-                <li><a href="/settings/team" className="nav-item">Manage Team</a></li>
-              </ul>
-            </nav>
-          </aside>
-          
-          <main className="main-content">
-            <header className="header">
-              <div className="breadcrumb">FoodHouse SaaS</div>
-              <div className="user-profile">
-                <a href="/settings/team" style={{ marginRight: '1.5rem', fontSize: '0.875rem', color: 'var(--primary)', textDecoration: 'none' }}>Manage Team</a>
-                <a href="/onboarding" style={{ marginRight: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)', textDecoration: 'none' }}>Reset Demo</a>
-              </div>
-            </header>
+      <body className="antialiased">
+        <ToastProvider>
+          <div className="dashboard-container">
+            <Sidebar />
             
-            <section className="content-area">
-              {children}
-            </section>
-          </main>
-        </div>
+            <main className="main-content">
+              <header className="header">
+                <div className="breadcrumb text-sm font-bold text-slate-400">
+                  FoodHouse SaaS <span className="mx-2 text-slate-200">/</span> Operational Context
+                </div>
+                
+                <div className="flex items-center gap-6">
+                  <RoleSwitcher />
+                  <div className="h-6 w-[1px] bg-slate-100"></div>
+                  <a href="/onboarding" className="text-10 font-black uppercase text-slate-400 hover:text-slate-900 transition-colors">Reset Demo</a>
+                </div>
+              </header>
+              
+              <section className="content-area">
+                {children}
+              </section>
+            </main>
+          </div>
+        </ToastProvider>
       </body>
     </html>
   )

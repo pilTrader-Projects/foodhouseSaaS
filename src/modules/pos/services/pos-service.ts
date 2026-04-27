@@ -1,23 +1,21 @@
 import { BaseService } from '@/services/base-service'
 import prisma from '@/lib/prisma'
-import { InventoryService } from '../../inventory/services/inventory-service'
+import { DeductionService } from '@/services/deduction-service'
 
 /**
  * PosService handles order creation and coordinates with the 
- * Inventory module to ensure stock is deducted in a single transaction.
+ * DeductionService to ensure stock is accurately accounted for.
  */
 export class PosService extends BaseService {
-    private inventoryService: InventoryService
+    private deductionService: DeductionService
 
     constructor(tenantId: string, branchId: string) {
         super(tenantId, branchId)
-        this.inventoryService = new InventoryService(tenantId, branchId)
+        this.deductionService = new DeductionService(tenantId, branchId)
     }
 
     /**
      * Creates a new order. 
-     * This logic is wrapped in a Prisma transaction to ensure 
-     * that inventory is only deducted if the order is successfully created.
      */
     async createOrder(items: { productId: string; quantity: number; price: number }[]) {
         // 1. Feature Gate
@@ -31,7 +29,7 @@ export class PosService extends BaseService {
                 data: {
                     tenantId: this.tenantId,
                     branchId: this.branchId!,
-                    userId: 'user-admin', // Use the admin user created during seeding
+                    userId: 'user-admin',
                     totalAmount,
                     items: {
                         create: items.map((item) => ({
@@ -43,9 +41,9 @@ export class PosService extends BaseService {
                 },
             })
 
-            // 2. Delegate inventory consumption to the Inventory module
+            // 2. Delegate deduction to specialized service
             for (const item of items) {
-                await this.inventoryService.consumeIngredients(item.productId, item.quantity)
+                await this.deductionService.deductStock(item.productId, item.quantity, tx)
             }
 
             return order

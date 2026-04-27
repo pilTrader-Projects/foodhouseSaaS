@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,37 +8,37 @@ datasource db {
 }
 
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  branches  Branch[]
-  users     User[]
-  roles     Role[]
-  
-  // Subscription related (modular SaaS)
-  plan      String   @default("basic") // basic, pro, enterprise
-  features  String[] // feature flags
-
-  // Relations
-  products    Product[]
+  id          String           @id @default(cuid())
+  name        String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  plan        String           @default("basic")
+  features    String[]
+  branches    Branch[]
   ingredients Ingredient[]
-  stocks      Stock[]
   orders      Order[]
+  products    Product[]
+  purchases   PurchaseRecord[]
+  roles       Role[]
+  stocks      Stock[]
+  suppliers   Supplier[]
+  users       User[]
 }
 
 model Branch {
-  id        String   @id @default(cuid())
-  name      String
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  users     User[]
-
-  // Relations
-  stocks    Stock[]
-  orders    Order[]
+  id             String             @id @default(cuid())
+  name           String
+  tenantId       String
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  tenant         Tenant             @relation(fields: [tenantId], references: [id])
+  branchProducts BranchProduct[]
+  orders         Order[]
+  preparedStocks PreparedStock[]
+  productionLogs ProductionRecord[]
+  purchases      PurchaseRecord[]
+  stocks         Stock[]
+  users          User[]
 }
 
 model User {
@@ -50,107 +47,180 @@ model User {
   name      String?
   password  String
   tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
   branchId  String?
-  branch    Branch?  @relation(fields: [branchId], references: [id])
   roleId    String
-  role      Role     @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+  role      Role     @relation(fields: [roleId], references: [id])
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
 }
 
 model Role {
   id          String       @id @default(cuid())
   name        String
-  tenantId    String?      // Null for system-wide roles, otherwise tenant-specific
-  tenant      Tenant?      @relation(fields: [tenantId], references: [id])
-  permissions Permission[]
-  users       User[]
+  tenantId    String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  tenant      Tenant?      @relation(fields: [tenantId], references: [id])
+  users       User[]
+  permissions Permission[] @relation("PermissionToRole")
 }
 
 model Permission {
   id          String   @id @default(cuid())
-  name        String   @unique // e.g., "pos:sale", "inventory:view"
+  name        String   @unique
   description String?
-  roles       Role[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  roles       Role[]   @relation("PermissionToRole")
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  price       Float
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  branchId    String?  // Nullable if the product is global to the tenant
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  ingredients RecipeItem[]
-  orderItems  OrderItem[]
+  id              String             @id @default(cuid())
+  name            String
+  price           Float
+  tenantId        String
+  branchId        String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  deductionModel  String             @default("ON_ORDER")
+  branchOverrides BranchProduct[]
+  orderItems      OrderItem[]
+  preparedStocks  PreparedStock[]
+  tenant          Tenant             @relation(fields: [tenantId], references: [id])
+  productionLogs  ProductionRecord[]
+  ingredients    RecipeItem[]       @relation("ProductToRecipe")
+  asComponent    RecipeItem[]       @relation("ComponentToProduct")
+  batchSize      Float              @default(1)
 }
 
 model Ingredient {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
-  unit        String   // kg, l, pc, etc.
+  unit        String
   tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  supplierId  String?
+  supplier    Supplier?        @relation(fields: [supplierId], references: [id])
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  purchases   PurchaseRecord[]
   recipeItems RecipeItem[]
   stocks      Stock[]
 }
 
 model RecipeItem {
-  id           String     @id @default(cuid())
-  productId    String
-  product      Product    @relation(fields: [productId], references: [id])
-  ingredientId String
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  amount       Float      // Amount required per product unit
+  id                 String     @id @default(cuid())
+  productId          String
+  product            Product    @relation("ProductToRecipe", fields: [productId], references: [id])
+  ingredientId       String?
+  ingredient         Ingredient? @relation(fields: [ingredientId], references: [id])
+  componentProductId String?
+  componentProduct   Product?   @relation("ComponentToProduct", fields: [componentProductId], references: [id])
+  amount             Float      // Amount required per product unit
 }
 
 model Stock {
   id           String     @id @default(cuid())
   tenantId     String
-  tenant       Tenant     @relation(fields: [tenantId], references: [id])
   branchId     String
-  branch       Branch     @relation(fields: [branchId], references: [id])
   ingredientId String
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
   quantity     Float      @default(0)
   updatedAt    DateTime   @updatedAt
+  branch       Branch     @relation(fields: [branchId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
 
   @@unique([branchId, ingredientId])
+}
+
+model Supplier {
+  id          String           @id @default(cuid())
+  name        String
+  contact     String?
+  tenantId    String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  ingredients Ingredient[]
+  purchases   PurchaseRecord[]
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+}
+
+model PurchaseRecord {
+  id           String     @id @default(cuid())
+  tenantId     String
+  branchId     String
+  supplierId   String
+  ingredientId String
+  quantity     Float
+  unitCost     Float
+  totalCost    Float
+  createdAt    DateTime   @default(now())
+  branch       Branch     @relation(fields: [branchId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  supplier     Supplier   @relation(fields: [supplierId], references: [id])
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
 }
 
 model Order {
   id          String      @id @default(cuid())
   tenantId    String
-  tenant      Tenant      @relation(fields: [tenantId], references: [id])
   branchId    String
-  branch      Branch      @relation(fields: [branchId], references: [id])
   userId      String
-  user        User        @relation(fields: [userId], references: [id])
   totalAmount Float
-  status      String      @default("COMPLETED") // COMPLETED, CANCELLED, PENDING
+  status      String      @default("PENDING")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  branch      Branch      @relation(fields: [branchId], references: [id])
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
   items       OrderItem[]
 }
 
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
   productId String
-  product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   pricePaid Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model BranchProduct {
+  id            String   @id @default(cuid())
+  branchId      String
+  productId     String
+  priceOverride Float?
+  isAvailable   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  branch        Branch   @relation(fields: [branchId], references: [id])
+  product       Product  @relation(fields: [productId], references: [id])
+
+  @@unique([branchId, productId])
+}
+
+model PreparedStock {
+  id        String   @id @default(cuid())
+  branchId  String
+  productId String
+  quantity  Float    @default(0)
+  updatedAt DateTime @updatedAt
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([branchId, productId])
+}
+
+model ProductionRecord {
+  id        String   @id @default(cuid())
+  branchId  String
+  productId String
+  quantity  Float
+  createdAt DateTime @default(now())
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
 }

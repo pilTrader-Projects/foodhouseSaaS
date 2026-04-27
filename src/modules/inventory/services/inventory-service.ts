@@ -8,14 +8,16 @@ import prisma from '@/lib/prisma'
 export class InventoryService extends BaseService {
     /**
      * Consumes ingredients based on the quantity of a product sold.
-     * This is a "destructive" operation that updates stock levels.
+     * Supports external Prisma transactions.
      */
-    async consumeIngredients(productId: string, quantity: number) {
+    async consumeIngredients(productId: string, quantity: number, tx?: any) {
+        const db = tx || prisma
+
         // 1. Feature Gate
         await this.ensureFeature('inventory')
 
-        // 2. Fetch the product recipe (ingredients and their required amounts)
-        const product = await prisma.product.findUnique({
+        // 2. Fetch the product recipe
+        const product = await db.product.findUnique({
             where: { id: productId },
             include: {
                 ingredients: {
@@ -24,16 +26,16 @@ export class InventoryService extends BaseService {
             },
         })
 
-        if (!product) {
-            throw new Error('Product not found')
-        }
+        if (!product) throw new Error('Product not found')
 
         // 2. Iterate through ingredients and deduct stock
         for (const recipeItem of product.ingredients) {
+            // Only deduct if it's a raw ingredient (not a component product)
+            if (!recipeItem.ingredientId) continue;
+
             const amountToDeduct = recipeItem.amount * quantity
 
-            // Using updateMany scoped to tenant and branch for extra safety
-            await prisma.stock.updateMany({
+            await db.stock.updateMany({
                 where: {
                     tenantId: this.tenantId,
                     branchId: this.branchId,
@@ -43,8 +45,49 @@ export class InventoryService extends BaseService {
                     quantity: {
                         decrement: amountToDeduct,
                     },
-                } as any,
+                },
             })
         }
+    }
+
+    /**
+     * Creates a new ingredient for the tenant.
+     */
+    async createIngredient(data: { name: string; unit: string }) {
+        await this.ensureFeature('inventory')
+        return prisma.ingredient.create({
+            data: {
+                ...data,
+                tenantId: this.tenantId,
+            },
+        })
+    }
+
+    /**
+     * Fetches all ingredients for the tenant and includes stock levels for the current branch.
+     */
+    async getBranchStock() {
+        if (!this.branchId) throw new Error('Branch context required for inventory profiling');
+        await this.ensureFeature('inventory');
+
+        return prisma.ingredient.findMany({
+            where: { tenantId: this.tenantId },
+            include: {
+                stocks: {
+                    where: { branchId: this.branchId }
+                }
+            },
+            orderBy: { name: 'asc' },
+        })
+    }
+
+    /**
+     * Fetches all ingredients for the current tenant.
+     */
+    async getIngredients() {
+        return prisma.ingredient.findMany({
+            where: { tenantId: this.tenantId },
+            orderBy: { name: 'asc' },
+        })
     }
 }

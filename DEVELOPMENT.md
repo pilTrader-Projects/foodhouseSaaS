@@ -35,13 +35,20 @@ This list defines the order of building blocks to ensure zero technical debt and
 *   **[I-2] Automated Ingredient Deduction** (✅ DONE)
 *   **[S-5] Subscription Limits Enforcement** (✅ **DONE**)
     *   *Rationale*: Prevents abuse of plan tiers (e.g., branch count) before scaling to reporting features.
-*   **[I-3] Supplier Linkage & Procurement** (📅 PLANNED)
+*   **[I-3] Supplier Linkage & Procurement** (✅ **DONE**)
+    *   *Rationale*: Completes the operational data chain (Procurement -> Inventory -> Sale).
 
-### **III. Operational Visibility (Reporting Layer)**
-*   **[A-1] Cross-Branch Data Aggregation Logic** (📅 PLANNED)
-    *   *Rationale*: Depends on [S-2] (Context) and [P-2] (Sales Data).
-*   **[U-1] Executive Dashboard (Owner View)** (📅 PLANNED)
-    *   *Rationale*: Consumes the logic from [A-1].
+### **III. Branch Operational Context (Refinement Layer)**
+*   **[S-7] Team Management & Branch Assignment** (✅ **DONE**)
+    *   *Rationale*: Allows owners to delegate operations to staff (Cashiers, Managers, Chefs) with strict role isolation.
+*   **[S-8] UI-Level RBAC Enforcement** (✅ **DONE**)
+    *   *Rationale*: Ensures staff only access modules relevant to their role and branch.
+*   **[P-3] Branch-Specific Menus & Overrides** (✅ **DONE**)
+    *   *Rationale*: Allows localized pricing and items, enabling branches to adapt to local stock and demand.
+*   **[K-1] Kitchen Display System (KDS)** (✅ **DONE**)
+*   **[K-2] Hybrid Production Tracking** (✅ **DONE**)
+    *   *Rationale*: Supports both batch-cooked items (Chef logs production) and on-demand items (automatic recipe deduction) in a single unified system.
+*   **[I-5] Wastage & Spoilage Tracking** (📅 PLANNED)
 
 ### **IV. Commercial Expansion (Monetization Layer)**
 *   **[M-1] Billing Integration (Stripe / PayMongo)** (📅 PLANNED)
@@ -57,12 +64,13 @@ This list defines the order of building blocks to ensure zero technical debt and
 | **1** | **Design** | System Design (DB Schema, RBAC Model) | ✅ **Completed** | 2026-04-27 |
 | **2** | **Core** | SaaS Core (Auth, Tenant, RBAC, Feature Flags) | ✅ **Completed** | 2026-04-27 |
 | **3** | **Vertical** | POS-lite (Products, Orders, Sales) | 🔄 **In Progress** | 2026-04-27 |
-| **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking) | 🔄 **In Progress** | 2026-04-27 |
-| **5** | **Scale** | Aggregation Logic (Cross-branch reporting) | 📅 **Planned** | - |
-| **6** | **UI** | Dashboard (Owner view, KPIs) | 📅 **Planned** | - |
-| **7** | **SaaS** | Subscription System (Limits, Plan Enforcement) | ✅ **Completed** | 2026-04-27 |
-| **8** | **Fin** | Billing Integration (Payments) | 📅 **Planned** | - |
-| **9** | **Admin** | SaaS Global Admin Panel | 📅 **Planned** | - |
+| **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking, Suppliers) | ✅ **Completed** | 2026-04-27 |
+| **5** | **Scale** | Aggregation Logic (Cross-branch reporting) | ✅ **Completed** | 2026-04-27 |
+| **6** | **UI** | Dashboard (Owner view, KPIs) | ✅ **Completed** | 2026-04-27 |
+| **7** | **Team** | Personnel Management (Roles, Branch Assignment) | ✅ **Completed** | 2026-04-27 |
+| **8** | **SaaS** | Subscription System (Limits, Plan Enforcement) | ✅ **Completed** | 2026-04-27 |
+| **9** | **Fin** | Billing Integration (Payments) | 📅 **Planned** | - |
+| **10** | **Admin** | SaaS Global Admin Panel | 📅 **Planned** | - |
 
 ---
 
@@ -111,3 +119,9 @@ This list defines the order of building blocks to ensure zero technical debt and
 | 2026-04-27 | POS | Service Refactor | Grouped order creation and inventory deduction in transactions. |
 | 2026-04-27 | SaaS | Feature Gating | Implemented `PLAN_FEATURES` system in `FeatureService`. |
 | 2026-04-27 | SaaS | Limit Enforcement | Implemented `max_branches` enforcement in `TenantService`. |
+| 2026-04-27 | Inventory | Supplier & Procurement | Implemented `Supplier` model, `SupplierService`, and `PurchaseRecord`. |
+| 2026-04-27 | Analytics | Aggregation Logic | Exposed cross-branch sales and stock analytics via API routes. |
+| 2026-04-27 | POS | Menu Overrides | Implemented `BranchProduct` model and `MenuService` to resolve localized pricing/availability. |
+| 2026-04-27 | UI | Executive Dashboard | Built a premium, data-driven dashboard using Lucide React and Glassmorphism. |
+| 2026-04-27 | Team | Personnel & RBAC | Implemented `UserService`, `/api/auth/me`, and guarded `Sidebar` with `RoleSwitcher`. |
+| 2026-04-27 | Core | Visibility Fix | Changed `featureService` visibility to `protected` in `BaseService` to support sub-services. |
