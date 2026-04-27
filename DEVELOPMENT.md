@@ -45,7 +45,7 @@ This list defines the order of building blocks to ensure zero technical debt and
     *   *Rationale*: Ensures staff only access modules relevant to their role and branch.
 *   **[P-3] Branch-Specific Menus & Overrides** (✅ **DONE**)
     *   *Rationale*: Allows localized pricing and items, enabling branches to adapt to local stock and demand.
-*   **[K-1] Kitchen Display System (KDS)** (🟡 **IN PROGRESS**)
+*   **[K-1] Kitchen Display System (KDS)** (✅ **DONE**)
     *   *Rationale*: Provides live order tracking for the Chef role, enabling real-time fulfillment and status updates (Pending -> Preparing -> Ready).
 *   **[I-5] Wastage & Spoilage Tracking** (📅 PLANNED)
 
