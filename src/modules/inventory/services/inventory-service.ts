@@ -64,6 +64,24 @@ export class InventoryService extends BaseService {
     }
 
     /**
+     * Fetches all ingredients for the tenant and includes stock levels for the current branch.
+     */
+    async getBranchStock() {
+        if (!this.branchId) throw new Error('Branch context required for inventory profiling');
+        await this.ensureFeature('inventory');
+
+        return prisma.ingredient.findMany({
+            where: { tenantId: this.tenantId },
+            include: {
+                stocks: {
+                    where: { branchId: this.branchId }
+                }
+            },
+            orderBy: { name: 'asc' },
+        })
+    }
+
+    /**
      * Fetches all ingredients for the current tenant.
      */
     async getIngredients() {
