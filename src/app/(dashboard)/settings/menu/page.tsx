@@ -11,6 +11,7 @@ import {
 import { useUser } from '@/context/user-context';
 import { useApi } from '@/hooks/use-api';
 import { RBACGate } from '@/components/auth/rbac-gate';
+import { Card, Badge, Modal, Button } from '@/components/ui';
 
 export default function MenuManagementPage() {
   return (
@@ -27,6 +28,15 @@ function MenuManagementContent() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
 
+  // Add Product State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: 0,
+    deductionModel: 'ON_ORDER',
+    batchSize: 1
+  });
+
   const fetchProducts = async () => {
     if (!user?.branchId) return;
     try {
@@ -42,6 +52,21 @@ function MenuManagementContent() {
   useEffect(() => {
     if (user?.branchId) fetchProducts();
   }, [user?.branchId]);
+
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+        await request('/api/products', {
+            method: 'POST',
+            body: JSON.stringify(newProduct),
+        });
+        setIsAddModalOpen(false);
+        setNewProduct({ name: '', price: 0, deductionModel: 'ON_ORDER', batchSize: 1 });
+        fetchProducts();
+    } catch (e) {
+        console.error("Creation failed", e);
+    }
+  };
 
   const updateDeductionModel = async (productId: string, model: string, batchSize: number) => {
     setSavingId(productId);
@@ -68,7 +93,7 @@ function MenuManagementContent() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in text-slate-900">
       <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
@@ -77,7 +102,10 @@ function MenuManagementContent() {
           </h1>
           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Configure Catalog & Production Strategies</p>
         </div>
-        <button className="btn-minimal btn-accent flex items-center gap-2">
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="btn-minimal btn-accent flex items-center gap-2"
+        >
             <Plus className="w-4 h-4" /> Add New Item
         </button>
       </div>
@@ -147,6 +175,86 @@ function MenuManagementContent() {
             </div>
         )}
       </div>
+
+      <Modal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add New Product"
+        subtitle="Specify product metadata and production strategy"
+      >
+        <form onSubmit={handleAddProduct} className="space-y-6">
+            <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Product Name</label>
+                <input 
+                    required
+                    type="text"
+                    placeholder="e.g. Traditional Burger"
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                    className="input-minimal"
+                />
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Base Selling Price</label>
+                <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400">₱</span>
+                    <input 
+                        required
+                        type="number"
+                        placeholder="0.00"
+                        value={newProduct.price || ''}
+                        onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+                        className="input-minimal pl-10"
+                    />
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Deduction Model</label>
+                <div className="flex gap-2">
+                    <button 
+                        type="button"
+                        onClick={() => setNewProduct({ ...newProduct, deductionModel: 'ON_ORDER' })}
+                        className={`flex-1 h-12 text-[10px] font-black uppercase rounded-sm transition-all ${newProduct.deductionModel === 'ON_ORDER' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                    >
+                        On-Order (Direct)
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => setNewProduct({ ...newProduct, deductionModel: 'ON_PRODUCTION' })}
+                        className={`flex-1 h-12 text-[10px] font-black uppercase rounded-sm transition-all ${newProduct.deductionModel === 'ON_PRODUCTION' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                    >
+                        On-Production (Batch)
+                    </button>
+                </div>
+            </div>
+
+            {newProduct.deductionModel === 'ON_PRODUCTION' && (
+                <div className="flex flex-col gap-2 animate-in slide-in-from-top-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Standard Batch Size (Units)</label>
+                    <input 
+                        required
+                        type="number"
+                        placeholder="30"
+                        value={newProduct.batchSize}
+                        onChange={(e) => setNewProduct({ ...newProduct, batchSize: parseInt(e.target.value) })}
+                        className="input-minimal"
+                    />
+                </div>
+            )}
+
+            <Button 
+                type="submit"
+                variant="primary"
+                className="w-full h-16 mt-4"
+                loading={apiLoading}
+                icon={Plus}
+            >
+                Confirm Specification
+            </Button>
+        </form>
+      </Modal>
     </div>
   );
 }
