@@ -47,13 +47,13 @@ export function Sidebar() {
         </div>
         <div>
           <h2 className="!p-0 leading-none">FoodHouse</h2>
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{user?.tenant?.name || 'SaaS'}</span>
+          <span className="text-10 font-black text-slate-500 uppercase tracking-widest">{user?.tenant?.name || 'SaaS'}</span>
         </div>
       </div>
 
       <nav className="flex-1 space-y-8">
         <div>
-          <h3 className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Operations</h3>
+          <h3 className="px-4 text-10 font-black text-slate-500 uppercase tracking-widest mb-4">Operations</h3>
           <ul className="nav-links">
             {navItems.filter(item => item.guard()).map((item) => (
               <li key={item.href}>
@@ -71,7 +71,7 @@ export function Sidebar() {
 
         {(isRole('Owner') || isRole('Manager')) && (
           <div>
-            <h3 className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Management</h3>
+            <h3 className="px-4 text-10 font-black text-slate-500 uppercase tracking-widest mb-4">Management</h3>
             <ul className="nav-links">
               {adminItems.filter(item => item.guard()).map((item) => (
                 <li key={item.href}>
@@ -96,7 +96,7 @@ export function Sidebar() {
           </div>
           <div className="overflow-hidden">
             <p className="text-xs font-bold text-white truncate">{user?.name}</p>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{user?.role?.name}</p>
+            <p className="text-10 font-bold text-slate-500 uppercase tracking-wider">{user?.role?.name}</p>
           </div>
         </div>
       </div>

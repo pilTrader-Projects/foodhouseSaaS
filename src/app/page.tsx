@@ -200,7 +200,7 @@ export default function PremiumDashboard() {
                   <div key={alert.id} className="p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-bold text-sm text-slate-100">{alert.ingredient.name}</span>
-                      <span className="text-[10px] font-black bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded-full uppercase">Critical</span>
+                      <span className="text-10 font-black bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded-full uppercase">Critical</span>
                     </div>
                     <p className="text-xs text-slate-400 font-medium">{alert.quantity} {alert.ingredient.unit} left at {alert.branch.name}</p>
                   </div>
@@ -226,7 +226,7 @@ export default function PremiumDashboard() {
                 <div className="inline-block p-2 bg-slate-50 rounded-full group-hover:bg-blue-50 transition-colors">
                   <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
                 </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase mt-2 group-hover:text-primary transition-colors">Generate Profit Report</p>
+                <p className="text-10 font-black text-slate-400 uppercase mt-2 group-hover:text-primary transition-colors">Generate Profit Report</p>
               </div>
             </div>
           </div>

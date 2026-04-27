@@ -106,20 +106,21 @@ export default function PosTerminalPage() {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-180px)]">
+        <div className="grid grid-cols-1 lg-grid-cols-3 gap-8" style={{ height: 'calc(100vh - 180px)' }}>
             
             {/* Left: Product Selection */}
-            <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-2">
+            <div className="flex-1 space-y-6 overflow-y-auto" style={{ gridColumn: 'span 2' }}>
                 <Card title="Product Menu" subtitle="Tap to add items to current order">
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md-grid-cols-3 gap-4">
                         {products.map(product => (
                             <div 
                                 key={product.id} 
                                 onClick={() => setSelectedProduct(product)}
-                                className="bg-slate-50 p-6 rounded-3xl border-2 border-transparent hover:border-blue-600 hover:bg-white transition-all cursor-pointer text-center group"
+                                className="bg-slate-50 p-6 rounded-3xl border-2 border-transparent transition-all cursor-pointer text-center group"
+                                style={{ border: '2px solid transparent' }}
                             >
-                                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🍔</div>
-                                <p className="font-black text-slate-800 text-sm whitespace-nowrap overflow-hidden text-ellipsis">{product.name}</p>
+                                <div className="text-3xl mb-3">🍔</div>
+                                <p className="font-black text-slate-800 text-sm">{product.name}</p>
                                 <p className="font-black text-blue-600 mt-1">₱{product.price.toLocaleString()}</p>
                             </div>
                         ))}
@@ -129,7 +130,7 @@ export default function PosTerminalPage() {
 
             {/* Right: Cart & Summary */}
             <Card className="flex flex-col h-full overflow-hidden">
-                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-50">
+                <div className="flex items-center gap-3 mb-6 border-b border-slate-50 pb-6">
                     <ShoppingBag className="w-6 h-6 text-blue-600" />
                     <h3 className="text-xl font-black text-slate-900 uppercase">Cart</h3>
                     <Badge variant="dark" className="ml-auto">{cart.length}</Badge>
@@ -137,31 +138,31 @@ export default function PosTerminalPage() {
 
                 <div className="flex-1 overflow-y-auto space-y-3 mb-6">
                     {cart.map(item => (
-                        <div key={item.cartId} className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl group">
+                        <div key={item.cartId} className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl">
                             <div className="flex-1">
                                 <p className="font-black text-slate-800 text-sm">{item.name}</p>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase">Qty: {item.quantity}</p>
+                                <p className="text-10 font-black text-slate-400 uppercase">Qty: {item.quantity}</p>
                             </div>
                             <div className="text-right">
                                 <p className="font-black text-slate-900">₱{item.displayPrice.toLocaleString()}</p>
-                                <button onClick={() => removeFromCart(item.cartId)} className="text-rose-500 hover:text-rose-700 mt-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                                <button onClick={() => removeFromCart(item.cartId)} style={{ color: '#f43f5e', background: 'none', border: 'none', cursor: 'pointer', marginTop: '4px' }}><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                         </div>
                     ))}
                     {cart.length === 0 && (
-                        <div className="h-full flex flex-col items-center justify-center text-slate-300 py-20">
-                            <Package className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="font-black uppercase text-[10px] tracking-widest leading-loose">Cart is Empty</p>
+                        <div className="h-full flex flex-col items-center justify-center text-slate-300" style={{ padding: '5rem 0' }}>
+                            <Package className="w-12 h-12 mb-4" style={{ opacity: 0.2 }} />
+                            <p className="font-black uppercase text-10 tracking-widest">Cart is Empty</p>
                         </div>
                     )}
                 </div>
 
-                <div className="pt-6 border-t-2 border-dashed border-slate-50 mt-auto">
-                    <div className="flex justify-between items-center mb-6 px-2">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
+                <div className="border-t-2 border-dashed border-slate-50 pt-6 mt-auto">
+                    <div className="flex justify-between items-center mb-6">
+                        <span className="text-10 font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
                         <span className="text-3xl font-black text-slate-900">₱{total.toLocaleString()}</span>
                     </div>
-                    <Button variant="primary" className="w-full h-16 text-lg" disabled={cart.length === 0} onClick={() => setShowPaymentModal(true)} icon={CreditCard}>
+                    <Button variant="primary" style={{ width: '100%', height: '4rem', fontSize: '1.125rem' }} disabled={cart.length === 0} onClick={() => setShowPaymentModal(true)} icon={CreditCard}>
                         Checkout Order
                     </Button>
                 </div>
@@ -169,13 +170,13 @@ export default function PosTerminalPage() {
 
             {/* Quantity Modal */}
             <Modal isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} title="Select Quantity" subtitle={selectedProduct?.name}>
-                <div className="text-center py-6">
+                <div className="text-center" style={{ padding: '1.5rem 0' }}>
                     <div className="flex items-center justify-center gap-8 mb-8">
-                        <button onClick={() => setQuantityInput(q => Math.max(1, q - 1))} className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-2xl hover:bg-slate-200">-</button>
+                        <button onClick={() => setQuantityInput(q => Math.max(1, q - 1))} className="bg-slate-100 flex items-center justify-center font-black" style={{ width: '4rem', height: '4rem', borderRadius: '1rem', fontSize: '1.5rem', border: 'none' }}>-</button>
                         <span className="text-6xl font-black text-slate-900">{quantityInput}</span>
-                        <button onClick={() => setQuantityInput(q => q + 1)} className="w-16 h-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-2xl hover:bg-black">+</button>
+                        <button onClick={() => setQuantityInput(q => q + 1)} className="bg-slate-900 text-white flex items-center justify-center font-black" style={{ width: '4rem', height: '4rem', borderRadius: '1rem', fontSize: '1.5rem', border: 'none' }}>+</button>
                     </div>
-                    <Button variant="primary" className="w-full h-16" onClick={confirmAddToCart}>Add to Cart • ₱{(selectedProduct?.price * quantityInput).toLocaleString()}</Button>
+                    <Button variant="primary" style={{ width: '100%', height: '4rem' }} onClick={confirmAddToCart}>Add to Cart • ₱{(selectedProduct?.price * quantityInput).toLocaleString()}</Button>
                 </div>
             </Modal>
 
@@ -185,41 +186,54 @@ export default function PosTerminalPage() {
                     <div className="grid grid-cols-2 gap-4">
                         <button 
                             onClick={() => setPaymentType('Cash')}
-                            className={`p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all ${paymentType === 'Cash' ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-100 bg-white text-slate-400'}`}
+                            className="p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all"
+                            style={{ 
+                                backgroundColor: paymentType === 'Cash' ? '#eff6ff' : 'white', 
+                                borderColor: paymentType === 'Cash' ? '#2563eb' : '#f1f5f9',
+                                color: paymentType === 'Cash' ? '#2563eb' : '#94a3b8',
+                                cursor: 'pointer'
+                            }}
                         >
                             <Banknote className="w-8 h-8" />
-                            <span className="font-black uppercase text-[10px] tracking-widest">Cash</span>
+                            <span className="font-black uppercase text-10 tracking-widest">Cash</span>
                         </button>
                         <button 
                             onClick={() => setPaymentType('Digital')}
-                            className={`p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all ${paymentType === 'Digital' ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-100 bg-white text-slate-400'}`}
+                            className="p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all"
+                            style={{ 
+                                backgroundColor: paymentType === 'Digital' ? '#eff6ff' : 'white', 
+                                borderColor: paymentType === 'Digital' ? '#2563eb' : '#f1f5f9',
+                                color: paymentType === 'Digital' ? '#2563eb' : '#94a3b8',
+                                cursor: 'pointer'
+                            }}
                         >
                             <CreditCard className="w-8 h-8" />
-                            <span className="font-black uppercase text-[10px] tracking-widest">Digital</span>
+                            <span className="font-black uppercase text-10 tracking-widest">Digital</span>
                         </button>
                     </div>
 
                     <div className="space-y-4">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Amount Tendered</label>
+                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest pl-1">Amount Tendered</label>
                         <input 
                             type="number" autoFocus
                             placeholder="0.00"
                             value={amountTendered}
                             onChange={(e) => setAmountTendered(e.target.value)}
-                            className="w-full h-20 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] px-8 text-3xl font-black text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
+                            className="w-full bg-slate-50 border-2 border-slate-100"
+                            style={{ height: '5rem', borderRadius: '1.5rem', padding: '0 2rem', fontSize: '1.875rem', fontWeight: 900, outline: 'none' }}
                         />
                     </div>
 
                     {paymentType === 'Cash' && parseFloat(amountTendered) >= total && (
-                        <div className="bg-green-50 p-6 rounded-3xl flex justify-between items-center border border-green-100">
-                            <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Change Due</span>
+                        <div className="bg-green-50 p-6 rounded-3xl flex justify-between items-center" style={{ border: '1px solid #dcfce7' }}>
+                            <span className="text-10 font-black text-green-600 uppercase tracking-widest">Change Due</span>
                             <span className="text-3xl font-black text-green-700">₱{change.toLocaleString()}</span>
                         </div>
                     )}
 
                     <Button 
                         variant="dark" 
-                        className="w-full h-20 text-lg shadow-2xl" 
+                        style={{ width: '100%', height: '5rem', fontSize: '1.125rem' }} 
                         disabled={parseFloat(amountTendered) < total || isCheckingOut} 
                         onClick={handleCheckout} 
                         loading={isCheckingOut} icon={CheckCircle2}

@@ -138,10 +138,10 @@ export default function TeamManagementPage() {
                     
                     <div className="flex items-center gap-8">
                       <div className="text-right">
-                        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white mb-1">
+                        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-10 font-black uppercase tracking-wider bg-slate-900 text-white mb-1">
                           {emp.role?.name}
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 flex items-center justify-end gap-1 uppercase">
+                        <p className="text-10 font-bold text-slate-400 flex items-center justify-end gap-1 uppercase">
                           <MapPin className="w-3 h-3" /> {emp.branch?.name || 'All Branches'}
                         </p>
                       </div>
@@ -172,7 +172,7 @@ export default function TeamManagementPage() {
             
             <form onSubmit={handleAdd} className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Full Name</label>
+                <label className="text-10 font-black uppercase text-slate-400 tracking-widest pl-1">Full Name</label>
                 <input 
                   required
                   placeholder="e.g. Maria Clara"
@@ -183,7 +183,7 @@ export default function TeamManagementPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Email Address</label>
+                <label className="text-10 font-black uppercase text-slate-400 tracking-widest pl-1">Email Address</label>
                 <input 
                   required
                   type="email"
@@ -196,7 +196,7 @@ export default function TeamManagementPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Role</label>
+                  <label className="text-10 font-black uppercase text-slate-400 tracking-widest pl-1">Role</label>
                   <select 
                     value={formData.roleName}
                     onChange={e => setFormData(prev => ({ ...prev, roleName: e.target.value }))}
@@ -210,7 +210,7 @@ export default function TeamManagementPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Branch</label>
+                  <label className="text-10 font-black uppercase text-slate-400 tracking-widest pl-1">Branch</label>
                   <select 
                     required
                     value={formData.branchId}
@@ -235,12 +235,12 @@ export default function TeamManagementPage() {
           </div>
 
           <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl">
-            <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3">Permissions Preview</h4>
+            <h4 className="text-10 font-black uppercase text-slate-400 tracking-widest mb-3">Permissions Preview</h4>
             <div className="space-y-2">
               {formData.roleName === 'Cashier' && <p className="text-xs font-bold text-slate-600">• Access to POS Only</p>}
               {formData.roleName === 'Manager' && <p className="text-xs font-bold text-slate-600">• Inventory, POS Sales View, Receipts</p>}
               {formData.roleName === 'Chef' && <p className="text-xs font-bold text-slate-600">• Kitchen Display & Supply Management</p>}
-              <p className="text-[10px] text-slate-400 mt-4 italic font-medium">Access is strictly scoped to the assigned branch.</p>
+              <p className="text-10 text-slate-400 mt-4 italic font-medium">Access is strictly scoped to the assigned branch.</p>
             </div>
           </div>
         </div>

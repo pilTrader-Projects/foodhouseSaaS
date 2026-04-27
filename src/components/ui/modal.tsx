@@ -41,7 +41,7 @@ export const Modal = ({
             <div className="p-8 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 uppercase">{title}</h2>
-                {subtitle && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{subtitle}</p>}
+                {subtitle && <p className="text-10 font-bold text-slate-400 uppercase tracking-widest mt-1">{subtitle}</p>}
               </div>
               <button 
                 onClick={onClose} 

@@ -31,7 +31,7 @@ export function RoleSwitcher() {
     <div className="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
       <div className="flex items-center gap-2">
         <UserCircle className="w-4 h-4 text-slate-400" />
-        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Switch Role:</span>
+        <span className="text-10 font-black uppercase text-slate-400 tracking-widest">Switch Role:</span>
       </div>
       <select 
         value={currentId}

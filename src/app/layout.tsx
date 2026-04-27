@@ -30,7 +30,7 @@ export default function RootLayout({
                 <div className="flex items-center gap-6">
                   <RoleSwitcher />
                   <div className="h-6 w-[1px] bg-slate-100"></div>
-                  <a href="/onboarding" className="text-[10px] font-black uppercase text-slate-400 hover:text-slate-900 transition-colors">Reset Demo</a>
+                  <a href="/onboarding" className="text-10 font-black uppercase text-slate-400 hover:text-slate-900 transition-colors">Reset Demo</a>
                 </div>
               </header>
               
