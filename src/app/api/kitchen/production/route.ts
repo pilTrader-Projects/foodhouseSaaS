@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ProductionService } from '@/services/production-service'
 
 export async function POST(req: NextRequest) {
-    const tenantId = req.headers.get('x-tenant-id') || 'tenant-demo'
-    const branchId = req.headers.get('x-branch-id')
+    const tenantId = req.headers.get('x-tenant-id')
+    const branchId = req.headers.get('x-branch-id') || req.nextUrl.searchParams.get('branchId')
     const body = await req.json()
     const { productId, quantity } = body
 
@@ -22,8 +22,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-    const tenantId = req.headers.get('x-tenant-id') || 'tenant-demo'
-    const branchId = req.headers.get('x-branch-id')
+    const tenantId = req.headers.get('x-tenant-id')
+    const branchId = req.headers.get('x-branch-id') || req.nextUrl.searchParams.get('branchId')
 
     if (!branchId) {
         return NextResponse.json({ error: 'Missing branch ID' }, { status: 400 })

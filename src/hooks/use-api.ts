@@ -15,14 +15,16 @@ export function useApi() {
         setError(null);
 
         const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') : null;
+        const branchId = typeof window !== 'undefined' ? localStorage.getItem('branchId') : null;
         const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
 
-        const headers = {
+        const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             ...(tenantId ? { 'x-tenant-id': tenantId } : {}),
+            ...(branchId ? { 'x-branch-id': branchId } : {}),
             ...(userId ? { 'x-user-id': userId } : {}),
             ...options.headers,
-        };
+        } as any;
 
         try {
             const res = await fetch(url, { ...options, headers });
