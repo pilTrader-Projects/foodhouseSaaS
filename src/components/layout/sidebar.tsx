@@ -51,6 +51,11 @@ export function Sidebar() {
     return permissions.includes(item.perm) || permissions.includes('tenant:admin');
   });
 
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = '/';
+  };
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -82,10 +87,10 @@ export function Sidebar() {
           <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
         </button>
         
-        <Link href="/" className="sidebar-link opacity-50">
+        <button onClick={handleLogout} className="theme-toggle opacity-50">
           <LogOut size={18} />
-          <span>Exit Console</span>
-        </Link>
+          <span>Sign Out</span>
+        </button>
       </div>
 
       <style jsx>{`

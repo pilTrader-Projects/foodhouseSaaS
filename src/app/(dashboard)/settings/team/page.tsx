@@ -99,7 +99,7 @@ function TeamManagementContent() {
       const { user } = await res.json();
       setEmployees(prev => [user, ...prev]);
       setFormData(prev => ({ ...prev, name: '', email: '' }));
-      alert('Member invited successfully!');
+      alert(`Invitation sent to ${user.email}!\n\nTemporary Login Credentials:\nEmail: ${user.email}\nPassword: change-me-later`);
     } catch (e: any) {
       alert(e.message);
     } finally {
