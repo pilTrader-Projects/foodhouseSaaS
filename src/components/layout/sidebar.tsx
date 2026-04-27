@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   Moon,
   Sun,
-  LogOut
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { useTheme } from '@/context/theme-context';
 import { useUser } from '@/context/user-context';
