@@ -16,7 +16,7 @@ describe('API: POST /api/orders (Transactional Hardening)', () => {
         if (context.branchId !== null) headers.set('x-branch-id', context.branchId || 'branch-1')
         if (context.userId !== null) headers.set('x-user-id', context.userId || 'user-1')
 
-        return new Request('http://localhost', {
+        return new NextRequest('http://localhost', {
             method: 'POST',
             headers,
             body: JSON.stringify(body)
@@ -43,7 +43,7 @@ describe('API: POST /api/orders (Transactional Hardening)', () => {
         headers.set('x-branch-id', 'b1')
         // Missing x-user-id
 
-        const req = new Request('http://localhost', { method: 'POST', headers, body: JSON.stringify({ items: [] }) })
+        const req = new NextRequest('http://localhost', { method: 'POST', headers, body: JSON.stringify({ items: [] }) })
         const res = await POST(req as any)
         const data = await res.json()
 

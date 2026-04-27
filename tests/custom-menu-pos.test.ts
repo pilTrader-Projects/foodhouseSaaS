@@ -9,9 +9,9 @@ vi.mock('@/lib/prisma', () => ({
     default: {
         $transaction: vi.fn((cb) => cb(prisma)),
         order: { create: vi.fn() },
-        product: { 
+        product: {
             create: vi.fn(),
-            findUnique: vi.fn() 
+            findUnique: vi.fn()
         },
     },
 }))
@@ -34,17 +34,17 @@ describe('Integration: Custom Menu Sale (₱ PHP)', () => {
 
         // 1. Create custom product
         const customItem = { name: 'Adobo Rice', price: 150.0 }
-        ;(prisma.product.create as any).mockResolvedValue({ id: 'custom-1', ...customItem })
+            ; (prisma.product.create as any).mockResolvedValue({ id: 'custom-1', ...customItem })
         const product = await productService.createProduct(customItem)
 
-        // 2. Perform Sale
-        ;(prisma.product.findUnique as any).mockResolvedValue({
-            id: 'custom-1',
-            ingredients: [] // No recipe for this simple item
-        })
-        ;(prisma.order.create as any).mockResolvedValue({ id: 'order-1', totalAmount: 300.0 })
+            // 2. Perform Sale
+            ; (prisma.product.findUnique as any).mockResolvedValue({
+                id: 'custom-1',
+                ingredients: [] // No recipe for this simple item
+            })
+            ; (prisma.order.create as any).mockResolvedValue({ id: 'order-1', totalAmount: 300.0 })
 
-        const order = await posService.createOrder([
+        const order = await posService.createOrder('mock-user', [
             { productId: 'custom-1', quantity: 2, price: 150.0 }
         ])
 

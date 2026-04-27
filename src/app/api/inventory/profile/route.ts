@@ -1,13 +1,13 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { InventoryService } from '@/modules/inventory/services/inventory-service';
+import { getApiContext, missingContextResponse } from '@/lib/api-context';
 
 export async function GET(req: NextRequest) {
     try {
-        const tenantId = req.headers.get('x-tenant-id');
-        const branchId = req.headers.get('x-branch-id') || req.nextUrl.searchParams.get('branchId');
+        const { tenantId, branchId } = await getApiContext(req);
 
         if (!tenantId || !branchId) {
-            return NextResponse.json({ error: 'Tenant and Branch context required' }, { status: 400 });
+            return missingContextResponse();
         }
 
         const inventoryService = new InventoryService(tenantId, branchId);

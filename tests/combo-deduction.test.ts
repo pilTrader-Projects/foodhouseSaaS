@@ -21,12 +21,25 @@ describe('Combo Meal Deductions (K-2+)', () => {
         await prisma.recipeItem.deleteMany({ where: { product: { tenantId } } })
         await prisma.recipeItem.deleteMany({ where: { componentProduct: { tenantId } } })
         await prisma.product.deleteMany({ where: { tenantId } })
+        await prisma.user.deleteMany({ where: { tenantId } })
+        await prisma.role.deleteMany({ where: { tenantId } })
         await prisma.branch.deleteMany({ where: { tenantId } })
         await prisma.tenant.deleteMany({ where: { id: tenantId } })
 
         // Setup
         await prisma.tenant.create({ data: { id: tenantId, name: 'Combo Test Tenant', features: ['pos', 'inventory'] } })
         await prisma.branch.create({ data: { id: branchId, name: 'Branch 1', tenantId } })
+        const role = await prisma.role.create({ data: { name: 'OWNER', tenantId } })
+        await prisma.user.create({
+            data: {
+                id: 'user-123',
+                email: 'test@user.com',
+                name: 'Test User',
+                password: 'dummy',
+                tenantId: tenantId,
+                roleId: role.id
+            }
+        })
     })
 
     it('should deduct from prepared stock of a component product when composite meal is sold', async () => {
@@ -66,7 +79,7 @@ describe('Combo Meal Deductions (K-2+)', () => {
         expect(stockBefore?.quantity).toBe(30)
 
         // 4. Cashier sells 2 Solo Chicken Meals
-        await posService.createOrder([
+        await posService.createOrder('user-123', [
             { productId: combo.id, quantity: 2, price: 150 }
         ])
 

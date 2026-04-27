@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET, POST } from '@/app/api/products/[id]/recipe/route'
 import { RecipeService } from '@/services/recipe-service'
+import { NextRequest } from 'next/server'
 
 vi.mock('@/services/recipe-service')
 
@@ -12,7 +13,7 @@ describe('API: /api/products/[id]/recipe (Recipe Management)', () => {
     const createReq = (method: string, body?: any, tenantId: string | null = 'tenant-123') => {
         const headers = new Headers()
         if (tenantId) headers.set('x-tenant-id', tenantId)
-        return new Request('http://localhost', {
+        return new NextRequest('http://localhost', {
             method,
             headers,
             body: body ? JSON.stringify(body) : undefined

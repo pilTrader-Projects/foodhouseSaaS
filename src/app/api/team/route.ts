@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { UserService } from '@/services/user-service'
+import { getApiContext, missingContextResponse } from '@/lib/api-context'
 
 export async function GET(req: NextRequest) {
-    const tenantId = req.headers.get('x-tenant-id')
-    const branchId = req.headers.get('x-branch-id') || req.nextUrl.searchParams.get('branchId')
+    const { tenantId, branchId } = await getApiContext(req)
 
-    if (!tenantId) {
-        return NextResponse.json({ error: 'Tenant context required' }, { status: 400 })
-    }
+    if (!tenantId) return missingContextResponse('Tenant context required')
 
     try {
         const service = new UserService(tenantId)
@@ -19,12 +17,18 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const tenantId = req.headers.get('x-tenant-id')
-    const body = await req.json()
+    const { tenantId, branchId: headerBranchId } = await getApiContext(req)
+    if (!tenantId) return missingContextResponse('Tenant context required')
 
     try {
+        const body = await req.json()
+
+        // Resolve branchId: priority Body > Header
+        const finalBranchId = body.branchId || headerBranchId
+        if (!finalBranchId) return missingContextResponse('Branch context required for invitation')
+
         const service = new UserService(tenantId)
-        const user = await service.inviteUser(body)
+        const user = await service.inviteUser({ ...body, branchId: finalBranchId })
         return NextResponse.json({ user })
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })

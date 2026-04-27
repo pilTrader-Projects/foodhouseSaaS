@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { SupplierService } from '@/services/supplier-service';
+import { getApiContext, missingContextResponse } from '@/lib/api-context';
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
     try {
-        const tenantId = request.headers.get('x-tenant-id');
-        if (!tenantId) return NextResponse.json({ error: 'Missing tenant ID' }, { status: 400 });
+        const { tenantId } = await getApiContext(req);
+        if (!tenantId) return missingContextResponse('Tenant context required');
 
         const supplierService = new SupplierService(tenantId);
         const suppliers = await supplierService.getSuppliers();
@@ -15,12 +16,12 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
     try {
-        const tenantId = request.headers.get('x-tenant-id');
-        if (!tenantId) return NextResponse.json({ error: 'Missing tenant ID' }, { status: 400 });
+        const { tenantId } = await getApiContext(req);
+        if (!tenantId) return missingContextResponse('Tenant context required');
 
-        const body = await request.json();
+        const body = await req.json();
         const supplierService = new SupplierService(tenantId);
         const supplier = await supplierService.createSupplier(body);
 

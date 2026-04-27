@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ProductionService } from '@/services/production-service'
+import { getApiContext, missingContextResponse } from '@/lib/api-context'
 
 export async function POST(req: NextRequest) {
-    const tenantId = req.headers.get('x-tenant-id')
-    const branchId = req.headers.get('x-branch-id') || req.nextUrl.searchParams.get('branchId')
-    const body = await req.json()
-    const { productId, quantity } = body
-
-    if (!branchId) {
-        return NextResponse.json({ error: 'Missing branch ID' }, { status: 400 })
-    }
+    const { tenantId, branchId } = await getApiContext(req)
+    if (!tenantId || !branchId) return missingContextResponse()
 
     try {
+        const body = await req.json()
+        const { productId, quantity } = body
+
         const service = new ProductionService(tenantId, branchId)
         const record = await service.recordProduction(productId, quantity)
         return NextResponse.json({ message: 'Production recorded successfully', record })
@@ -22,12 +20,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-    const tenantId = req.headers.get('x-tenant-id')
-    const branchId = req.headers.get('x-branch-id') || req.nextUrl.searchParams.get('branchId')
-
-    if (!branchId) {
-        return NextResponse.json({ error: 'Missing branch ID' }, { status: 400 })
-    }
+    const { tenantId, branchId } = await getApiContext(req)
+    if (!tenantId || !branchId) return missingContextResponse()
 
     try {
         const service = new ProductionService(tenantId, branchId)
