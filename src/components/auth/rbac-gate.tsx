@@ -19,9 +19,11 @@ interface RBACGateProps {
   redirectOnFail?: string;
 }
 
+import { useUser } from '@/context/user-context';
+
 /**
  * RBACGate protects child components based on user permissions.
- * Hardened to handle auth failures silently without crashing.
+ * Now consumes global UserProvider state.
  */
 export function RBACGate({ 
   permission, 
@@ -29,52 +31,19 @@ export function RBACGate({
   fallback, 
   redirectOnFail 
 }: RBACGateProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [authFailed, setAuthFailed] = useState(false);
+  const { user, permissions, loading, authFailed } = useUser();
   const router = useRouter();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function checkAuth() {
-      try {
-        const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') || 'user-admin' : 'user-admin';
-        const res = await fetch('/api/auth/me', {
-          headers: { 'x-user-id': userId }
-        });
-        
-        if (!res.ok) {
-           if (isMounted) setAuthFailed(true);
-           return;
-        }
-        
-        const data = await res.json();
-        if (isMounted) setUser(data.user);
-      } catch (e) {
-        console.warn("RBAC Silence: Auth check interrupted", e);
-        if (isMounted) setAuthFailed(true);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    checkAuth();
-    return () => { isMounted = false; };
-  }, []);
-
-  // Handle Redirection logic in a separate effect to avoid state sync issues during render
+  // Handle Redirection logic
   useEffect(() => {
     if (!loading) {
-       const hasPerm = user?.role.permissions.some(p => 
-         p.name === permission || p.name === 'tenant:admin'
-       );
+       const hasPerm = permissions.includes(permission) || permissions.includes('tenant:admin');
        
        if (authFailed || (!hasPerm && user)) {
           if (redirectOnFail) router.push(redirectOnFail);
        }
     }
-  }, [loading, authFailed, user, permission, redirectOnFail, router]);
+  }, [loading, authFailed, user, permissions, permission, redirectOnFail, router]);
 
   if (loading) {
     return (

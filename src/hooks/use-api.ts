@@ -1,0 +1,47 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+
+/**
+ * Standardized API Hook
+ * Unifies loading states, error extraction, and fetch configuration.
+ */
+export function useApi() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const request = useCallback(async (url: string, options: RequestInit = {}) => {
+        setLoading(true);
+        setError(null);
+
+        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') : null;
+        const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(tenantId ? { 'x-tenant-id': tenantId } : {}),
+            ...(userId ? { 'x-user-id': userId } : {}),
+            ...options.headers,
+        };
+
+        try {
+            const res = await fetch(url, { ...options, headers });
+            const data = await res.json();
+
+            if (!res.ok) {
+                const errMsg = data.error || data.message || 'An unexpected error occurred';
+                setError(errMsg);
+                throw new Error(errMsg);
+            }
+
+            return data;
+        } catch (e: any) {
+            if (!error) setError(e.message);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }, [error]);
+
+    return { request, loading, error, setError };
+}

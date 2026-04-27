@@ -13,8 +13,11 @@ import {
 } from 'lucide-react';
 import { RBACGate } from '@/components/auth/rbac-gate';
 
+import { useUser } from '@/context/user-context';
+
 export default function PremiumDashboard() {
   const router = useRouter();
+  const { user, permissions, loading: authLoading } = useUser();
   const [data, setData] = useState({
     sales: 0,
     performance: [] as any[],
@@ -24,16 +27,10 @@ export default function PremiumDashboard() {
   const [tenant, setTenant] = useState<any>(null);
 
   useEffect(() => {
-    async function init() {
-      const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') || 'user-admin' : 'user-admin';
-      const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
-      
-      try {
-        const res = await fetch('/api/auth/me', { headers: { 'x-user-id': userId } });
-        const meData = await res.json();
-        const role = meData.user.role.name;
+    if (authLoading) return;
 
-        // Perspective Redirects
+    if (user) {
+        const role = user.role.name;
         if (role === 'Chef') {
             router.push('/kitchen');
             return;
@@ -42,8 +39,11 @@ export default function PremiumDashboard() {
             router.push('/pos');
             return;
         }
+    }
 
-        // Load Analytics if allowed
+    async function fetchDashboardData() {
+      const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
+      try {
         const [salesRes, perfRes, stockRes] = await Promise.all([
           fetch('/api/analytics/global-sales', { headers: { 'x-tenant-id': tenantId } }),
           fetch('/api/analytics/branch-performance', { headers: { 'x-tenant-id': tenantId } }),
@@ -62,13 +62,13 @@ export default function PremiumDashboard() {
           stockAlerts: stockData.criticalStock || [],
         });
       } catch (e) {
-        console.error("Dashboard Init Error", e);
+        console.error("Failed to fetch analytics", e);
       } finally {
         setLoading(false);
       }
     }
-    init();
-  }, [router]);
+    fetchDashboardData();
+  }, [authLoading, user, router]);
 
   return (
     <RBACGate permission="access:dashboard" redirectOnFail="/pos">

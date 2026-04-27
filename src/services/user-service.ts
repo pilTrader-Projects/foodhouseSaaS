@@ -1,5 +1,6 @@
 import { BaseService } from './base-service'
 import prisma from '@/lib/prisma'
+import { ROLES } from '@/lib/constants'
 
 /**
  * UserService manages branch personnel, invitations, and role assignments.
