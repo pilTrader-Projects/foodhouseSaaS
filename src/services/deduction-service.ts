@@ -24,29 +24,30 @@ export class DeductionService extends BaseService {
             include: { ingredients: true }
         })
 
-        if (!product) return
+        if (!product) throw new Error(`Product ${productId} not found for deduction`)
 
         // 1. Deduct the top-level item based on its strategy
         if (product.deductionModel === 'ON_PRODUCTION') {
             await this.consumePreparedStock(productId, quantity, tx)
         } else {
+            // Standard raw ingredient deduction
             await this.inventoryService.consumeIngredients(productId, quantity, tx)
         }
 
-        // 2. Recursively deduct recipe components
+        // 2. Recursively deduct recipe components (sub-products)
         await this.deductRecipeComponents(product, quantity, tx)
     }
 
     /**
      * Deducts only the recipe components of a product.
-     * Used by ProductionService to consume ingredients without deducting the product itself.
+     * Prevents infinite recursion by only processing componentProductId.
      */
     async deductRecipeComponents(product: any, quantity: number, tx: any) {
         if (!product.ingredients) return
 
         for (const recipeItem of product.ingredients) {
             if (recipeItem.componentProductId) {
-                // If it's a sub-product, use the standard recursive deduction
+                // Recursive call for sub-components
                 await this.deductStock(
                     recipeItem.componentProductId,
                     recipeItem.amount * quantity,
@@ -58,16 +59,15 @@ export class DeductionService extends BaseService {
 
     /**
      * Deducts from prepared stock (finished goods) during a sale.
-     * Moved from ProductionService to break circular dependency.
      */
-    async consumePreparedStock(productId: string, quantity: number, tx?: any) {
-        if (!this.branchId) throw new Error('Branch context required for consumption')
-        const db = tx || prisma
+    async consumePreparedStock(productId: string, quantity: number, tx: any) {
+        const branchId = this.branchId
+        if (!branchId) throw new Error('Branch context required for prepared stock consumption')
 
-        return db.preparedStock.upsert({
+        return tx.preparedStock.upsert({
             where: {
                 branchId_productId: {
-                    branchId: this.branchId,
+                    branchId,
                     productId
                 }
             },
@@ -75,7 +75,7 @@ export class DeductionService extends BaseService {
                 quantity: { decrement: quantity }
             },
             create: {
-                branchId: this.branchId,
+                branchId,
                 productId,
                 quantity: -quantity
             }
