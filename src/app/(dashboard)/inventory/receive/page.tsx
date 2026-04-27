@@ -1,31 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, Save, ShoppingCart, Truck, Search, PlusCircle } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Package, Plus, Trash2, Save, ShoppingCart, Truck, PlusCircle, Loader2 } from 'lucide-react';
 import { Badge, Button, Card, Modal } from '@/components/ui';
-import { useToast } from '@/components/ui/toast';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useUser } from '@/context/user-context';
+import { useApi } from '@/hooks/use-api';
 
-interface Supplier {
-    id: string;
-    name: string;
-}
-
-interface Ingredient {
-    id: string;
-    name: string;
-    unit: string;
-}
-
-interface DeliveryItem {
-    ingredientId: string;
-    quantity: number;
-    unitCost: number;
-}
+interface Supplier { id: string; name: string; }
+interface Ingredient { id: string; name: string; unit: string; }
+interface DeliveryItem { ingredientId: string; quantity: number; unitCost: number; }
 
 export default function ReceiveDelivery() {
-    const { branchId, loading: authLoading } = usePermissions();
-    const { toast } = useToast();
+    const { user, loading: authLoading } = useUser();
+    const { request, loading: apiLoading, error } = useApi();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
     const [selectedSupplier, setSelectedSupplier] = useState<string>('');
@@ -39,81 +26,62 @@ export default function ReceiveDelivery() {
     const [newIngData, setNewIngData] = useState({ name: '', unit: '' });
     const [isCreating, setIsCreating] = useState(false);
 
-    const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
-
-    const fetchCatalogs = async () => {
+    const fetchCatalogs = useCallback(async () => {
         try {
-            const [suppRes, ingRes] = await Promise.all([
-                fetch('/api/procurement/suppliers', { headers: { 'x-tenant-id': tenantId } }),
-                fetch('/api/inventory/ingredients', { headers: { 'x-tenant-id': tenantId } })
+            const [suppData, ingData] = await Promise.all([
+                request('/api/procurement/suppliers'),
+                request('/api/inventory/ingredients')
             ]);
-            const [suppData, ingData] = await Promise.all([suppRes.json(), ingRes.json()]);
             setSuppliers(Array.isArray(suppData) ? suppData : []);
             setIngredients(Array.isArray(ingData) ? ingData : []);
         } catch (e) {
-            toast("Failed to load catalogs", "error");
+            console.error("Failed to load catalogs", e);
         }
-    };
+    }, [request]);
 
     useEffect(() => {
         fetchCatalogs();
-    }, [tenantId]);
+    }, [fetchCatalogs]);
 
     const handleQuickAddSupplier = async () => {
-        if (!newSuppData.name) return toast("Supplier name required", "error");
+        if (!newSuppData.name) return;
         setIsCreating(true);
         try {
-            const res = await fetch('/api/procurement/suppliers', {
+            const created = await request('/api/procurement/suppliers', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
                 body: JSON.stringify(newSuppData)
             });
-            if (res.ok) {
-                const created = await res.json();
-                toast("Supplier added", "success");
-                setSelectedSupplier(created.id);
-                setShowSuppModal(false);
-                setNewSuppData({ name: '', contact: '' });
-                fetchCatalogs();
-            }
+            setSelectedSupplier(created.id);
+            setShowSuppModal(false);
+            setNewSuppData({ name: '', contact: '' });
+            fetchCatalogs();
         } catch (e) {
-            toast("Creation failed", "error");
+            console.error("Creation failed", e);
         } finally {
             setIsCreating(false);
         }
     };
 
     const handleQuickAddIngredient = async () => {
-        if (!newIngData.name || !newIngData.unit) return toast("Name and Unit required", "error");
+        if (!newIngData.name || !newIngData.unit) return;
         setIsCreating(true);
         try {
-            const res = await fetch('/api/inventory/ingredients', {
+            await request('/api/inventory/ingredients', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
                 body: JSON.stringify(newIngData)
             });
-            if (res.ok) {
-                toast("Ingredient added", "success");
-                setShowIngModal(false);
-                setNewIngData({ name: '', unit: '' });
-                fetchCatalogs();
-            }
+            setShowIngModal(false);
+            setNewIngData({ name: '', unit: '' });
+            fetchCatalogs();
         } catch (e) {
-            toast("Creation failed", "error");
+             console.error("Creation failed", e);
         } finally {
             setIsCreating(false);
         }
     };
 
-    const addItem = () => {
-        setItems([...items, { ingredientId: '', quantity: 1, unitCost: 0 }]);
-    };
-
-    const removeItem = (index: number) => {
-        if (items.length === 1) return;
-        setItems(items.filter((_, i) => i !== index));
-    };
-
+    const addItem = () => setItems([...items, { ingredientId: '', quantity: 1, unitCost: 0 }]);
+    const removeItem = (index: number) => items.length > 1 && setItems(items.filter((_, i) => i !== index));
     const updateItem = (index: number, field: keyof DeliveryItem, value: any) => {
         const newItems = [...items];
         newItems[index] = { ...newItems[index], [field]: value };
@@ -123,56 +91,59 @@ export default function ReceiveDelivery() {
     const totalCost = items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
 
     const handleSubmit = async () => {
-        if (!selectedSupplier) return toast("Select a supplier", "error");
-        if (items.some(i => !i.ingredientId || i.quantity <= 0)) return toast("Check item details", "error");
-
+        if (!selectedSupplier || !user?.branchId) return;
         setIsSaving(true);
         try {
-            const res = await fetch('/api/procurement/delivery', {
+            await request('/api/procurement/delivery', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-tenant-id': tenantId,
-                    'x-branch-id': branchId!
-                },
+                headers: { 'x-branch-id': user.branchId },
                 body: JSON.stringify({ supplierId: selectedSupplier, items })
             });
-
-            if (res.ok) {
-                toast("Delivery recorded successfully", "success");
-                setItems([{ ingredientId: '', quantity: 1, unitCost: 0 }]);
-                setSelectedSupplier('');
-            } else {
-                const err = await res.json();
-                toast(err.error || "Failed to record", "error");
-            }
+            setItems([{ ingredientId: '', quantity: 1, unitCost: 0 }]);
+            setSelectedSupplier('');
+            alert("Delivery Recorded Successfully");
         } catch (e) {
-            toast("Connection failure", "error");
+            console.error("Submission error", e);
         } finally {
             setIsSaving(false);
         }
     };
 
+    if (authLoading) {
+        return (
+          <div className="h-[60vh] flex-col flex-center text-slate-400">
+            <Loader2 className="w-12 h-12 rounded-full animate-spin mb-4 text-blue-600" />
+            <p className="font-black tracking-widest uppercase text-xs text-slate-900">Syncing Procurement...</p>
+          </div>
+        );
+    }
+
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex justify-between items-center bg-white p-8 rounded-4xl border-2 border-slate-100 shadow-sm">
+        <div className="space-y-8 animate-fade-in">
+            <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
                 <div>
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                         <Package className="w-10 h-10 text-blue-600" />
                         Receive Delivery
                     </h1>
-                    <p className="text-10 font-black text-slate-400 uppercase tracking-widest mt-1">Incoming Inventory & Procurement Control</p>
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Incoming Inventory & Procurement Control</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="bg-slate-900 px-6 py-3 rounded-2xl flex items-center gap-4 text-white">
+                    <div className="bg-slate-900 px-6 py-3 rounded-md flex items-center gap-4 text-white">
                         <div className="text-right">
-                            <p className="text-10 font-black text-slate-500 uppercase tracking-widest">Total Value</p>
-                            <p className="text-xl font-black">${totalCost.toLocaleString()}</p>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Value</p>
+                            <p className="text-xl font-black">₱{totalCost.toLocaleString()}</p>
                         </div>
                         <ShoppingCart className="w-5 h-5 text-slate-400" />
                     </div>
                 </div>
             </div>
+
+            {error && (
+                <div className="p-4 bg-rose-50 text-rose-600 text-xs font-black uppercase tracking-widest rounded-sm border border-rose-100">
+                    Error: {error}
+                </div>
+            )}
 
             <Card className="p-0 overflow-hidden border-none shadow-none">
                 <div className="p-8 bg-slate-50 border-b border-slate-100">
@@ -187,8 +158,7 @@ export default function ReceiveDelivery() {
                         <select 
                             value={selectedSupplier}
                             onChange={(e) => setSelectedSupplier(e.target.value)}
-                            className="w-full h-16 px-6 bg-white border-2 border-slate-200 rounded-2xl font-black text-slate-800 appearance-none focus:border-blue-600 transition-all outline-none"
-                            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'3\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.25rem' }}
+                            className="w-full h-16 px-6 bg-white border border-slate-200 rounded-md font-black text-slate-800 focus:border-blue-600 transition-all outline-none"
                         >
                             <option value="">Select Supplier...</option>
                             {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -197,7 +167,7 @@ export default function ReceiveDelivery() {
                 </div>
 
                 <div className="p-8 space-y-6">
-                    <div className="flex justify-between items-center pr-12">
+                    <div className="flex justify-between items-center">
                         <h3 className="text-lg font-black text-slate-900">Delivery Line Items</h3>
                         <div className="flex gap-3">
                             <Button variant="outline" onClick={() => setShowIngModal(true)} icon={PlusCircle} size="xs">Quick Add Item</Button>
@@ -207,39 +177,39 @@ export default function ReceiveDelivery() {
 
                     <div className="space-y-4">
                         {items.map((item, index) => (
-                            <div key={index} className="flex gap-4 items-end animate-in slide-in-from-right-4 duration-300">
+                            <div key={index} className="flex gap-4 items-end">
                                 <div className="flex-1">
-                                    <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Ingredient</label>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Ingredient</label>
                                     <select 
                                         value={item.ingredientId}
                                         onChange={(e) => updateItem(index, 'ingredientId', e.target.value)}
-                                        className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-slate-800 outline-none focus:border-blue-200 transition-all"
+                                        className="w-full h-14 px-4 bg-slate-50 border border-slate-100 rounded-md font-bold text-slate-800 outline-none focus:border-blue-200 transition-all"
                                     >
                                         <option value="">Choose item...</option>
                                         {ingredients.map(i => <option key={i.id} value={i.id}>{i.name} ({i.unit})</option>)}
                                     </select>
                                 </div>
                                 <div className="w-32">
-                                    <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Qty</label>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Qty</label>
                                     <input 
                                         type="number" 
                                         value={item.quantity}
                                         onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
-                                        className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-black text-center text-slate-900 outline-none focus:border-blue-200 transition-all"
+                                        className="w-full h-14 px-4 bg-slate-50 border border-slate-100 rounded-md font-black text-center text-slate-900 outline-none focus:border-blue-200 transition-all"
                                     />
                                 </div>
                                 <div className="w-32">
-                                    <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Unit Cost</label>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Unit Cost</label>
                                     <input 
                                         type="number" 
                                         value={item.unitCost}
                                         onChange={(e) => updateItem(index, 'unitCost', parseFloat(e.target.value))}
-                                        className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-black text-center text-slate-900 outline-none focus:border-blue-200 transition-all"
+                                        className="w-full h-14 px-4 bg-slate-50 border border-slate-100 rounded-md font-black text-center text-slate-900 outline-none focus:border-blue-200 transition-all"
                                     />
                                 </div>
                                 <button 
                                     onClick={() => removeItem(index)}
-                                    className="h-14 w-12 flex items-center justify-center text-slate-300 hover:text-rose-500 transition-colors"
+                                    className="h-14 w-12 flex-center text-slate-300 hover:text-rose-500 transition-colors"
                                     disabled={items.length === 1}
                                 >
                                     <Trash2 className="w-5 h-5" />
@@ -253,10 +223,10 @@ export default function ReceiveDelivery() {
                     <Button 
                         variant="primary"
                         icon={Save}
-                        disabled={!selectedSupplier || isSaving}
-                        loading={isSaving}
+                        disabled={!selectedSupplier || isSaving || apiLoading}
+                        loading={isSaving || apiLoading}
                         onClick={handleSubmit}
-                        style={{ height: '4rem', paddingLeft: '3rem', paddingRight: '3rem' }}
+                        className="h-16 px-12"
                     >
                         Confirm Receipt
                     </Button>
@@ -271,17 +241,17 @@ export default function ReceiveDelivery() {
             >
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2">Company Name</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Company Name</label>
                         <input 
-                            className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold"
+                            className="w-full h-14 px-4 bg-slate-50 border border-slate-100 rounded-md font-bold"
                             value={newSuppData.name}
                             onChange={e => setNewSuppData({ ...newSuppData, name: e.target.value })}
                         />
                     </div>
                     <div>
-                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2">Contact Details</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Contact Details</label>
                         <input 
-                            className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold"
+                            className="w-full h-14 px-4 bg-slate-50 border border-slate-100 rounded-md font-bold"
                             value={newSuppData.contact}
                             onChange={e => setNewSuppData({ ...newSuppData, contact: e.target.value })}
                         />
@@ -298,17 +268,17 @@ export default function ReceiveDelivery() {
             >
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2">Item Name</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Item Name</label>
                         <input 
-                            className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold"
+                            className="w-full h-14 px-4 bg-slate-50 border border-slate-100 rounded-md font-bold"
                             value={newIngData.name}
                             onChange={e => setNewIngData({ ...newIngData, name: e.target.value })}
                         />
                     </div>
                     <div>
-                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2">Unit (e.g. KG, PCS, LITER)</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Unit (e.g. KG, PCS, LITER)</label>
                         <input 
-                            className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold"
+                            className="w-full h-14 px-4 bg-slate-50 border border-slate-100 rounded-md font-bold"
                             value={newIngData.unit}
                             onChange={e => setNewIngData({ ...newIngData, unit: e.target.value })}
                         />

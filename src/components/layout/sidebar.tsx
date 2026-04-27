@@ -10,11 +10,13 @@ import {
   Package, 
   ChefHat, 
   Settings,
+  Settings2,
   ShieldCheck,
   Moon,
   Sun,
   LogOut,
-  Loader2
+  Loader2,
+  MapPin
 } from 'lucide-react';
 import { useTheme } from '@/context/theme-context';
 import { useUser } from '@/context/user-context';
@@ -29,6 +31,7 @@ export function Sidebar() {
     { name: 'POS Terminal', icon: ShoppingCart, href: '/pos', perm: 'access:pos' },
     { name: 'Inventory', icon: Package, href: '/inventory', perm: 'access:inventory' },
     { name: 'Kitchen', icon: ChefHat, href: '/kitchen', perm: 'access:kitchen' },
+    { name: 'Menu', icon: Settings2, href: '/settings/menu', perm: 'access:menu' },
     { name: 'Team', icon: Users, href: '/settings/team', perm: 'access:team' },
     { name: 'Settings', icon: Settings, href: '/settings', perm: 'manage:settings' },
   ];
@@ -54,6 +57,24 @@ export function Sidebar() {
         </div>
         <span className="font-black tracking-tight uppercase text-white">FoodHouse</span>
       </div>
+
+      {user && (
+        <div className="px-10 py-8 border-b border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-white/10 rounded-sm flex-center font-black text-white text-xs">
+              {user.name.charAt(0)}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-black text-white uppercase tracking-tight">{user.name}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{user.role.name}</span>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-2 px-3 py-2 bg-white/5 rounded-sm">
+             <MapPin className="w-3 h-3 text-slate-500" />
+             <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{user.branch?.name || 'Grand HQ'}</span>
+          </div>
+        </div>
+      )}
 
       <nav className="sidebar-nav">
         {visibleItems.map((item) => {

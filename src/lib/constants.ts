@@ -16,6 +16,7 @@ export const PERMISSIONS = {
     ACCESS_INVENTORY: 'access:inventory',
     ACCESS_KITCHEN: 'access:kitchen',
     ACCESS_TEAM: 'access:team',
+    ACCESS_MENU: 'access:menu',
 
     // Settings & Admin
     MANAGE_SETTINGS: 'manage:settings',

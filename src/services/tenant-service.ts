@@ -13,6 +13,16 @@ export class TenantService {
         this.featureService = featureService || new FeatureService()
     }
 
+    async createTenant(data: { name: string; plan?: string }) {
+        return prisma.tenant.create({
+            data: {
+                name: data.name,
+                plan: data.plan || 'basic',
+                features: [],
+            },
+        })
+    }
+
     /**
      * Complete onboarding transaction: Tenant + Multi-standard Roles + Owner User + Initial Branch.
      */
@@ -46,7 +56,8 @@ export class TenantService {
                         PERMISSIONS.ACCESS_DASHBOARD,
                         PERMISSIONS.ACCESS_POS,
                         PERMISSIONS.ACCESS_INVENTORY,
-                        PERMISSIONS.ACCESS_KITCHEN
+                        PERMISSIONS.ACCESS_KITCHEN,
+                        PERMISSIONS.ACCESS_MENU
                     )
                 },
                 { name: ROLES.CHEF, permissions: getPermIds(PERMISSIONS.ACCESS_KITCHEN, PERMISSIONS.ACCESS_INVENTORY) },

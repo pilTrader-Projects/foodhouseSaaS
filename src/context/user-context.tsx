@@ -9,6 +9,10 @@ interface User {
     name: string;
     permissions: { name: string }[];
   };
+  branch?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface UserContextType {

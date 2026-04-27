@@ -13,9 +13,11 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '@/context/user-context';
 
 export default function OnboardingPage() {
     const [step, setStep] = useState(1);
+    const { refreshUser } = useUser();
     const [formData, setFormData] = useState({
         user: { name: '', email: '', password: '' },
         business: { name: '', plan: 'basic' },
@@ -51,6 +53,10 @@ export default function OnboardingPage() {
             if (res.ok) {
                 localStorage.setItem('tenantId', data.tenantId);
                 localStorage.setItem('userId', data.userId);
+                
+                // Refresh context before redirect
+                await refreshUser();
+                
                 router.push('/dashboard');
             } else {
                 setError(data.error || 'Something went wrong');
