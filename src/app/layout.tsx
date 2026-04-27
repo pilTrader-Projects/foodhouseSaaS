@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import './modern.css'
 import { ToastProvider } from '@/components/ui/toast'
 
 export const metadata: Metadata = {

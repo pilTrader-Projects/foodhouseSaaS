@@ -1,0 +1,413 @@
+/* Modern Styling System for FoodHouse SaaS */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    --secondary-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    --blue-glow: 0 10px 40px -10px rgba(37, 99, 235, 0.4);
+    --shadow-premium: 0 20px 60px -15px rgba(15, 23, 42, 0.1);
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-3xl: 2.5rem;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-900: #0f172a;
+}
+
+/* Base Utility Overrides */
+.font-black {
+    font-weight: 900;
+}
+
+.tracking-tight {
+    letter-spacing: -0.025em;
+}
+
+.tracking-widest {
+    letter-spacing: 0.1em;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+/* Layout Utilities */
+.min-h-screen {
+    min-height: 100vh;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.gap-6 {
+    gap: 1.5rem;
+}
+
+.gap-8 {
+    gap: 2rem;
+}
+
+.gap-10 {
+    gap: 2.5rem;
+}
+
+.gap-16 {
+    gap: 4rem;
+}
+
+.max-w-xl {
+    max-width: 36rem;
+}
+
+.max-w-md {
+    max-width: 28rem;
+}
+
+.max-w-3xl {
+    max-width: 48rem;
+}
+
+.max-w-7xl {
+    max-width: 80rem;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.w-full {
+    width: 100%;
+}
+
+/* Spacing */
+.p-2 {
+    padding: 0.5rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.p-6 {
+    padding: 1.5rem;
+}
+
+.p-8 {
+    padding: 2rem;
+}
+
+.p-10 {
+    padding: 2.5rem;
+}
+
+.px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.px-8 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
+.px-10 {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+}
+
+.py-3 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.py-4 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.py-5 {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+}
+
+.py-8 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.py-20 {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.py-32 {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+}
+
+.pt-4 {
+    padding-top: 1rem;
+}
+
+.pt-10 {
+    padding-top: 2.5rem;
+}
+
+.pt-20 {
+    padding-top: 5rem;
+}
+
+.pb-2 {
+    padding-bottom: 0.5rem;
+}
+
+.pb-32 {
+    padding-bottom: 8rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+    margin-bottom: 0.75rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-10 {
+    margin-bottom: 2.5rem;
+}
+
+.mb-20 {
+    margin-bottom: 5rem;
+}
+
+/* Colors & Backgrounds */
+.bg-slate-50 {
+    background-color: var(--slate-50);
+}
+
+.bg-white {
+    background-color: white;
+}
+
+.bg-blue-600 {
+    background-color: #2563eb;
+}
+
+.bg-slate-900 {
+    background-color: var(--slate-900);
+}
+
+.bg-blue-50 {
+    background-color: #eff6ff;
+}
+
+.bg-emerald-50 {
+    background-color: #ecfdf5;
+}
+
+.bg-emerald-500 {
+    background-color: #10b981;
+}
+
+.bg-rose-50 {
+    background-color: #fff1f2;
+}
+
+.bg-rose-500 {
+    background-color: #f43f5e;
+}
+
+.text-slate-900 {
+    color: var(--slate-900);
+}
+
+.text-slate-600 {
+    color: var(--slate-600);
+}
+
+.text-slate-500 {
+    color: var(--slate-500);
+}
+
+.text-slate-400 {
+    color: var(--slate-400);
+}
+
+.text-blue-600 {
+    color: #2563eb;
+}
+
+.text-emerald-600 {
+    color: #059669;
+}
+
+.text-rose-600 {
+    color: #e11d48;
+}
+
+.text-white {
+    color: white;
+}
+
+/* Components */
+.rounded-xl {
+    border-radius: 0.75rem;
+}
+
+.rounded-2xl {
+    border-radius: 1rem;
+}
+
+.rounded-3xl {
+    border-radius: 1.5rem;
+}
+
+.rounded-card-premium {
+    border-radius: var(--radius-3xl);
+}
+
+.shadow-premium {
+    box-shadow: var(--shadow-premium);
+}
+
+.shadow-blue {
+    box-shadow: var(--blue-glow);
+}
+
+.card-premium {
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-premium);
+    border: 1px solid var(--slate-100);
+}
+
+.btn-premium {
+    padding: 1.25rem 2.5rem;
+    border-radius: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: var(--blue-glow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background: var(--slate-900);
+    color: white;
+}
+
+.input-premium {
+    width: 100%;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    padding: 1.25rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    color: var(--slate-900);
+    outline: none;
+    transition: all 0.2s;
+}
+
+.input-premium:focus {
+    background: white;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* Animations */
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .md\:flex {
+        display: none;
+    }
+
+    .grid-cols-1 {
+        grid-template-columns: 1fr;
+    }
+
+    .text-6xl {
+        font-size: 3rem;
+    }
+}
+
+.grid {
+    display: grid;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
