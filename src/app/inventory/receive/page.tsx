@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Package, Plus, Trash2, Save, ShoppingCart, Truck, Search } from 'lucide-react';
 import { Badge, Button, Card } from '@/components/ui';
 import { useToast } from '@/components/ui/toast';
-import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Supplier {
     id: string;
@@ -24,7 +24,7 @@ interface DeliveryItem {
 }
 
 export default function ReceiveDelivery() {
-    const { branchId, loading: authLoading } = useAuth();
+    const { branchId, loading: authLoading } = usePermissions();
     const { toast } = useToast();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);

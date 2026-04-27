@@ -11,6 +11,7 @@ import {
   Users, 
   ChefHat, 
   Package,
+  Truck,
   ShieldCheck,
   Loader2
 } from 'lucide-react';
