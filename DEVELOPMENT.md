@@ -43,8 +43,11 @@ This list defines the order of building blocks to ensure zero technical debt and
     *   *Rationale*: Allows owners to delegate operations to staff (Cashiers, Managers, Chefs) with strict role isolation.
 *   **[S-8] UI-Level RBAC Enforcement** (✅ **DONE**)
     *   *Rationale*: Ensures staff only access modules relevant to their role and branch.
-*   **[P-3] Branch-Specific Menus & Overrides** (📅 PLANNED)
-*   **[I-4] Stock Transfers & Branch Logistics** (📅 PLANNED)
+*   **[P-3] Branch-Specific Menus & Overrides** (✅ **DONE**)
+    *   *Rationale*: Allows localized pricing and items, enabling branches to adapt to local stock and demand.
+*   **[K-1] Kitchen Display System (KDS)** (🟡 **IN PROGRESS**)
+    *   *Rationale*: Provides live order tracking for the Chef role, enabling real-time fulfillment and status updates (Pending -> Preparing -> Ready).
+*   **[I-5] Wastage & Spoilage Tracking** (📅 PLANNED)
 
 ### **IV. Commercial Expansion (Monetization Layer)**
 *   **[M-1] Billing Integration (Stripe / PayMongo)** (📅 PLANNED)
@@ -117,6 +120,7 @@ This list defines the order of building blocks to ensure zero technical debt and
 | 2026-04-27 | SaaS | Limit Enforcement | Implemented `max_branches` enforcement in `TenantService`. |
 | 2026-04-27 | Inventory | Supplier & Procurement | Implemented `Supplier` model, `SupplierService`, and `PurchaseRecord`. |
 | 2026-04-27 | Analytics | Aggregation Logic | Exposed cross-branch sales and stock analytics via API routes. |
+| 2026-04-27 | POS | Menu Overrides | Implemented `BranchProduct` model and `MenuService` to resolve localized pricing/availability. |
 | 2026-04-27 | UI | Executive Dashboard | Built a premium, data-driven dashboard using Lucide React and Glassmorphism. |
 | 2026-04-27 | Team | Personnel & RBAC | Implemented `UserService`, `/api/auth/me`, and guarded `Sidebar` with `RoleSwitcher`. |
 | 2026-04-27 | Core | Visibility Fix | Changed `featureService` visibility to `protected` in `BaseService` to support sub-services. |

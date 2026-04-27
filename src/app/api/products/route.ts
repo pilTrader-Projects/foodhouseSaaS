@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
 import { ProductService } from '@/services/product-service';
+import { MenuService } from '@/services/menu-service';
 
 export async function GET(request: Request) {
     try {
         const tenantId = request.headers.get('x-tenant-id');
+        const branchId = request.headers.get('x-branch-id');
+
         if (!tenantId) return NextResponse.json({ error: 'Missing tenant ID' }, { status: 400 });
+
+        if (branchId) {
+            const menuService = new MenuService(tenantId, branchId);
+            const products = await menuService.getBranchMenu();
+            return NextResponse.json(products);
+        }
 
         const productService = new ProductService(tenantId);
         const products = await productService.getProducts();

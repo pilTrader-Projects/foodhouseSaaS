@@ -44,6 +44,7 @@ model Branch {
   // Relations
   stocks    Stock[]
   orders    Order[]
+  branchProducts BranchProduct[]
 }
 
 model User {
@@ -94,6 +95,7 @@ model Product {
   
   ingredients RecipeItem[]
   orderItems  OrderItem[]
+  branchOverrides BranchProduct[]
 }
 
 model Ingredient {
@@ -186,4 +188,18 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   pricePaid Float
+}
+
+model BranchProduct {
+  id              String   @id @default(cuid())
+  branchId        String
+  branch          Branch   @relation(fields: [branchId], references: [id])
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  priceOverride   Float?   // Optional price override
+  isAvailable     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([branchId, productId])
 }

@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { DEMO_PRODUCTS, DEMO_INGREDIENTS, INITIAL_STOCK, DEMO_BRANCH } from '@/lib/demo-data';
+import { usePermissions } from '@/hooks/usePermissions';
+import { Loader2, ShoppingBag } from 'lucide-react';
 
 export default function PosTerminalPage() {
+    const { branchId, user, loading: authLoading } = usePermissions();
     const [cart, setCart] = useState<any[]>([]);
     const [stock, setStock] = useState<Record<string, number>>(INITIAL_STOCK);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -20,13 +23,16 @@ export default function PosTerminalPage() {
     const [change, setChange] = useState<number>(0);
 
     useEffect(() => {
+        if (authLoading) return;
         const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
-        const branchId = 'branch-downtown';
 
         async function fetchProducts() {
             try {
                 const res = await fetch('/api/products', {
-                    headers: { 'x-tenant-id': tenantId }
+                    headers: { 
+                        'x-tenant-id': tenantId,
+                        ...(branchId ? { 'x-branch-id': branchId } : {})
+                    }
                 });
                 const data = await res.json();
                 if (res.ok) setProducts(data);
@@ -36,7 +42,7 @@ export default function PosTerminalPage() {
             }
         }
         fetchProducts();
-    }, []);
+    }, [branchId, authLoading]);
 
     const openQuantityModal = (product: any) => {
         setSelectedProduct(product);
@@ -202,10 +208,16 @@ export default function PosTerminalPage() {
                     <h2 style={{ marginBottom: '1.5rem' }}>Menu: {DEMO_BRANCH.name}</h2>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                         {products.map(product => (
-                            <div key={product.id} className="card" style={{ cursor: 'pointer', textAlign: 'center', transition: 'transform 0.1s' }} onClick={() => openQuantityModal(product)}>
-                                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🍔</div>
+                            <div 
+                                key={product.id} 
+                                className={`card ${!product.isAvailable ? 'opacity-50 grayscale pointer-events-none' : 'cursor-pointer hover:scale-105 transition-transform'}`} 
+                                style={{ textAlign: 'center' }} 
+                                onClick={() => product.isAvailable && openQuantityModal(product)}
+                            >
+                                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{product.isAvailable ? '🍔' : '🚫'}</div>
                                 <strong>{product.name}</strong>
                                 <p style={{ color: 'var(--primary)', fontWeight: 'bold' }}>₱{product.price.toFixed(2)}</p>
+                                {!product.isAvailable && <span className="text-[10px] font-black bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full uppercase">Unavailable</span>}
                             </div>
                         ))}
                     </div>
