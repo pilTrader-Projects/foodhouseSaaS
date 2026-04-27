@@ -6,6 +6,7 @@ export interface Session {
     tenantId: string
     branchId?: string
     role: string
+    permissions: string[]
 }
 
 /**
@@ -25,7 +26,11 @@ export class AuthService {
     async login(email: string): Promise<Session | null> {
         const user = await prisma.user.findUnique({
             where: { email },
-            include: { role: true },
+            include: {
+                role: {
+                    include: { permissions: true }
+                }
+            },
         })
 
         if (!user) return null
@@ -35,6 +40,7 @@ export class AuthService {
             tenantId: user.tenantId,
             branchId: user.branchId || undefined,
             role: user.role.name,
+            permissions: user.role.permissions.map(p => p.name)
         }
     }
 

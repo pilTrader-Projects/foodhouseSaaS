@@ -1,107 +1,181 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { usePermissions } from '@/hooks/usePermissions';
 import { 
-  BarChart3, 
-  ShoppingCart, 
-  Search, 
-  Settings, 
   Users, 
+  LayoutDashboard, 
+  ShoppingCart, 
+  Package, 
   ChefHat, 
-  Package,
-  Truck,
+  Settings,
   ShieldCheck,
-  Loader2
+  Moon,
+  Sun,
+  LogOut
 } from 'lucide-react';
+import { useTheme } from '@/context/theme-context';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, loading, hasPermission, isRole } = usePermissions();
+  const { theme, toggleTheme } = useTheme();
+  const [user, setUser] = useState<any>(null);
 
-  if (loading) {
-    return (
-      <aside className="sidebar flex flex-col items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin opacity-20" />
-      </aside>
-    );
-  }
+  useEffect(() => {
+    async function fetchUser() {
+      const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') || 'user-admin' : 'user-admin';
+      try {
+        const res = await fetch('/api/auth/me', { headers: { 'x-user-id': userId } });
+        const data = await res.json();
+        setUser(data.user);
+      } catch (e) {
+        console.error("Sidebar Auth Failed", e);
+      }
+    }
+    fetchUser();
+  }, []);
 
-  const navItems = [
-    { name: 'Dashboard', href: '/', icon: BarChart3, guard: () => isRole('Owner') || isRole('Manager') },
-    { name: 'POS Terminal', href: '/pos', icon: ShoppingCart, guard: () => true },
-    { name: 'Inventory', href: '/inventory', icon: Package, guard: () => isRole('Owner') || isRole('Manager') },
-    { name: 'Receive Delivery', href: '/inventory/receive', icon: Truck, guard: () => isRole('Owner') || isRole('Manager') || isRole('Staff') },
-    { name: 'Kitchen Display', href: '/kitchen', icon: ChefHat, guard: () => isRole('Owner') || isRole('Manager') || isRole('Chef') },
+  const menuItems = [
+    { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', perm: 'access:dashboard' },
+    { name: 'POS Terminal', icon: ShoppingCart, href: '/pos', perm: 'access:pos' },
+    { name: 'Inventory', icon: Package, href: '/inventory', perm: 'access:inventory' },
+    { name: 'Kitchen', icon: ChefHat, href: '/kitchen', perm: 'access:kitchen' },
+    { name: 'Team', icon: Users, href: '/settings/team', perm: 'access:team' },
+    { name: 'Settings', icon: Settings, href: '/settings', perm: 'manage:settings' },
   ];
 
-  const adminItems = [
-    { name: 'Team', href: '/settings/team', icon: Users, guard: () => isRole('Owner') },
-    { name: 'Menu Settings', href: '/settings/menu', icon: Settings, guard: () => isRole('Owner') || isRole('Manager') },
-  ];
+  const visibleItems = menuItems.filter(item => {
+    if (!user) return false;
+    const permissions = user.role.permissions.map((p: any) => p.name);
+    return permissions.includes(item.perm) || permissions.includes('tenant:admin');
+  });
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = '/';
+  };
 
   return (
     <aside className="sidebar">
-      <div className="flex items-center gap-3 px-4 mb-8">
-        <div className="p-2 bg-blue-600 rounded-lg text-white">
+      <div className="sidebar-brand">
+        <div className="p-2 bg-white rounded-sm text-black">
           <ShieldCheck className="w-6 h-6" />
         </div>
-        <div>
-          <h2 className="!p-0 leading-none">FoodHouse</h2>
-          <span className="text-10 font-black text-slate-500 uppercase tracking-widest">{user?.tenant?.name || 'SaaS'}</span>
-        </div>
+        <span className="font-black tracking-tight uppercase text-white">FoodHouse</span>
       </div>
 
-      <nav className="flex-1 space-y-8">
-        <div>
-          <h3 className="px-4 text-10 font-black text-slate-500 uppercase tracking-widest mb-4">Operations</h3>
-          <ul className="nav-links">
-            {navItems.filter(item => item.guard()).map((item) => (
-              <li key={item.href}>
-                <Link 
-                  href={item.href} 
-                  className={`nav-item flex items-center gap-3 ${pathname === item.href ? 'active' : ''}`}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {(isRole('Owner') || isRole('Manager')) && (
-          <div>
-            <h3 className="px-4 text-10 font-black text-slate-500 uppercase tracking-widest mb-4">Management</h3>
-            <ul className="nav-links">
-              {adminItems.filter(item => item.guard()).map((item) => (
-                <li key={item.href}>
-                  <Link 
-                    href={item.href} 
-                    className={`nav-item flex items-center gap-3 ${pathname === item.href ? 'active' : ''}`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <nav className="sidebar-nav">
+        {visibleItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link 
+              key={item.name} 
+              href={item.href}
+              className={`sidebar-link ${isActive ? 'active' : ''}`}
+            >
+              <item.icon size={18} />
+              <span>{item.name}</span>
+            </Link>
+          );
+        })}
       </nav>
 
-      <div className="mt-auto px-4 py-6 border-t border-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">
-            {user?.name?.charAt(0)}
-          </div>
-          <div className="overflow-hidden">
-            <p className="text-xs font-bold text-white truncate">{user?.name}</p>
-            <p className="text-10 font-bold text-slate-500 uppercase tracking-wider">{user?.role?.name}</p>
-          </div>
-        </div>
+      <div className="sidebar-footer">
+        <button onClick={toggleTheme} className="theme-toggle">
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+        </button>
+        
+        <button onClick={handleLogout} className="theme-toggle opacity-50">
+          <LogOut size={18} />
+          <span>Sign Out</span>
+        </button>
       </div>
+
+      <style jsx>{`
+        .sidebar {
+          width: 280px;
+          height: 100vh;
+          background-color: var(--sidebar-bg);
+          color: var(--sidebar-text);
+          display: flex;
+          flex-direction: column;
+          border-right: 1px solid rgba(255,255,255,0.05);
+          position: sticky;
+          top: 0;
+        }
+
+        .sidebar-brand {
+          padding: 2.5rem;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .sidebar-nav {
+          flex: 1;
+          padding: 1.5rem 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .sidebar-link {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.875rem 1.5rem;
+          border-radius: var(--radius-xs);
+          font-size: 0.75rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          transition: all 0.2s;
+          color: var(--sidebar-text);
+        }
+
+        .sidebar-link:hover {
+          background-color: rgba(255,255,255,0.05);
+          color: var(--sidebar-active);
+        }
+
+        .sidebar-link.active {
+          background-color: rgba(255,255,255,0.1);
+          color: var(--sidebar-active);
+        }
+
+        .sidebar-footer {
+          padding: 1.5rem 1rem;
+          border-top: 1px solid rgba(255,255,255,0.05);
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .theme-toggle {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.875rem 1.5rem;
+          width: 100%;
+          background: none;
+          border: none;
+          color: var(--sidebar-text);
+          font-size: 0.75rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+          color: var(--sidebar-active);
+          background-color: rgba(255,255,255,0.05);
+        }
+      `}</style>
     </aside>
   );
 }

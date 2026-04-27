@@ -46,4 +46,92 @@ export class TenantService {
             },
         })
     }
+
+    /**
+     * Complete onboarding transaction: Tenant + Multi-standard Roles + Owner User + Initial Branch.
+     */
+    async setupNewBusiness(data: {
+        user: { name: string; email: string; password?: string };
+        business: { name: string; plan?: string };
+        branch: { name: string };
+    }) {
+        // 1. Validate redundancy
+        const existingUser = await prisma.user.findUnique({
+            where: { email: data.user.email }
+        })
+        if (existingUser) {
+            throw new Error('Email already in use')
+        }
+
+        // 2. Execute Transaction
+        return await prisma.$transaction(async (tx) => {
+            // a. Create Tenant
+            const tenant = await tx.tenant.create({
+                data: {
+                    name: data.business.name,
+                    plan: data.business.plan || 'basic',
+                }
+            })
+
+            // b. Create standard Roles for this tenant
+            const createdRoles = await Promise.all([
+                tx.role.create({ data: { name: 'Owner', tenantId: tenant.id } }),
+                tx.role.create({ data: { name: 'Manager', tenantId: tenant.id } }),
+                tx.role.create({ data: { name: 'Chef', tenantId: tenant.id } }),
+                tx.role.create({ data: { name: 'Staff', tenantId: tenant.id } })
+            ]);
+
+            // c. Assign Permissions to Roles (Standard Mapping)
+            // Note: We assume permissions are already seeded globally
+            const allPerms = await tx.permission.findMany();
+            const getPermIds = (...names: string[]) => allPerms.filter(p => names.includes(p.name)).map(p => ({ id: p.id }));
+
+            await Promise.all([
+                // Owner: All permissions
+                tx.role.update({
+                    where: { id: createdRoles[0].id },
+                    data: { permissions: { connect: allPerms.map(p => ({ id: p.id })) } }
+                }),
+                // Manager: Dashboard, POS, Inventory, Kitchen
+                tx.role.update({
+                    where: { id: createdRoles[1].id },
+                    data: { permissions: { connect: getPermIds('access:dashboard', 'access:pos', 'access:inventory', 'access:kitchen') } }
+                }),
+                // Chef: Kitchen, Inventory
+                tx.role.update({
+                    where: { id: createdRoles[2].id },
+                    data: { permissions: { connect: getPermIds('access:kitchen', 'access:inventory') } }
+                }),
+                // Staff (Cashier): POS Terminal
+                tx.role.update({
+                    where: { id: createdRoles[3].id },
+                    data: { permissions: { connect: getPermIds('access:pos') } }
+                })
+            ]);
+
+            const ownerRole = createdRoles[0];
+
+            // d. Create initial Branch
+            const branch = await tx.branch.create({
+                data: {
+                    name: data.branch.name,
+                    tenantId: tenant.id
+                }
+            })
+
+            // e. Create Owner User
+            const user = await tx.user.create({
+                data: {
+                    name: data.user.name,
+                    email: data.user.email,
+                    password: data.user.password || 'password123',
+                    tenantId: tenant.id,
+                    roleId: ownerRole.id,
+                    branchId: branch.id
+                }
+            })
+
+            return { tenant, user, branch }
+        })
+    }
 }
