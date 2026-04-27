@@ -46,7 +46,8 @@ This list defines the order of building blocks to ensure zero technical debt and
 *   **[P-3] Branch-Specific Menus & Overrides** (✅ **DONE**)
     *   *Rationale*: Allows localized pricing and items, enabling branches to adapt to local stock and demand.
 *   **[K-1] Kitchen Display System (KDS)** (✅ **DONE**)
-    *   *Rationale*: Provides live order tracking for the Chef role, enabling real-time fulfillment and status updates (Pending -> Preparing -> Ready).
+*   **[K-2] Hybrid Production Tracking** (✅ **DONE**)
+    *   *Rationale*: Supports both batch-cooked items (Chef logs production) and on-demand items (automatic recipe deduction) in a single unified system.
 *   **[I-5] Wastage & Spoilage Tracking** (📅 PLANNED)
 
 ### **IV. Commercial Expansion (Monetization Layer)**

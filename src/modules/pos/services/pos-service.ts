@@ -1,6 +1,7 @@
 import { BaseService } from '@/services/base-service'
 import prisma from '@/lib/prisma'
 import { InventoryService } from '../../inventory/services/inventory-service'
+import { ProductionService } from '@/services/production-service'
 
 /**
  * PosService handles order creation and coordinates with the 
@@ -8,10 +9,12 @@ import { InventoryService } from '../../inventory/services/inventory-service'
  */
 export class PosService extends BaseService {
     private inventoryService: InventoryService
+    private productionService: ProductionService
 
     constructor(tenantId: string, branchId: string) {
         super(tenantId, branchId)
         this.inventoryService = new InventoryService(tenantId, branchId)
+        this.productionService = new ProductionService(tenantId, branchId)
     }
 
     /**
@@ -43,9 +46,19 @@ export class PosService extends BaseService {
                 },
             })
 
-            // 2. Delegate inventory consumption to the Inventory module
+            // 2. Delegate inventory consumption based on the hybrid model
             for (const item of items) {
-                await this.inventoryService.consumeIngredients(item.productId, item.quantity)
+                const product = await tx.product.findUnique({
+                    where: { id: item.productId }
+                })
+
+                if (product?.deductionModel === 'ON_PRODUCTION') {
+                    // Logic for pre-cooked items: Deduct from PREPARED stock
+                    await this.productionService.consumePreparedStock(item.productId, item.quantity)
+                } else {
+                    // Logic for made-to-order items: Deduct raw ingredients directly
+                    await this.inventoryService.consumeIngredients(item.productId, item.quantity)
+                }
             }
 
             return order

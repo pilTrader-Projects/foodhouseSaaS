@@ -100,14 +100,16 @@ export async function POST() {
             const product = await prisma.product.upsert({
                 where: { id: prod.id },
                 update: {
-                    price: prod.price
+                    price: prod.price,
+                    deductionModel: prod.id === 'p1' ? 'ON_PRODUCTION' : 'ON_ORDER' // p1 is Fried Chicken
                 },
                 create: {
                     id: prod.id,
                     name: prod.name,
                     price: prod.price,
                     tenantId: tenant.id,
-                    branchId: branch.id
+                    branchId: branch.id,
+                    deductionModel: prod.id === 'p1' ? 'ON_PRODUCTION' : 'ON_ORDER'
                 }
             });
 

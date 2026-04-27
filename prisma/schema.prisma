@@ -96,6 +96,9 @@ model Product {
   ingredients RecipeItem[]
   orderItems  OrderItem[]
   branchOverrides BranchProduct[]
+  preparedStocks PreparedStock[]
+  productionLogs ProductionRecord[]
+  deductionModel String @default("ON_ORDER") // ON_ORDER, ON_PRODUCTION
 }
 
 model Ingredient {
@@ -179,7 +182,6 @@ model Order {
   updatedAt   DateTime    @updatedAt
   items       OrderItem[]
 }
-
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
@@ -202,4 +204,26 @@ model BranchProduct {
   updatedAt       DateTime @updatedAt
 
   @@unique([branchId, productId])
+}
+
+model PreparedStock {
+  id        String  @id @default(cuid())
+  branchId  String
+  branch    Branch  @relation(fields: [branchId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Float   @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([branchId, productId])
+}
+
+model ProductionRecord {
+  id          String   @id @default(cuid())
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Float
+  createdAt   DateTime @default(now())
 }

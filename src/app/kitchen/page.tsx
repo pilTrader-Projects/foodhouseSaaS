@@ -18,6 +18,13 @@ export default function KitchenPage() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
+  // Production Entry State
+  const [showProductionModal, setShowProductionModal] = useState(false);
+  const [prodQty, setProdQty] = useState(5);
+  const [prodProductId, setProdProductId] = useState<string | null>(null);
+  const [availableProducts, setAvailableProducts] = useState<any[]>([]);
+  const [productionLoading, setProductionLoading] = useState(false);
+
   const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
 
   const fetchOrders = async () => {
@@ -38,12 +45,60 @@ export default function KitchenPage() {
     }
   };
 
+  const fetchProductionProducts = async () => {
+    if (!branchId) return;
+    try {
+        const res = await fetch('/api/products', {
+            headers: { 
+                'x-tenant-id': tenantId,
+                'x-branch-id': branchId
+            }
+        });
+        const data = await res.json();
+        // Only show products using the Production deduction model
+        setAvailableProducts(data.filter((p: any) => p.deductionModel === 'ON_PRODUCTION'));
+    } catch (e) {
+        console.error("Fetch Products Error:", e);
+    }
+  };
+
   useEffect(() => {
     if (authLoading) return;
     fetchOrders();
+    fetchProductionProducts();
     const interval = setInterval(fetchOrders, 5000); // Polling every 5s
     return () => clearInterval(interval);
   }, [branchId, authLoading]);
+
+  const handleRecordProduction = async () => {
+    if (!prodProductId || !branchId) return;
+    setProductionLoading(true);
+    try {
+        const res = await fetch('/api/kitchen/production', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-tenant-id': tenantId,
+                'x-branch-id': branchId 
+            },
+            body: JSON.stringify({ productId: prodProductId, quantity: prodQty }),
+        });
+
+        if (res.ok) {
+            setShowProductionModal(false);
+            alert(`Production logged: ${prodQty} units added to stock.`);
+            // Refresh orders in case some were waiting for stock
+            fetchOrders();
+        } else {
+            const err = await res.json();
+            alert(`Production failed: ${err.error}`);
+        }
+    } catch (e) {
+        alert("Connection error logging production");
+    } finally {
+        setProductionLoading(false);
+    }
+  };
 
   const updateStatus = async (orderId: string, status: string) => {
     setUpdatingId(orderId);
@@ -98,7 +153,15 @@ export default function KitchenPage() {
           </p>
         </div>
         
-        <div className="flex gap-4">
+    <div className="flex gap-4">
+          <button 
+            onClick={() => setShowProductionModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2"
+          >
+            <PlayCircle className="w-4 h-4" />
+            Produce Batch
+          </button>
+
           <div className="bg-slate-900 text-white px-6 py-3 rounded-2xl flex items-center gap-4 shadow-xl shadow-slate-900/20">
             <div className="text-right">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Active</p>
@@ -110,6 +173,57 @@ export default function KitchenPage() {
           </div>
         </div>
       </div>
+
+      {/* Production Entry Modal */}
+      {showProductionModal && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] flex items-center justify-center p-6 animate-in fade-in zoom-in duration-300">
+          <div className="bg-white rounded-[3rem] w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="p-8 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 uppercase">Production Entry</h2>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Log cooked items to make them available in POS</p>
+              </div>
+              <button onClick={() => setShowProductionModal(false)} className="w-10 h-10 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors cursor-pointer">×</button>
+            </div>
+            
+            <div className="p-8 space-y-6">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Select Product</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {availableProducts.map(p => (
+                    <button 
+                      key={p.id}
+                      onClick={() => setProdProductId(p.id)}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all ${prodProductId === p.id ? 'border-blue-600 bg-blue-50' : 'border-slate-100 hover:border-slate-200 bg-white'}`}
+                    >
+                      <p className="font-black text-slate-800 text-sm">{p.name}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Batch Sized</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Batch Quantity (pcs)</label>
+                <div className="flex items-center justify-center gap-6">
+                  <button onClick={() => setProdQty(q => Math.max(1, q - 1))} className="w-14 h-14 rounded-2xl bg-slate-100 font-black text-xl hover:bg-slate-200 cursor-pointer">-</button>
+                  <span className="text-5xl font-black text-slate-900 min-w-[100px] text-center">{prodQty}</span>
+                  <button onClick={() => setProdQty(q => q + 1)} className="w-14 h-14 rounded-2xl bg-slate-900 text-white font-black text-xl hover:bg-black cursor-pointer">+</button>
+                </div>
+              </div>
+
+              <button 
+                onClick={handleRecordProduction}
+                disabled={!prodProductId || productionLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white h-20 rounded-[1.5rem] font-black uppercase text-lg tracking-widest shadow-xl shadow-blue-600/30 flex items-center justify-center gap-3 active:scale-95 transition-all mt-4"
+              >
+                {productionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <PlayCircle className="w-6 h-6 fill-white/20" />}
+                Log Production
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {orders.map((order) => {
