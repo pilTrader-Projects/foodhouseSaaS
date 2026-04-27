@@ -13,7 +13,7 @@ describe('API: POST /api/products (Product Creation)', () => {
     const createReq = (body: any, tenantId: string | null = 'tenant-123') => {
         const headers = new Headers()
         if (tenantId) headers.set('x-tenant-id', tenantId)
-        return new Request('http://localhost/api/products', {
+        return new NextRequest('http://localhost/api/products', {
             method: 'POST',
             headers,
             body: JSON.stringify(body)

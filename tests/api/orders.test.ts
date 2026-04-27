@@ -31,7 +31,8 @@ describe('API: Orders Route', () => {
             method: 'POST',
             headers: {
                 'x-tenant-id': 'tenant-1',
-                'x-branch-id': 'branch-1'
+                'x-branch-id': 'branch-1',
+                'x-user-id': 'user-1'
             },
             body: JSON.stringify({
                 items: [{ productId: 'p1', quantity: 2, price: 50 }]

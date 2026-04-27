@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ProductService } from '@/services/product-service';
 import { MenuService } from '@/services/menu-service';
+import { getApiContext, missingContextResponse } from '@/lib/api-context';
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
     try {
-        const tenantId = request.headers.get('x-tenant-id');
-        const branchId = request.headers.get('x-branch-id');
+        const { tenantId, branchId } = await getApiContext(req);
 
-        if (!tenantId) return NextResponse.json({ error: 'Missing tenant ID' }, { status: 400 });
+        if (!tenantId) return missingContextResponse();
 
         if (branchId) {
             const menuService = new MenuService(tenantId, branchId);
@@ -25,12 +25,12 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
     try {
-        const tenantId = request.headers.get('x-tenant-id');
-        if (!tenantId) return NextResponse.json({ error: 'Missing tenant ID' }, { status: 400 });
+        const { tenantId } = await getApiContext(req);
+        if (!tenantId) return missingContextResponse();
 
-        const body = await request.json();
+        const body = await req.json();
         const productService = new ProductService(tenantId);
         const product = await productService.createProduct(body);
 
@@ -41,12 +41,12 @@ export async function POST(request: Request) {
     }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(req: NextRequest) {
     try {
-        const tenantId = request.headers.get('x-tenant-id');
-        if (!tenantId) return NextResponse.json({ error: 'Missing tenant ID' }, { status: 400 });
+        const { tenantId } = await getApiContext(req);
+        if (!tenantId) return missingContextResponse();
 
-        const body = await request.json();
+        const body = await req.json();
         const { productId, ...data } = body;
 
         if (!productId) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });

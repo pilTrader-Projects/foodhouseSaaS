@@ -38,7 +38,7 @@ describe('PosService (TDD)', () => {
         ]
             ; (prisma.order.create as any).mockResolvedValue({ id: 'order-1', totalAmount: 200 })
 
-        const order = await service.createOrder(orderItems)
+        const order = await service.createOrder('user-mock', orderItems)
 
         // Verify order creation
         expect(prisma.order.create).toHaveBeenCalledWith(expect.objectContaining({

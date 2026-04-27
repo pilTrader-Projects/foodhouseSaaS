@@ -40,7 +40,7 @@ describe('PosService (POS-lite TDD)', () => {
         ]
             ; (prisma.order.create as any).mockResolvedValue({ id: 'order-1', totalAmount: 20.0 })
 
-        const order = await service.createOrder(orderItems)
+        const order = await service.createOrder('user-1', orderItems)
 
         expect(prisma.order.create).toHaveBeenCalledWith(expect.objectContaining({
             data: expect.objectContaining({
@@ -55,6 +55,6 @@ describe('PosService (POS-lite TDD)', () => {
     it('should reject order if POS feature is disabled', async () => {
         ; (prisma.tenant.findUnique as any).mockResolvedValue({ plan: 'none', features: [] })
 
-        await expect(service.createOrder([])).rejects.toThrow(/Feature 'pos' is not enabled/)
+        await expect(service.createOrder('user-1', [])).rejects.toThrow(/Feature 'pos' is not enabled/)
     })
 })
