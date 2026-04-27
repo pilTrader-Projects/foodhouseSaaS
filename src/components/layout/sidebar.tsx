@@ -37,7 +37,7 @@ export function Sidebar() {
   ];
 
   const adminItems = [
-    { name: 'Team', href: '/settings/team', icon: Users, guard: () => isRole('Owner') },
+    { name: 'Team', href: '/settings/team', icon: Users, guard: () => isRole('Owner') || isRole('Manager') },
     { name: 'Menu Settings', href: '/settings/menu', icon: Settings, guard: () => isRole('Owner') || isRole('Manager') },
   ];
 
