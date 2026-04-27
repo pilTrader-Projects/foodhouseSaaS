@@ -14,8 +14,17 @@ import {
   Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { RBACGate } from '@/components/auth/rbac-gate';
 
 export default function TeamManagementPage() {
+  return (
+    <RBACGate permission="access:team" redirectOnFail="/dashboard">
+      <TeamManagementContent />
+    </RBACGate>
+  );
+}
+
+function TeamManagementContent() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [branches, setBranches] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);

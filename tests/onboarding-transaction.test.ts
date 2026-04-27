@@ -22,7 +22,16 @@ vi.mock('@/lib/prisma', () => ({
             create: vi.fn(),
             findFirst: vi.fn(),
             createMany: vi.fn(),
+            update: vi.fn(),
         },
+        permission: {
+            findMany: vi.fn().mockResolvedValue([
+                { id: 'p1', name: 'access:dashboard' },
+                { id: 'p2', name: 'access:pos' },
+                { id: 'p3', name: 'access:inventory' },
+                { id: 'p4', name: 'access:kitchen' }
+            ])
+        }
     },
 }))
 

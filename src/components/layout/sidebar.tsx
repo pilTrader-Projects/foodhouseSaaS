@@ -1,11 +1,10 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Users, 
-  Store, 
-  MapPin, 
   LayoutDashboard, 
   ShoppingCart, 
   Package, 
@@ -21,15 +20,36 @@ import { useTheme } from '@/context/theme-context';
 export function Sidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') || 'user-admin' : 'user-admin';
+      try {
+        const res = await fetch('/api/auth/me', { headers: { 'x-user-id': userId } });
+        const data = await res.json();
+        setUser(data.user);
+      } catch (e) {
+        console.error("Sidebar Auth Failed", e);
+      }
+    }
+    fetchUser();
+  }, []);
 
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-    { name: 'POS Terminal', icon: ShoppingCart, href: '/pos' },
-    { name: 'Inventory', icon: Package, href: '/inventory' },
-    { name: 'Kitchen', icon: ChefHat, href: '/kitchen' },
-    { name: 'Team', icon: Users, href: '/settings/team' },
-    { name: 'Settings', icon: Settings, href: '/settings' },
+    { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', perm: 'access:dashboard' },
+    { name: 'POS Terminal', icon: ShoppingCart, href: '/pos', perm: 'access:pos' },
+    { name: 'Inventory', icon: Package, href: '/inventory', perm: 'access:inventory' },
+    { name: 'Kitchen', icon: ChefHat, href: '/kitchen', perm: 'access:kitchen' },
+    { name: 'Team', icon: Users, href: '/settings/team', perm: 'access:team' },
+    { name: 'Settings', icon: Settings, href: '/settings', perm: 'manage:settings' },
   ];
+
+  const visibleItems = menuItems.filter(item => {
+    if (!user) return false;
+    const permissions = user.role.permissions.map((p: any) => p.name);
+    return permissions.includes(item.perm) || permissions.includes('tenant:admin');
+  });
 
   return (
     <aside className="sidebar">
@@ -41,7 +61,7 @@ export function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        {menuItems.map((item) => {
+        {visibleItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link 

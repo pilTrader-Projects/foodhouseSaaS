@@ -74,16 +74,44 @@ export class TenantService {
             })
 
             // b. Create standard Roles for this tenant
-            const standardRoles = ['Owner', 'Manager', 'Staff', 'Chef']
-            const createdRoles = await Promise.all(
-                standardRoles.map(roleName => tx.role.create({
-                    data: { name: roleName, tenantId: tenant.id }
-                }))
-            )
+            const createdRoles = await Promise.all([
+                tx.role.create({ data: { name: 'Owner', tenantId: tenant.id } }),
+                tx.role.create({ data: { name: 'Manager', tenantId: tenant.id } }),
+                tx.role.create({ data: { name: 'Chef', tenantId: tenant.id } }),
+                tx.role.create({ data: { name: 'Staff', tenantId: tenant.id } })
+            ]);
 
-            const ownerRole = createdRoles.find(r => r.name === 'Owner')!
+            // c. Assign Permissions to Roles (Standard Mapping)
+            // Note: We assume permissions are already seeded globally
+            const allPerms = await tx.permission.findMany();
+            const getPermIds = (...names: string[]) => allPerms.filter(p => names.includes(p.name)).map(p => ({ id: p.id }));
 
-            // c. Create initial Branch
+            await Promise.all([
+                // Owner: All permissions
+                tx.role.update({
+                    where: { id: createdRoles[0].id },
+                    data: { permissions: { connect: allPerms.map(p => ({ id: p.id })) } }
+                }),
+                // Manager: Dashboard, POS, Inventory, Kitchen
+                tx.role.update({
+                    where: { id: createdRoles[1].id },
+                    data: { permissions: { connect: getPermIds('access:dashboard', 'access:pos', 'access:inventory', 'access:kitchen') } }
+                }),
+                // Chef: Kitchen, Inventory
+                tx.role.update({
+                    where: { id: createdRoles[2].id },
+                    data: { permissions: { connect: getPermIds('access:kitchen', 'access:inventory') } }
+                }),
+                // Staff (Cashier): POS Terminal
+                tx.role.update({
+                    where: { id: createdRoles[3].id },
+                    data: { permissions: { connect: getPermIds('access:pos') } }
+                })
+            ]);
+
+            const ownerRole = createdRoles[0];
+
+            // d. Create initial Branch
             const branch = await tx.branch.create({
                 data: {
                     name: data.branch.name,
@@ -91,7 +119,7 @@ export class TenantService {
                 }
             })
 
-            // d. Create Owner User
+            // e. Create Owner User
             const user = await tx.user.create({
                 data: {
                     name: data.user.name,
