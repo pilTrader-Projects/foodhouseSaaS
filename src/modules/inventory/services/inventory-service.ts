@@ -49,4 +49,14 @@ export class InventoryService extends BaseService {
             })
         }
     }
+
+    /**
+     * Fetches all ingredients for the current tenant.
+     */
+    async getIngredients() {
+        return prisma.ingredient.findMany({
+            where: { tenantId: this.tenantId },
+            orderBy: { name: 'asc' },
+        })
+    }
 }

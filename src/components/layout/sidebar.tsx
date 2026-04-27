@@ -29,8 +29,9 @@ export function Sidebar() {
 
   const navItems = [
     { name: 'Dashboard', href: '/', icon: BarChart3, guard: () => isRole('Owner') || isRole('Manager') },
-    { name: 'POS Terminal', href: '/pos', icon: ShoppingCart, guard: () => true }, // Accessible by all
+    { name: 'POS Terminal', href: '/pos', icon: ShoppingCart, guard: () => true },
     { name: 'Inventory', href: '/inventory', icon: Package, guard: () => isRole('Owner') || isRole('Manager') },
+    { name: 'Receive Delivery', href: '/inventory/receive', icon: Truck, guard: () => isRole('Owner') || isRole('Manager') || isRole('Staff') },
     { name: 'Kitchen Display', href: '/kitchen', icon: ChefHat, guard: () => isRole('Owner') || isRole('Manager') || isRole('Chef') },
   ];
 

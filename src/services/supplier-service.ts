@@ -68,4 +68,13 @@ export class SupplierService extends BaseService {
             return purchase
         })
     }
+    /**
+     * Fetches all suppliers for the current tenant.
+     */
+    async getSuppliers() {
+        return prisma.supplier.findMany({
+            where: { tenantId: this.tenantId },
+            orderBy: { name: 'asc' },
+        })
+    }
 }
