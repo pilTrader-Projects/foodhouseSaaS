@@ -1,5 +1,7 @@
+'use client';
+
 import { Sidebar } from '@/components/layout/sidebar'
-import { RoleSwitcher } from '@/components/layout/role-switcher'
+import { useTheme } from '@/context/theme-context'
 
 export default function DashboardLayout({
   children,
@@ -11,15 +13,13 @@ export default function DashboardLayout({
       <Sidebar />
       
       <main className="main-content">
-        <header className="header" style={{ borderBottom: '1px solid var(--border)', background: 'white' }}>
-          <div className="breadcrumb" style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--slate-400)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            FoodHouse <span style={{ margin: '0 0.5rem', opacity: 0.2 }}>/</span> Management Console
+        <header className="header">
+          <div className="text-xs font-black uppercase tracking-widest text-muted">
+            FoodHouse <span className="opacity-20 px-2">/</span> Management Console
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <RoleSwitcher />
-            <div style={{ width: '1px', height: '1.5rem', background: 'var(--border-light)' }}></div>
-            <a href="/onboarding" style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--slate-400)', textDecoration: 'none' }}>System Reset</a>
+          <div className="flex items-center gap-6">
+            <a href="/onboarding" className="text-xs font-black uppercase text-muted hover-main">System Reset</a>
           </div>
         </header>
         
@@ -27,6 +27,10 @@ export default function DashboardLayout({
           {children}
         </section>
       </main>
+
+      <style jsx>{`
+        .hover-main:hover { color: var(--text-main); }
+      `}</style>
     </div>
   )
 }

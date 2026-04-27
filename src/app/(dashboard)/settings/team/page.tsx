@@ -238,25 +238,23 @@ export default function TeamManagementPage() {
         </div>
 
         <div className="flex-col gap-6">
-          <div className="card-minimal bg-black text-white border-none">
+          <div className="card-minimal p-8">
             <h3 className="text-xl font-serif font-black mb-6">Invite Personnel</h3>
             <form onSubmit={handleAddMember} className="flex-col gap-4">
               <input 
                 required
                 placeholder="Full Name"
                 className="input-minimal"
-                style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: 'white' }}
                 value={formData.name}
                 onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
               />
               <input 
                 required
-                type="email"
+                type="email" 
                 placeholder="Email Address"
                 className="input-minimal"
-                style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: 'white' }}
                 value={formData.email}
-                onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
               />
               
               <div className="grid grid-cols-2 gap-4">
@@ -264,11 +262,10 @@ export default function TeamManagementPage() {
                   value={formData.roleName}
                   onChange={e => setFormData(prev => ({ ...prev, roleName: e.target.value }))}
                   className="input-minimal"
-                  style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: 'white' }}
                 >
                   <option disabled>Position</option>
                   {roles.map(r => (
-                    <option key={r.id} value={r.name} className="text-slate-900">{r.name}</option>
+                    <option key={r.id} value={r.name} className="text-main">{r.name}</option>
                   ))}
                 </select>
                 <select 
@@ -276,10 +273,9 @@ export default function TeamManagementPage() {
                   value={formData.branchId}
                   onChange={e => setFormData(prev => ({ ...prev, branchId: e.target.value }))}
                   className="input-minimal"
-                  style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: 'white' }}
                 >
                   {branches.map(b => (
-                    <option key={b.id} value={b.id} className="text-slate-900">{b.name}</option>
+                    <option key={b.id} value={b.id} className="text-main">{b.name}</option>
                   ))}
                 </select>
               </div>
@@ -288,22 +284,21 @@ export default function TeamManagementPage() {
                 type="submit"
                 disabled={submitting}
                 className="btn-minimal btn-accent w-full"
-                style={{ background: 'white', color: 'black' }}
               >
-                {submitting ? <Loader2 className="animate-spin" style={{ width: '1rem', height: '1rem' }} /> : 'Send Invitation'}
+                {submitting ? <Loader2 className="animate-spin w-4 h-4" /> : 'Send Invitation'}
               </button>
             </form>
           </div>
           
-          <div className="p-8 border rounded-sm">
-            <h4 className="text-xs font-black uppercase text-slate-400 tracking-widest mb-4">Organization Capacity</h4>
+          <div className="p-8 border-main rounded-sm bg-surface">
+            <h4 className="text-xs font-black uppercase text-muted tracking-widest mb-4">Organization Capacity</h4>
             <div className="flex-col gap-4">
               <div className="flex-between">
-                <span className="text-xs font-bold text-slate-500">Personnel Seats</span>
+                <span className="text-xs font-bold text-muted">Personnel Seats</span>
                 <span className="text-xs font-black">{employees.length} / 15</span>
               </div>
-              <div style={{ height: '4px', background: 'var(--border-light)', borderRadius: '2px', overflow: 'hidden' }}>
-                <div style={{ width: `${(employees.length / 15) * 100}%`, height: '100%', background: 'var(--accent-dark)' }} />
+              <div className="progress-bg">
+                <div className="progress-bar" style={{ width: `${(employees.length / 15) * 100}%` }} />
               </div>
             </div>
           </div>
@@ -312,3 +307,9 @@ export default function TeamManagementPage() {
     </div>
   );
 }
+
+// Local Utility (Better moved to global, but keeping here for now to avoid cross-file risk)
+const styles = `
+  .progress-bg { height: 4px; background: var(--border-main); border-radius: 2px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--primary); transition: width 0.3s; }
+`;
