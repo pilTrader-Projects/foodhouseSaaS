@@ -24,7 +24,7 @@ describe('API: /api/products/[id]/recipe (Recipe Management)', () => {
             const mockRecipe = [{ id: 'r1', amount: 1 }]
                 ; (RecipeService.prototype.getRecipe as any).mockResolvedValue(mockRecipe)
 
-            const res = await GET(createReq('GET') as any, { params: { id: 'p1' } })
+            const res = await GET(createReq('GET') as any, { params: Promise.resolve({ id: 'p1' }) })
             const data = await res.json()
 
             expect(res.status).toBe(200)
@@ -33,7 +33,7 @@ describe('API: /api/products/[id]/recipe (Recipe Management)', () => {
         })
 
         it('should fail if tenant ID is missing', async () => {
-            const res = await GET(createReq('GET', null, null) as any, { params: { id: 'p1' } })
+            const res = await GET(createReq('GET', null, null) as any, { params: Promise.resolve({ id: 'p1' }) })
             const data = await res.json()
 
             expect(res.status).toBe(400)
@@ -43,7 +43,7 @@ describe('API: /api/products/[id]/recipe (Recipe Management)', () => {
         it('should handle service layer failures', async () => {
             ; (RecipeService.prototype.getRecipe as any).mockRejectedValue(new Error('Internal Database Error'))
 
-            const res = await GET(createReq('GET') as any, { params: { id: 'p1' } })
+            const res = await GET(createReq('GET') as any, { params: Promise.resolve({ id: 'p1' }) })
             const data = await res.json()
 
             expect(res.status).toBe(500)
@@ -59,7 +59,7 @@ describe('API: /api/products/[id]/recipe (Recipe Management)', () => {
             ]
                 ; (RecipeService.prototype.updateRecipe as any).mockResolvedValue(items)
 
-            const res = await POST(createReq('POST', { items }) as any, { params: { id: 'p1' } })
+            const res = await POST(createReq('POST', { items }) as any, { params: Promise.resolve({ id: 'p1' }) })
             const data = await res.json()
 
             expect(res.status).toBe(200)
@@ -71,7 +71,7 @@ describe('API: /api/products/[id]/recipe (Recipe Management)', () => {
             const items: any[] = []
                 ; (RecipeService.prototype.updateRecipe as any).mockResolvedValue([])
 
-            const res = await POST(createReq('POST', { items }) as any, { params: { id: 'p1' } })
+            const res = await POST(createReq('POST', { items }) as any, { params: Promise.resolve({ id: 'p1' }) })
             const data = await res.json()
 
             expect(res.status).toBe(200)
@@ -79,7 +79,7 @@ describe('API: /api/products/[id]/recipe (Recipe Management)', () => {
         })
 
         it('should fail update if tenant ID is missing', async () => {
-            const res = await POST(createReq('POST', { items: [] }, null) as any, { params: { id: 'p1' } })
+            const res = await POST(createReq('POST', { items: [] }, null) as any, { params: Promise.resolve({ id: 'p1' }) })
             const data = await res.json()
 
             expect(res.status).toBe(400)
@@ -89,7 +89,7 @@ describe('API: /api/products/[id]/recipe (Recipe Management)', () => {
         it('should respond with 500 if the service fails during update', async () => {
             ; (RecipeService.prototype.updateRecipe as any).mockRejectedValue(new Error('Atomic Transaction Failure'))
 
-            const res = await POST(createReq('POST', { items: [] }) as any, { params: { id: 'p1' } })
+            const res = await POST(createReq('POST', { items: [] }) as any, { params: Promise.resolve({ id: 'p1' }) })
             const data = await res.json()
 
             expect(res.status).toBe(500)

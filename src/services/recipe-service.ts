@@ -15,6 +15,8 @@ export class RecipeService extends BaseService {
         componentProductId?: string;
         amount: number
     }[]) {
+        if (!productId) throw new Error('Product ID is required for recipe update')
+
         return prisma.$transaction(async (tx) => {
             // 1. Delete existing recipe items
             await tx.recipeItem.deleteMany({
@@ -26,8 +28,8 @@ export class RecipeService extends BaseService {
                 items.map(item => tx.recipeItem.create({
                     data: {
                         productId,
-                        ingredientId: item.ingredientId,
-                        componentProductId: item.componentProductId,
+                        ingredientId: item.ingredientId || null,
+                        componentProductId: item.componentProductId || null,
                         amount: item.amount
                     }
                 }))
