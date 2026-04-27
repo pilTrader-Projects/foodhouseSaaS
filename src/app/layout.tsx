@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+import { ThemeProvider } from '@/context/theme-context'
+import { ToastProvider } from '@/components/ui/toast'
 import './globals.css'
 import './modern.css'
-import { ToastProvider } from '@/components/ui/toast'
 
 export const metadata: Metadata = {
   title: 'FoodHouse SaaS | Modern Management Platform',
@@ -15,10 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased bg-slate-50">
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+      <body className="antialiased">
+        <ThemeProvider>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
