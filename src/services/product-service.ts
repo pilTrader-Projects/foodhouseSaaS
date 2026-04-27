@@ -21,6 +21,21 @@ export class ProductService extends BaseService {
     }
 
     /**
+     * Updates an existing product.
+     */
+    async updateProduct(productId: string, data: { name?: string; price?: number; deductionModel?: string; batchSize?: number }) {
+        await this.ensureFeature('pos')
+
+        return prisma.product.update({
+            where: {
+                id: productId,
+                ...this.getScope(),
+            },
+            data,
+        })
+    }
+
+    /**
      * Fetches all products for the tenant.
      */
     async getProducts() {

@@ -47,7 +47,7 @@ export default function MenuManagementPage() {
     setSavingId(productId);
     try {
         const res = await fetch('/api/products', {
-            method: 'POST',
+            method: 'PATCH',
             headers: { 
                 'Content-Type': 'application/json',
                 'x-tenant-id': tenantId,

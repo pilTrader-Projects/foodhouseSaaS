@@ -8,6 +8,7 @@ vi.mock('@/lib/prisma', () => ({
         product: {
             findMany: vi.fn().mockResolvedValue([]),
             create: vi.fn().mockResolvedValue({}),
+            update: vi.fn().mockResolvedValue({}),
         },
         tenant: {
             findUnique: vi.fn().mockResolvedValue({ plan: 'basic', features: [] }),
@@ -40,6 +41,22 @@ describe('Multi-tenancy Isolation (ProductService)', () => {
                 tenantId: 'tenant-2',
                 branchId: 'branch-2',
             },
+        })
+    })
+    it('should scope update operations to the tenant and branch', async () => {
+        const service = new ProductService('tenant-3', 'branch-3')
+        const productId = 'prod-123'
+        const patchData = { price: 20.0 }
+
+        await service.updateProduct(productId, patchData)
+
+        expect(prisma.product.update).toHaveBeenCalledWith({
+            where: {
+                id: productId,
+                tenantId: 'tenant-3',
+                branchId: 'branch-3',
+            },
+            data: patchData,
         })
     })
 })
