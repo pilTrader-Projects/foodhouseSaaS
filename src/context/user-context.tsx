@@ -50,6 +50,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       } else {
         const data = await res.json();
         setUser(data.user);
+        
+        // Persist context for useApi and other low-level utilities
+        if (data.user.tenantId) localStorage.setItem('tenantId', data.user.tenantId);
+        if (data.user.branchId) localStorage.setItem('branchId', data.user.branchId);
+        
         setAuthFailed(false);
       }
     } catch (e) {

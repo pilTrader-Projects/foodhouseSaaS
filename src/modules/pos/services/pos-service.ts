@@ -17,7 +17,7 @@ export class PosService extends BaseService {
     /**
      * Creates a new order. 
      */
-    async createOrder(items: { productId: string; quantity: number; price: number }[]) {
+    async createOrder(userId: string, items: { productId: string; quantity: number; price: number }[]) {
         // 1. Feature Gate
         await this.ensureFeature('pos')
 
@@ -29,7 +29,7 @@ export class PosService extends BaseService {
                 data: {
                     tenantId: this.tenantId,
                     branchId: this.branchId!,
-                    userId: 'user-admin',
+                    userId,
                     totalAmount,
                     items: {
                         create: items.map((item) => ({

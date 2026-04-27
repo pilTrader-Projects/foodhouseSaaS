@@ -1,13 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { PosService } from '@/modules/pos/services/pos-service';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
         const tenantId = request.headers.get('x-tenant-id');
-        const branchId = request.headers.get('x-branch-id');
+        const branchId = request.headers.get('x-branch-id') || request.nextUrl.searchParams.get('branchId');
+        const userId = request.headers.get('x-user-id');
 
-        if (!tenantId || !branchId) {
-            return NextResponse.json({ error: 'Missing tenant or branch ID' }, { status: 400 });
+        if (!tenantId || !branchId || !userId) {
+            return NextResponse.json({ error: 'Missing tenant, branch, or user context' }, { status: 400 });
         }
 
         const body = await request.json();
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
         }
 
         const posService = new PosService(tenantId, branchId);
-        const order = await posService.createOrder(items);
+        const order = await posService.createOrder(userId, items);
 
         return NextResponse.json(order);
     } catch (error: any) {

@@ -14,8 +14,8 @@ export const PLAN_FEATURES: Record<string, string[]> = {
  * 'unlimited_branches' feature flag overrides max_branches.
  */
 export const PLAN_LIMITS: Record<string, { max_branches: number; max_users: number }> = {
-    basic: { max_branches: 1, max_users: 3 },
-    pro: { max_branches: 5, max_users: 15 },
+    basic: { max_branches: 1, max_users: 5 },
+    pro: { max_branches: 5, max_users: 25 },
     enterprise: { max_branches: 100, max_users: 500 },
 }
 

@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { InventoryService } from '@/modules/inventory/services/inventory-service';
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
     try {
-        const tenantId = request.headers.get('x-tenant-id');
-        const branchId = request.headers.get('x-branch-id');
+        const tenantId = req.headers.get('x-tenant-id');
+        const branchId = req.headers.get('x-branch-id') || req.nextUrl.searchParams.get('branchId');
 
         if (!tenantId || !branchId) {
             return NextResponse.json({ error: 'Tenant and Branch context required' }, { status: 400 });
