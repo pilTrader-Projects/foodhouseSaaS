@@ -7,6 +7,7 @@ export default function MenuManagementPage() {
     const [menu, setMenu] = useState<any[]>([]);
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
+    const [deductionModel, setDeductionModel] = useState('ON_ORDER');
 
     useEffect(() => {
         const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
@@ -36,7 +37,11 @@ export default function MenuManagementPage() {
                     'Content-Type': 'application/json',
                     'x-tenant-id': tenantId
                 },
-                body: JSON.stringify({ name, price: parseFloat(price) }),
+                body: JSON.stringify({ 
+                    name, 
+                    price: parseFloat(price),
+                    deductionModel
+                }),
             });
 
             if (res.ok) {
@@ -44,6 +49,7 @@ export default function MenuManagementPage() {
                 setMenu([...menu, newItem]);
                 setName('');
                 setPrice('');
+                setDeductionModel('ON_ORDER');
             } else {
                 alert("Failed to add item");
             }
@@ -70,6 +76,7 @@ export default function MenuManagementPage() {
                         <thead>
                             <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
                                 <th style={{ padding: '0.75rem' }}>Product Name</th>
+                                <th style={{ padding: '0.75rem' }}>Strategy</th>
                                 <th style={{ padding: '0.75rem' }}>Price (PHP)</th>
                                 <th style={{ padding: '0.75rem' }}>Action</th>
                             </tr>
@@ -77,7 +84,22 @@ export default function MenuManagementPage() {
                         <tbody>
                             {menu.map(item => (
                                 <tr key={item.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td style={{ padding: '0.75rem' }}>{item.name}</td>
+                                    <td style={{ padding: '0.75rem' }}>
+                                        <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {item.id}</div>
+                                    </td>
+                                    <td style={{ padding: '0.75rem' }}>
+                                        <span style={{ 
+                                            padding: '2px 8px', 
+                                            borderRadius: '999px', 
+                                            fontSize: '10px', 
+                                            fontWeight: 'bold',
+                                            backgroundColor: item.deductionModel === 'ON_PRODUCTION' ? '#dcfce7' : '#f1f5f9',
+                                            color: item.deductionModel === 'ON_PRODUCTION' ? '#166534' : '#64748b'
+                                        }}>
+                                            {item.deductionModel === 'ON_PRODUCTION' ? 'BATCH COOKED' : 'ON DEMAND'}
+                                        </span>
+                                    </td>
                                     <td style={{ padding: '0.75rem' }}>₱{item.price.toFixed(2)}</td>
                                     <td style={{ padding: '0.75rem' }}>
                                         <button 
@@ -117,6 +139,17 @@ export default function MenuManagementPage() {
                                 placeholder="0.00"
                                 style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem', borderRadius: '0.4rem', border: '1px solid var(--border)' }}
                             />
+                        </div>
+                        <div>
+                            <label style={{ fontSize: '0.875rem', fontWeight: 'bold' }}>Inventory Strategy</label>
+                            <select 
+                                value={deductionModel}
+                                onChange={e => setDeductionModel(e.target.value)}
+                                style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem', borderRadius: '0.4rem', border: '1px solid var(--border)', background: 'white' }}
+                            >
+                                <option value="ON_ORDER">On-Demand (Deduct ingredients at sale)</option>
+                                <option value="ON_PRODUCTION">Batch-Cooked (Chef logs cooked items)</option>
+                            </select>
                         </div>
                         <button 
                             type="submit"

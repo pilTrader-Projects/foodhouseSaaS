@@ -55,8 +55,14 @@ export default function KitchenPage() {
             }
         });
         const data = await res.json();
-        // Only show products using the Production deduction model
-        setAvailableProducts(data.filter((p: any) => p.deductionModel === 'ON_PRODUCTION'));
+        
+        // Defensive Check: Ensure data is an array before filtering
+        if (Array.isArray(data)) {
+            setAvailableProducts(data.filter((p: any) => p.deductionModel === 'ON_PRODUCTION'));
+        } else {
+            console.error("API returned non-array products:", data);
+            setAvailableProducts([]);
+        }
     } catch (e) {
         console.error("Fetch Products Error:", e);
     }
@@ -187,39 +193,52 @@ export default function KitchenPage() {
             </div>
             
             <div className="p-8 space-y-6">
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Select Product</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {availableProducts.map(p => (
-                    <button 
-                      key={p.id}
-                      onClick={() => setProdProductId(p.id)}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${prodProductId === p.id ? 'border-blue-600 bg-blue-50' : 'border-slate-100 hover:border-slate-200 bg-white'}`}
-                    >
-                      <p className="font-black text-slate-800 text-sm">{p.name}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Batch Sized</p>
-                    </button>
-                  ))}
+              {!availableProducts.length ? (
+                <div className="p-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                  <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-4" />
+                  <p className="text-slate-600 font-bold">No Batch Products Configured</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-2 leading-relaxed">
+                    Products must be set to "Batch-Cooked" in <br/>
+                    <span className="text-blue-500">Settings &gt; Menu Management</span>
+                  </p>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Select Product</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {availableProducts.map(p => (
+                        <button 
+                          key={p.id}
+                          onClick={() => setProdProductId(p.id)}
+                          className={`p-4 rounded-2xl border-2 text-left transition-all ${prodProductId === p.id ? 'border-blue-600 bg-blue-50' : 'border-slate-100 hover:border-slate-200 bg-white'}`}
+                        >
+                          <p className="font-black text-slate-800 text-sm">{p.name}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Batch Tracking</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Batch Quantity (pcs)</label>
-                <div className="flex items-center justify-center gap-6">
-                  <button onClick={() => setProdQty(q => Math.max(1, q - 1))} className="w-14 h-14 rounded-2xl bg-slate-100 font-black text-xl hover:bg-slate-200 cursor-pointer">-</button>
-                  <span className="text-5xl font-black text-slate-900 min-w-[100px] text-center">{prodQty}</span>
-                  <button onClick={() => setProdQty(q => q + 1)} className="w-14 h-14 rounded-2xl bg-slate-900 text-white font-black text-xl hover:bg-black cursor-pointer">+</button>
-                </div>
-              </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Batch Quantity (pcs)</label>
+                    <div className="flex items-center justify-center gap-6">
+                      <button onClick={() => setProdQty(q => Math.max(1, q - 1))} className="w-14 h-14 rounded-2xl bg-slate-100 font-black text-xl hover:bg-slate-200 cursor-pointer">-</button>
+                      <span className="text-5xl font-black text-slate-900 min-w-[100px] text-center">{prodQty}</span>
+                      <button onClick={() => setProdQty(q => q + 1)} className="w-14 h-14 rounded-2xl bg-slate-900 text-white font-black text-xl hover:bg-black cursor-pointer">+</button>
+                    </div>
+                  </div>
 
-              <button 
-                onClick={handleRecordProduction}
-                disabled={!prodProductId || productionLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white h-20 rounded-[1.5rem] font-black uppercase text-lg tracking-widest shadow-xl shadow-blue-600/30 flex items-center justify-center gap-3 active:scale-95 transition-all mt-4"
-              >
-                {productionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <PlayCircle className="w-6 h-6 fill-white/20" />}
-                Log Production
-              </button>
+                  <button 
+                    onClick={handleRecordProduction}
+                    disabled={!prodProductId || productionLoading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white h-20 rounded-[1.5rem] font-black uppercase text-lg tracking-widest shadow-xl shadow-blue-600/30 flex items-center justify-center gap-3 active:scale-95 transition-all mt-4"
+                  >
+                    {productionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <PlayCircle className="w-6 h-6 fill-white/20" />}
+                    Log Production
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
