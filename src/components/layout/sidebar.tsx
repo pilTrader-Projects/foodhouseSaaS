@@ -13,28 +13,16 @@ import {
   ShieldCheck,
   Moon,
   Sun,
-  LogOut
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { useTheme } from '@/context/theme-context';
+import { useUser } from '@/context/user-context';
 
 export function Sidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    async function fetchUser() {
-      const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') || 'user-admin' : 'user-admin';
-      try {
-        const res = await fetch('/api/auth/me', { headers: { 'x-user-id': userId } });
-        const data = await res.json();
-        setUser(data.user);
-      } catch (e) {
-        console.error("Sidebar Auth Failed", e);
-      }
-    }
-    fetchUser();
-  }, []);
+  const { user, permissions, loading } = useUser();
 
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', perm: 'access:dashboard' },
@@ -46,10 +34,12 @@ export function Sidebar() {
   ];
 
   const visibleItems = menuItems.filter(item => {
-    if (!user) return false;
-    const permissions = user.role.permissions.map((p: any) => p.name);
     return permissions.includes(item.perm) || permissions.includes('tenant:admin');
   });
+
+  if (loading) {
+    return <aside className="sidebar opacity-50 flex-center"><Loader2 className="animate-spin text-white/20" /></aside>;
+  }
 
   const handleLogout = () => {
     localStorage.clear();

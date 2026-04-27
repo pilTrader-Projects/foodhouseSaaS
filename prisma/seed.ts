@@ -1,16 +1,7 @@
 import { PrismaClient } from '@prisma/client'
+import { PERMISSIONS } from '../src/lib/constants'
 
 const prisma = new PrismaClient()
-
-const PERMISSIONS = {
-    ACCESS_DASHBOARD: 'access:dashboard',
-    ACCESS_POS: 'access:pos',
-    ACCESS_INVENTORY: 'access:inventory',
-    ACCESS_KITCHEN: 'access:kitchen',
-    ACCESS_TEAM: 'access:team',
-    MANAGE_SETTINGS: 'manage:settings',
-    ADMIN: 'tenant:admin'
-};
 
 async function main() {
     console.log('🌱 Seeding permissions...')

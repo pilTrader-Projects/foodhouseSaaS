@@ -12,10 +12,10 @@
     "prisma:migrate": "prisma migrate dev",
     "tests": "vitest",
     "coverage": "vitest run --coverage",
-    "sanity": "NODE_OPTIONS='--loader ts-node/esm' ts-node tests/sanity-check.ts"
+    "sanity": "tsx tests/sanity-check.ts"
   },
   "prisma": {
-    "seed": "node --loader ts-node/esm prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.13.0",
@@ -27,14 +27,20 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20.17.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.5",
     "eslint": "^8.57.0",
     "eslint-config-next": "^16.2.4",
+    "happy-dom": "^20.9.0",
+    "jsdom": "^29.1.0",
     "prisma": "^5.21.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.6.3",
     "vitest": "^4.1.5"
   }
