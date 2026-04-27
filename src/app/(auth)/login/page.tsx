@@ -12,12 +12,15 @@ import {
   ChevronLeft
 } from 'lucide-react';
 
+import { useUser } from '@/context/user-context';
+
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+    const { refreshUser } = useUser();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,6 +39,10 @@ export default function LoginPage() {
             if (res.ok) {
                 localStorage.setItem('userId', data.userId);
                 localStorage.setItem('tenantId', data.tenantId);
+                
+                // Explicitly refresh the global user context before redirecting
+                await refreshUser();
+                
                 router.push('/dashboard');
             } else {
                 setError(data.error || 'Invalid credentials');
