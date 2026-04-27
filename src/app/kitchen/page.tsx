@@ -4,16 +4,19 @@ import { useState, useEffect } from 'react';
 import { 
   ChefHat, 
   Clock, 
-  CheckCircle2, 
   PlayCircle, 
-  AlertCircle,
-  Loader2,
-  Tally4
+  CheckCircle2,
+  Tally4,
+  RotateCcw
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
+import { Badge, Button, Card } from '@/components/ui';
+import { Modal } from '@/components/ui/modal';
+import { useToast } from '@/components/ui/toast';
 
 export default function KitchenPage() {
   const { branchId, loading: authLoading } = usePermissions();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -55,16 +58,11 @@ export default function KitchenPage() {
             }
         });
         const data = await res.json();
-        
-        // Defensive Check: Ensure data is an array before filtering
         if (Array.isArray(data)) {
             setAvailableProducts(data.filter((p: any) => p.deductionModel === 'ON_PRODUCTION'));
-        } else {
-            console.error("API returned non-array products:", data);
-            setAvailableProducts([]);
         }
     } catch (e) {
-        console.error("Fetch Products Error:", e);
+        toast("Failed to load production list", "error");
     }
   };
 
@@ -72,7 +70,7 @@ export default function KitchenPage() {
     if (authLoading) return;
     fetchOrders();
     fetchProductionProducts();
-    const interval = setInterval(fetchOrders, 5000); // Polling every 5s
+    const interval = setInterval(fetchOrders, 5000);
     return () => clearInterval(interval);
   }, [branchId, authLoading]);
 
@@ -94,15 +92,15 @@ export default function KitchenPage() {
             setShowProductionModal(false);
             const product = availableProducts.find(p => p.id === prodProductId);
             const totalYield = prodQty * (product?.batchSize || 1);
-            alert(`Production logged: ${prodQty} batch(es) yielded ${totalYield} units.`);
-            setProdQty(1); // Reset to 1 batch
+            toast(`Logged ${prodQty} batch(es). Yield: ${totalYield} units.`, "success");
+            setProdQty(1);
             fetchOrders();
         } else {
             const err = await res.json();
-            alert(`Production failed: ${err.error}`);
+            toast(err.error, "error");
         }
     } catch (e) {
-        alert("Connection error logging production");
+        toast("Connection error", "error");
     } finally {
         setProductionLoading(false);
     }
@@ -122,240 +120,138 @@ export default function KitchenPage() {
       });
 
       if (res.ok) {
-        // Optimistic UI update or wait for next poll
+        toast(`Order updated to ${status}`, "info");
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
       }
     } catch (e) {
-      alert("Failed to update order status");
+      toast("Update failed", "error");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const getTimeElapsed = (createdAt: string) => {
-    const start = new Date(createdAt).getTime();
-    const now = new Date().getTime();
-    const diff = Math.floor((now - start) / 1000 / 60);
-    return diff;
-  };
-
   if (loading && !orders.length) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center text-slate-400">
-        <Loader2 className="w-12 h-12 animate-spin mb-4 opacity-20" />
-        <p className="font-bold tracking-widest uppercase text-xs">Syncing Kitchen Data...</p>
+        <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-blue-600 animate-spin mb-4" />
+        <p className="font-black tracking-widest uppercase text-xs">Syncing Kitchen...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center border-b border-slate-100 pb-6">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center bg-white p-8 rounded-[2.5rem] border-2 border-slate-50 shadow-sm">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             <ChefHat className="w-10 h-10 text-blue-600" />
             Kitchen Display
           </h1>
-          <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] mt-1 pl-1">
-            Real-time Order Fulfillment • Branch: {branchId?.split('-').pop()}
-          </p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Live Order Tracking • Branch ID: {branchId?.split('-').pop()}</p>
         </div>
         
-    <div className="flex gap-4">
-          <button 
-            onClick={() => setShowProductionModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2"
-          >
-            <PlayCircle className="w-4 h-4" />
-            Produce Batch
-          </button>
-
-          <div className="bg-slate-900 text-white px-6 py-3 rounded-2xl flex items-center gap-4 shadow-xl shadow-slate-900/20">
+        <div className="flex gap-4">
+          <Button onClick={() => setShowProductionModal(true)} icon={PlayCircle}>Produce Batch</Button>
+          <div className="bg-slate-900 px-6 py-3 rounded-2xl flex items-center gap-4 text-white">
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Active</p>
-              <p className="text-xl font-black leading-none">{orders.length}</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active</p>
+              <p className="text-xl font-black">{orders.length}</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-              <Tally4 className="w-4 h-4" />
-            </div>
+            <Tally4 className="w-5 h-5 text-slate-400" />
           </div>
         </div>
       </div>
-
-      {/* Production Entry Modal */}
-      {showProductionModal && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] flex items-center justify-center p-6 animate-in fade-in zoom-in duration-300">
-          <div className="bg-white rounded-[3rem] w-full max-w-lg overflow-hidden shadow-2xl">
-            <div className="p-8 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-black text-slate-900 uppercase">Production Entry</h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Log cooked items to make them available in POS</p>
-              </div>
-              <button onClick={() => setShowProductionModal(false)} className="w-10 h-10 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors cursor-pointer">×</button>
-            </div>
-            
-            <div className="p-8 space-y-6">
-              {!availableProducts.length ? (
-                <div className="p-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                  <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-600 font-bold">No Batch Products Configured</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-2 leading-relaxed">
-                    Products must be set to "Batch-Cooked" in <br/>
-                    <span className="text-blue-500">Settings &gt; Menu Management</span>
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Select Product</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {availableProducts.map(p => (
-                        <button 
-                          key={p.id}
-                          onClick={() => setProdProductId(p.id)}
-                          className={`p-4 rounded-2xl border-2 text-left transition-all ${prodProductId === p.id ? 'border-blue-600 bg-blue-50' : 'border-slate-100 hover:border-slate-200 bg-white'}`}
-                        >
-                          <p className="font-black text-slate-800 text-sm">{p.name}</p>
-                          <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">
-                            Yield: {p.batchSize} units / batch
-                          </p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Number of Batches</label>
-                    <div className="flex items-center justify-center gap-6">
-                      <button onClick={() => setProdQty(q => Math.max(1, q - 1))} className="w-14 h-14 rounded-2xl bg-slate-100 font-black text-xl hover:bg-slate-200 cursor-pointer">-</button>
-                      <span className="text-5xl font-black text-slate-900 min-w-[100px] text-center">{prodQty}</span>
-                      <button onClick={() => setProdQty(q => q + 1)} className="w-14 h-14 rounded-2xl bg-slate-900 text-white font-black text-xl hover:bg-black cursor-pointer">+</button>
-                    </div>
-                    {prodProductId && (
-                      <p className="text-center text-[10px] font-black text-blue-600 uppercase mt-4 tracking-widest">
-                        Total Yield: {prodQty * (availableProducts.find(p => p.id === prodProductId)?.batchSize || 0)} Units
-                      </p>
-                    )}
-                  </div>
-
-                  <button 
-                    onClick={handleRecordProduction}
-                    disabled={!prodProductId || productionLoading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white h-20 rounded-[1.5rem] font-black uppercase text-lg tracking-widest shadow-xl shadow-blue-600/30 flex items-center justify-center gap-3 active:scale-95 transition-all mt-4"
-                  >
-                    {productionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <PlayCircle className="w-6 h-6 fill-white/20" />}
-                    Log Production
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {orders.map((order) => {
-          const elapsed = getTimeElapsed(order.createdAt);
-          const isLate = elapsed > 15;
-          const isPreparing = order.status === 'PREPARING';
-          const isReady = order.status === 'READY';
-
-          return (
-            <div 
-              key={order.id} 
-              className={`relative flex flex-col bg-white rounded-[2rem] border-2 transition-all duration-300 ${isReady ? 'border-green-500 shadow-xl shadow-green-500/10' : isLate ? 'border-rose-500 animate-pulse' : isPreparing ? 'border-blue-500' : 'border-slate-200'}`}
-            >
-              {/* Header */}
-              <div className={`p-5 rounded-t-[1.8rem] flex justify-between items-start ${isReady ? 'bg-green-50' : isLate ? 'bg-rose-50' : isPreparing ? 'bg-blue-50' : 'bg-slate-50'}`}>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900 leading-none">ORDER #{order.id.slice(-4).toUpperCase()}</h3>
-                  <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-wider">{order.user?.name || 'POS'}</p>
-                </div>
-                <div className={`flex flex-col items-end ${isLate ? 'text-rose-600' : 'text-slate-500'}`}>
-                  <div className="flex items-center gap-1.5 font-black text-sm">
-                    <Clock className="w-3.5 h-3.5" />
-                    {elapsed}m
-                  </div>
-                </div>
+        {orders.map((order) => (
+          <Card key={order.id} className="relative group overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100 group-hover:bg-blue-600 transition-colors" />
+            
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-lg font-black text-slate-900 leading-none">#{order.id.slice(-4).toUpperCase()}</h3>
+                <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{order.user?.name || 'POS SESSION'}</p>
               </div>
-
-              {/* Items List */}
-              <div className="p-6 flex-1 space-y-4">
-                {order.items.map((item: any) => (
-                  <div key={item.id} className="flex justify-between items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-                    <div>
-                      <p className="font-black text-slate-800 leading-tight">{item.product.name}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Standard Prep</p>
-                    </div>
-                    <span className="bg-slate-900 text-white text-xs font-black min-w-[24px] h-6 flex items-center justify-center rounded-lg shadow-sm">
-                      {item.quantity}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Footer Actions */}
-              <div className="p-4 bg-slate-50/30 rounded-b-[1.8rem] border-t border-slate-100">
-                {updatingId === order.id ? (
-                  <div className="w-full h-14 flex items-center justify-center text-slate-400 font-black text-xs uppercase tracking-widest">
-                    Updating...
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-2">
-                    {order.status === 'PENDING' && (
-                      <button 
-                        onClick={() => updateStatus(order.id, 'PREPARING')}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white h-14 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
-                      >
-                        <PlayCircle className="w-5 h-5 fill-white/20" />
-                        Start Prep
-                      </button>
-                    )}
-                    {order.status === 'PREPARING' && (
-                      <button 
-                        onClick={() => updateStatus(order.id, 'READY')}
-                        className="w-full bg-green-500 hover:bg-green-600 text-white h-14 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-95 transition-all"
-                      >
-                        <CheckCircle2 className="w-5 h-5 fill-white/20" />
-                        Mark as Ready
-                      </button>
-                    )}
-                    {order.status === 'READY' && (
-                      <button 
-                        onClick={() => updateStatus(order.id, 'COMPLETED')}
-                        className="w-full bg-slate-900 hover:bg-black text-white h-14 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 active:scale-95 transition-all"
-                      >
-                        <CheckCircle2 className="w-5 h-5 text-green-400" />
-                        Served & Clear
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Status Ribbon */}
-              <div className={`absolute -top-3 -right-3 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg ${isReady ? 'bg-green-500 text-white' : isPreparing ? 'bg-blue-500 text-white shadow-blue-500/30' : 'bg-slate-100 text-slate-500'}`}>
+              <Badge variant={order.status === 'READY' ? 'success' : order.status === 'PREPARING' ? 'info' : 'default'} size="xs">
                 {order.status}
-              </div>
+              </Badge>
             </div>
-          );
-        })}
+
+            <div className="space-y-3 mb-8">
+              {order.items.map((item: any) => (
+                <div key={item.id} className="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+                  <span className="font-bold text-slate-800 text-sm">{item.product.name}</span>
+                  <span className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black text-xs text-slate-900 shadow-sm">{item.quantity}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4 border-t border-slate-50">
+              {order.status === 'PENDING' && (
+                <Button variant="primary" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'PREPARING')} icon={PlayCircle} className="w-full">Start Prep</Button>
+              )}
+              {order.status === 'PREPARING' && (
+                <Button variant="success" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'READY')} icon={CheckCircle2} className="w-full">Mark Ready</Button>
+              )}
+              {order.status === 'READY' && (
+                <Button variant="dark" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'COMPLETED')} icon={CheckCircle2} className="w-full">Clear Order</Button>
+              )}
+            </div>
+          </Card>
+        ))}
       </div>
 
-      {orders.length === 0 && (
-        <div className="p-24 text-center bg-slate-50 rounded-[3rem] border-4 border-dashed border-slate-100">
-          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl mx-auto mb-6">
-            <AlertCircle className="w-10 h-10 text-slate-200" />
+      <Modal 
+        isOpen={showProductionModal} 
+        onClose={() => setShowProductionModal(false)}
+        title="Production Entry"
+        subtitle="Log batch cooking for standardized tracking"
+      >
+        {!availableProducts.length ? (
+          <div className="text-center p-12 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+            <p className="font-bold text-slate-400">No batch products found.</p>
           </div>
-          <h2 className="text-2xl font-black text-slate-300 uppercase tracking-widest">Kitchen is Clean</h2>
-          <p className="text-slate-400 font-bold mt-2">No active orders found for this branch.</p>
-        </div>
-      )}
+        ) : (
+          <div className="space-y-8">
+            <div className="grid grid-cols-2 gap-3">
+              {availableProducts.map(p => (
+                <button 
+                  key={p.id}
+                  onClick={() => setProdProductId(p.id)}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all ${prodProductId === p.id ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+                >
+                  <p className="font-black text-slate-800 text-sm">{p.name}</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase mt-1">Yield: {p.batchSize} / BATCH</p>
+                </button>
+              ))}
+            </div>
 
-      <style jsx global>{`
-        .animate-in { animation: fadeIn 0.5s forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
+            <div className="text-center">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Number of Batches</p>
+              <div className="flex items-center justify-center gap-8">
+                <button onClick={() => setProdQty(q => Math.max(1, q - 1))} className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-xl hover:bg-slate-200 transition-all">-</button>
+                <span className="text-6xl font-black text-slate-900">{prodQty}</span>
+                <button onClick={() => setProdQty(q => q + 1)} className="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center font-black text-xl text-white hover:bg-black transition-all">+</button>
+              </div>
+              {prodProductId && (
+                <p className="text-xs font-black text-blue-600 uppercase mt-6 tracking-widest">
+                  Total Yield: {prodQty * (availableProducts.find(p => p.id === prodProductId)?.batchSize || 0)} Units
+                </p>
+              )}
+            </div>
+
+            <Button 
+              className="w-full h-20 text-lg" 
+              onClick={handleRecordProduction} 
+              loading={productionLoading} 
+              disabled={!prodProductId} 
+              icon={PlayCircle}
+            >
+              Confirm Production
+            </Button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

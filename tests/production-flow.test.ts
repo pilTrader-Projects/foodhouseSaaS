@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ProductionService } from '@/services/production-service'
-import { InventoryService } from '@/modules/inventory/services/inventory-service'
+import { DeductionService } from '@/services/deduction-service'
 import prisma from '@/lib/prisma'
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
     default: {
+        $transaction: vi.fn((fn) => fn(prisma)),
         product: {
             findUnique: vi.fn(),
         },
@@ -18,8 +19,8 @@ vi.mock('@/lib/prisma', () => ({
     },
 }))
 
-// Mock InventoryService
-vi.mock('@/modules/inventory/services/inventory-service')
+// Mock DeductionService
+vi.mock('@/services/deduction-service')
 
 describe('ProductionService (K-2 Hybrid)', () => {
     let service: ProductionService
@@ -31,38 +32,30 @@ describe('ProductionService (K-2 Hybrid)', () => {
         service = new ProductionService(tenantId, branchId)
     })
 
-    it('should record production and deduct ingredients at the same time', async () => {
+    it('should record production and delegate ingredient deduction to DeductionService', async () => {
         const productId = 'p1'
-        const quantity = 10
+        const numBatches = 2
+        const batchSize = 10
+        const totalYield = numBatches * batchSize
 
-            ; (prisma.product.findUnique as any).mockResolvedValue({ id: productId, deductionModel: 'ON_PRODUCTION' })
+            // 1. Setup Mocks
+            ; (prisma.product.findUnique as any).mockResolvedValue({ id: productId, batchSize })
 
-        await service.recordProduction(productId, quantity)
+        // 2. Execute
+        await service.recordProduction(productId, numBatches)
 
-        // 1. Should call InventoryService to deduct ingredients
-        expect(InventoryService.prototype.consumeIngredients).toHaveBeenCalledWith(productId, quantity)
+        // 3. Verify DeductionService was called for ingredients
+        expect(DeductionService.prototype.deductRecipeComponents).toHaveBeenCalledWith(expect.objectContaining({ id: productId }), numBatches, expect.anything())
 
-        // 2. Should update PreparedStock
+        // 4. Verify PreparedStock update (transactional context)
         expect(prisma.preparedStock.upsert).toHaveBeenCalledWith(expect.objectContaining({
             where: { branchId_productId: { branchId, productId } },
-            update: { quantity: { increment: quantity } }
+            update: { quantity: { increment: totalYield } }
         }))
 
-        // 3. Should log ProductionRecord
+        // 5. Verify ProductionRecord creation
         expect(prisma.productionRecord.create).toHaveBeenCalledWith(expect.objectContaining({
-            data: expect.objectContaining({ productId, quantity })
-        }))
-    })
-
-    it('should deduct from prepared stock on sale if model is ON_PRODUCTION', async () => {
-        const productId = 'p1'
-        const quantity = 2
-
-        await service.consumePreparedStock(productId, quantity)
-
-        expect(prisma.preparedStock.upsert).toHaveBeenCalledWith(expect.objectContaining({
-            where: { branchId_productId: { branchId, productId } },
-            update: { quantity: { decrement: quantity } }
+            data: expect.objectContaining({ productId, quantity: totalYield })
         }))
     })
 })

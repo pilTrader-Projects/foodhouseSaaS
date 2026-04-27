@@ -13,12 +13,13 @@ describe('Combo Meal Deductions (K-2+)', () => {
         posService = new PosService(tenantId, branchId)
         productionService = new ProductionService(tenantId, branchId)
 
-        // Cleanup
-        await prisma.recipeItem.deleteMany({ where: { product: { tenantId } } })
+        // Cleanup (High-fidelity deep cleanup)
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
         await prisma.productionRecord.deleteMany({ where: { branch: { tenantId } } })
         await prisma.preparedStock.deleteMany({ where: { branch: { tenantId } } })
+        await prisma.recipeItem.deleteMany({ where: { product: { tenantId } } })
+        await prisma.recipeItem.deleteMany({ where: { componentProduct: { tenantId } } })
         await prisma.product.deleteMany({ where: { tenantId } })
         await prisma.branch.deleteMany({ where: { tenantId } })
         await prisma.tenant.deleteMany({ where: { id: tenantId } })

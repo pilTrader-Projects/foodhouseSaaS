@@ -1,14 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DEMO_PRODUCTS, DEMO_INGREDIENTS, INITIAL_STOCK, DEMO_BRANCH } from '@/lib/demo-data';
 import { usePermissions } from '@/hooks/usePermissions';
-import { Loader2, ShoppingBag } from 'lucide-react';
+import { 
+  ShoppingBag, 
+  CreditCard, 
+  Banknote, 
+  Trash2, 
+  PlayCircle,
+  CheckCircle2,
+  Package
+} from 'lucide-react';
+import { Badge, Button, Card } from '@/components/ui';
+import { Modal } from '@/components/ui/modal';
+import { useToast } from '@/components/ui/toast';
 
 export default function PosTerminalPage() {
     const { branchId, user, loading: authLoading } = usePermissions();
+    const { toast } = useToast();
     const [cart, setCart] = useState<any[]>([]);
-    const [stock, setStock] = useState<Record<string, number>>(INITIAL_STOCK);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const [products, setProducts] = useState<any[]>([]);
     
@@ -22,32 +32,23 @@ export default function PosTerminalPage() {
     const [amountTendered, setAmountTendered] = useState<string>('');
     const [change, setChange] = useState<number>(0);
 
+    const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
+
     useEffect(() => {
         if (authLoading) return;
-        const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
-
         async function fetchProducts() {
             try {
                 const res = await fetch('/api/products', {
-                    headers: { 
-                        'x-tenant-id': tenantId,
-                        ...(branchId ? { 'x-branch-id': branchId } : {})
-                    }
+                    headers: { 'x-tenant-id': tenantId, 'x-branch-id': branchId! }
                 });
                 const data = await res.json();
-                if (res.ok) setProducts(data);
-                else setProducts(DEMO_PRODUCTS);
+                if (res.ok) setProducts(Array.isArray(data) ? data : []);
             } catch (e) {
-                setProducts(DEMO_PRODUCTS);
+                toast("Failed to load products", "error");
             }
         }
-        fetchProducts();
+        if (branchId) fetchProducts();
     }, [branchId, authLoading]);
-
-    const openQuantityModal = (product: any) => {
-        setSelectedProduct(product);
-        setQuantityInput(1);
-    };
 
     const confirmAddToCart = () => {
         if (selectedProduct && quantityInput > 0) {
@@ -58,6 +59,7 @@ export default function PosTerminalPage() {
                 cartId: Math.random() 
             }]);
             setSelectedProduct(null);
+            toast(`${selectedProduct.name} added to cart`, "success");
         }
     };
 
@@ -67,214 +69,165 @@ export default function PosTerminalPage() {
 
     const total = cart.reduce((sum, item) => sum + item.displayPrice, 0);
 
-    // Calculate change in real-time
     useEffect(() => {
         const tendered = parseFloat(amountTendered) || 0;
-        if (tendered >= total) {
-            setChange(tendered - total);
-        } else {
-            setChange(0);
-        }
+        setChange(tendered >= total ? tendered - total : 0);
     }, [amountTendered, total]);
 
     const handleCheckout = async () => {
         setIsCheckingOut(true);
-        const tenantId = localStorage.getItem('tenantId') || 'tenant-demo';
-        const branchId = 'branch-downtown';
-
         try {
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'x-tenant-id': tenantId,
-                    'x-branch-id': branchId
+                    'x-branch-id': branchId!
                 },
                 body: JSON.stringify({
-                    items: cart.map(item => ({
-                        productId: item.id,
-                        quantity: item.quantity,
-                        price: item.price
-                    }))
+                    items: cart.map(item => ({ productId: item.id, quantity: item.quantity, price: item.price }))
                 }),
             });
 
             if (res.ok) {
+                toast("Order Successful", "success");
                 setCart([]);
                 setShowPaymentModal(false);
                 setAmountTendered('');
-                alert(`Order Successful!\nTotal: ₱${total.toFixed(2)}\nPayment: ${paymentType}\nChange: ₱${change.toFixed(2)}`);
-                // Force reload or update inventory here if needed
-                window.location.reload(); 
             } else {
                 const error = await res.json();
-                alert(`Checkout failed: ${error.error}`);
+                toast(error.error, "error");
             }
         } catch (e) {
-            alert("Connection error during checkout");
+            toast("Checkout failed", "error");
         } finally {
             setIsCheckingOut(false);
         }
     };
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', height: 'calc(100vh - 150px)', position: 'relative' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-180px)]">
             
-            {/* Modal Overlay Helper */}
-            {(selectedProduct || showPaymentModal) && (
-                <div style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', zIndex: 100, borderRadius: '1rem'
-                }}>
-                    {/* Quantity Modal */}
-                    {selectedProduct && (
-                        <div className="card" style={{ width: '300px', textAlign: 'center' }}>
-                            <h3>{selectedProduct.name}</h3>
-                            <p style={{ margin: '1rem 0' }}>Enter Quantity:</p>
-                            <input 
-                                type="number" min="1" autoFocus
-                                value={quantityInput}
-                                onChange={(e) => setQuantityInput(parseInt(e.target.value) || 1)}
-                                style={{ width: '100%', padding: '1rem', fontSize: '1.5rem', textAlign: 'center', marginBottom: '1.5rem', borderRadius: '0.5rem', border: '1px solid var(--border)' }}
-                            />
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button onClick={() => setSelectedProduct(null)} style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--border)', background: 'white', borderRadius: '0.5rem', cursor: 'pointer' }}>Cancel</button>
-                                <button onClick={confirmAddToCart} style={{ flex: 1, padding: '0.75rem', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>Add to Order</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Payment Modal */}
-                    {showPaymentModal && (
-                        <div className="card" style={{ width: '400px' }}>
-                            <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Checkout & Payment</h2>
-                            
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.25rem' }}>
-                                <span>Total Amount:</span>
-                                <strong>₱{total.toFixed(2)}</strong>
-                            </div>
-
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Payment Method</label>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                                    <button 
-                                        onClick={() => setPaymentType('Cash')}
-                                        style={{ padding: '0.75rem', borderRadius: '0.5rem', border: `2px solid ${paymentType === 'Cash' ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: paymentType === 'Cash' ? '#eff6ff' : 'white', cursor: 'pointer' }}
-                                    >Cash</button>
-                                    <button 
-                                        onClick={() => setPaymentType('Digital')}
-                                        style={{ padding: '0.75rem', borderRadius: '0.5rem', border: `2px solid ${paymentType === 'Digital' ? 'var(--primary)' : 'var(--border)'}`, backgroundColor: paymentType === 'Digital' ? '#eff6ff' : 'white', cursor: 'pointer' }}
-                                    >GCash / Card</button>
-                                </div>
-                            </div>
-
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Amount Tendered (₱)</label>
-                                <input 
-                                    type="number" autoFocus
-                                    placeholder="0.00"
-                                    value={amountTendered}
-                                    onChange={(e) => setAmountTendered(e.target.value)}
-                                    style={{ width: '100%', padding: '1rem', fontSize: '1.25rem', borderRadius: '0.5rem', border: '1px solid var(--border)' }}
-                                />
-                            </div>
-
-                            {paymentType === 'Cash' && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', padding: '1rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem' }}>
-                                    <span style={{ fontWeight: 'bold', color: '#166534' }}>Change:</span>
-                                    <strong style={{ fontSize: '1.25rem', color: '#166534' }}>₱{change.toFixed(2)}</strong>
-                                </div>
-                            )}
-
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button onClick={() => setShowPaymentModal(false)} style={{ flex: 1, padding: '1rem', border: '1px solid var(--border)', background: 'white', borderRadius: '0.5rem', cursor: 'pointer' }}>Back</button>
-                                <button 
-                                    onClick={handleCheckout}
-                                    disabled={parseFloat(amountTendered) < total || isCheckingOut}
-                                    style={{ flex: 1, padding: '1rem', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer', opacity: parseFloat(amountTendered) < total ? 0.5 : 1 }}
-                                >
-                                    {isCheckingOut ? 'Processing...' : 'Complete Sale'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Left: Product Grid & Inventory */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <div className="card">
-                    <h2 style={{ marginBottom: '1.5rem' }}>Menu: {DEMO_BRANCH.name}</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+            {/* Left: Product Selection */}
+            <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-2">
+                <Card title="Product Menu" subtitle="Tap to add items to current order">
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                         {products.map(product => (
                             <div 
                                 key={product.id} 
-                                className={`card ${!product.isAvailable ? 'opacity-50 grayscale pointer-events-none' : 'cursor-pointer hover:scale-105 transition-transform'}`} 
-                                style={{ textAlign: 'center' }} 
-                                onClick={() => product.isAvailable && openQuantityModal(product)}
+                                onClick={() => setSelectedProduct(product)}
+                                className="bg-slate-50 p-6 rounded-3xl border-2 border-transparent hover:border-blue-600 hover:bg-white transition-all cursor-pointer text-center group"
                             >
-                                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{product.isAvailable ? '🍔' : '🚫'}</div>
-                                <strong>{product.name}</strong>
-                                <p style={{ color: 'var(--primary)', fontWeight: 'bold' }}>₱{product.price.toFixed(2)}</p>
-                                {!product.isAvailable && <span className="text-[10px] font-black bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full uppercase">Unavailable</span>}
+                                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🍔</div>
+                                <p className="font-black text-slate-800 text-sm whitespace-nowrap overflow-hidden text-ellipsis">{product.name}</p>
+                                <p className="font-black text-blue-600 mt-1">₱{product.price.toLocaleString()}</p>
                             </div>
                         ))}
                     </div>
-                </div>
-
-                <div className="card">
-                    <h3>Live Branch Inventory</h3>
-                    <table style={{ width: '100%', marginTop: '1rem', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
-                                <th style={{ padding: '0.5rem' }}>Ingredient</th>
-                                <th style={{ padding: '0.5rem' }}>Available Stock</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {DEMO_INGREDIENTS.map(ing => (
-                                <tr key={ing.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td style={{ padding: '0.5rem' }}>{ing.name}</td>
-                                    <td style={{ padding: '0.5rem', fontWeight: 'bold', color: stock[ing.id] < 2 ? 'var(--danger)' : 'inherit' }}>
-                                        {stock[ing.id].toFixed(2)} {ing.unit}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                </Card>
             </div>
 
-            {/* Right: Cart */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'white' }}>
-                <h3 style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>Current Order</h3>
-                <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 0' }}>
-                    {cart.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '2rem' }}>Cart is empty</p>}
+            {/* Right: Cart & Summary */}
+            <Card className="flex flex-col h-full overflow-hidden">
+                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-50">
+                    <ShoppingBag className="w-6 h-6 text-blue-600" />
+                    <h3 className="text-xl font-black text-slate-900 uppercase">Cart</h3>
+                    <Badge variant="dark" className="ml-auto">{cart.length}</Badge>
+                </div>
+
+                <div className="flex-1 overflow-y-auto space-y-3 mb-6">
                     {cart.map(item => (
-                        <div key={item.cartId} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.875rem' }}>
-                            <span>{item.name} <span style={{ color: 'var(--text-muted)' }}>x{item.quantity}</span></span>
-                            <div>
-                                <strong>₱{item.displayPrice.toFixed(2)}</strong>
-                                <button onClick={() => removeFromCart(item.cartId)} style={{ marginLeft: '0.5rem', color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>×</button>
+                        <div key={item.cartId} className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl group">
+                            <div className="flex-1">
+                                <p className="font-black text-slate-800 text-sm">{item.name}</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase">Qty: {item.quantity}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-black text-slate-900">₱{item.displayPrice.toLocaleString()}</p>
+                                <button onClick={() => removeFromCart(item.cartId)} className="text-rose-500 hover:text-rose-700 mt-1"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                         </div>
                     ))}
+                    {cart.length === 0 && (
+                        <div className="h-full flex flex-col items-center justify-center text-slate-300 py-20">
+                            <Package className="w-12 h-12 mb-4 opacity-20" />
+                            <p className="font-black uppercase text-[10px] tracking-widest leading-loose">Cart is Empty</p>
+                        </div>
+                    )}
                 </div>
-                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-                        <span>Total</span>
-                        <span>₱{total.toFixed(2)}</span>
+
+                <div className="pt-6 border-t-2 border-dashed border-slate-50 mt-auto">
+                    <div className="flex justify-between items-center mb-6 px-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
+                        <span className="text-3xl font-black text-slate-900">₱{total.toLocaleString()}</span>
                     </div>
-                    <button 
-                        onClick={() => setShowPaymentModal(true)}
-                        disabled={cart.length === 0}
-                        style={{ width: '100%', padding: '1rem', backgroundColor: 'var(--primary)', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: cart.length === 0 ? 'not-allowed' : 'pointer', opacity: cart.length === 0 ? 0.6 : 1 }}
-                    >
-                        Proceed to Payment
-                    </button>
+                    <Button variant="primary" className="w-full h-16 text-lg" disabled={cart.length === 0} onClick={() => setShowPaymentModal(true)} icon={CreditCard}>
+                        Checkout Order
+                    </Button>
                 </div>
-            </div>
+            </Card>
+
+            {/* Quantity Modal */}
+            <Modal isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} title="Select Quantity" subtitle={selectedProduct?.name}>
+                <div className="text-center py-6">
+                    <div className="flex items-center justify-center gap-8 mb-8">
+                        <button onClick={() => setQuantityInput(q => Math.max(1, q - 1))} className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-2xl hover:bg-slate-200">-</button>
+                        <span className="text-6xl font-black text-slate-900">{quantityInput}</span>
+                        <button onClick={() => setQuantityInput(q => q + 1)} className="w-16 h-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-2xl hover:bg-black">+</button>
+                    </div>
+                    <Button variant="primary" className="w-full h-16" onClick={confirmAddToCart}>Add to Cart • ₱{(selectedProduct?.price * quantityInput).toLocaleString()}</Button>
+                </div>
+            </Modal>
+
+            {/* Payment Modal */}
+            <Modal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} title="Complete Payment" subtitle={`Total Due: ₱${total.toLocaleString()}`}>
+                <div className="space-y-8">
+                    <div className="grid grid-cols-2 gap-4">
+                        <button 
+                            onClick={() => setPaymentType('Cash')}
+                            className={`p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all ${paymentType === 'Cash' ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-100 bg-white text-slate-400'}`}
+                        >
+                            <Banknote className="w-8 h-8" />
+                            <span className="font-black uppercase text-[10px] tracking-widest">Cash</span>
+                        </button>
+                        <button 
+                            onClick={() => setPaymentType('Digital')}
+                            className={`p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all ${paymentType === 'Digital' ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-100 bg-white text-slate-400'}`}
+                        >
+                            <CreditCard className="w-8 h-8" />
+                            <span className="font-black uppercase text-[10px] tracking-widest">Digital</span>
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Amount Tendered</label>
+                        <input 
+                            type="number" autoFocus
+                            placeholder="0.00"
+                            value={amountTendered}
+                            onChange={(e) => setAmountTendered(e.target.value)}
+                            className="w-full h-20 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] px-8 text-3xl font-black text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
+                        />
+                    </div>
+
+                    {paymentType === 'Cash' && parseFloat(amountTendered) >= total && (
+                        <div className="bg-green-50 p-6 rounded-3xl flex justify-between items-center border border-green-100">
+                            <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Change Due</span>
+                            <span className="text-3xl font-black text-green-700">₱{change.toLocaleString()}</span>
+                        </div>
+                    )}
+
+                    <Button 
+                        variant="dark" 
+                        className="w-full h-20 text-lg shadow-2xl" 
+                        disabled={parseFloat(amountTendered) < total || isCheckingOut} 
+                        onClick={handleCheckout} 
+                        loading={isCheckingOut} icon={CheckCircle2}
+                    >
+                        Confirm Transaction
+                    </Button>
+                </div>
+            </Modal>
         </div>
     );
 }
