@@ -20,7 +20,7 @@ export default function KitchenPage() {
 
   // Production Entry State
   const [showProductionModal, setShowProductionModal] = useState(false);
-  const [prodQty, setProdQty] = useState(5);
+  const [prodQty, setProdQty] = useState(1);
   const [prodProductId, setProdProductId] = useState<string | null>(null);
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
   const [productionLoading, setProductionLoading] = useState(false);
@@ -92,8 +92,10 @@ export default function KitchenPage() {
 
         if (res.ok) {
             setShowProductionModal(false);
-            alert(`Production logged: ${prodQty} units added to stock.`);
-            // Refresh orders in case some were waiting for stock
+            const product = availableProducts.find(p => p.id === prodProductId);
+            const totalYield = prodQty * (product?.batchSize || 1);
+            alert(`Production logged: ${prodQty} batch(es) yielded ${totalYield} units.`);
+            setProdQty(1); // Reset to 1 batch
             fetchOrders();
         } else {
             const err = await res.json();
@@ -214,19 +216,26 @@ export default function KitchenPage() {
                           className={`p-4 rounded-2xl border-2 text-left transition-all ${prodProductId === p.id ? 'border-blue-600 bg-blue-50' : 'border-slate-100 hover:border-slate-200 bg-white'}`}
                         >
                           <p className="font-black text-slate-800 text-sm">{p.name}</p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Batch Tracking</p>
+                          <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">
+                            Yield: {p.batchSize} units / batch
+                          </p>
                         </button>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Batch Quantity (pcs)</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Number of Batches</label>
                     <div className="flex items-center justify-center gap-6">
                       <button onClick={() => setProdQty(q => Math.max(1, q - 1))} className="w-14 h-14 rounded-2xl bg-slate-100 font-black text-xl hover:bg-slate-200 cursor-pointer">-</button>
                       <span className="text-5xl font-black text-slate-900 min-w-[100px] text-center">{prodQty}</span>
                       <button onClick={() => setProdQty(q => q + 1)} className="w-14 h-14 rounded-2xl bg-slate-900 text-white font-black text-xl hover:bg-black cursor-pointer">+</button>
                     </div>
+                    {prodProductId && (
+                      <p className="text-center text-[10px] font-black text-blue-600 uppercase mt-4 tracking-widest">
+                        Total Yield: {prodQty * (availableProducts.find(p => p.id === prodProductId)?.batchSize || 0)} Units
+                      </p>
+                    )}
                   </div>
 
                   <button 

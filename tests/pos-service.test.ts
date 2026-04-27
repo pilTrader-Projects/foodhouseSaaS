@@ -11,7 +11,7 @@ vi.mock('@/lib/prisma', () => ({
             create: vi.fn(),
         },
         product: {
-            findUnique: vi.fn().mockResolvedValue({ id: 'prod-1', deductionModel: 'ON_ORDER' }),
+            findUnique: vi.fn().mockResolvedValue({ id: 'prod-1', deductionModel: 'ON_ORDER', ingredients: [] }),
         },
         tenant: {
             findUnique: vi.fn().mockResolvedValue({ plan: 'basic', features: [] }),
@@ -50,7 +50,7 @@ describe('PosService (TDD)', () => {
 
         // Verify inventory deduction was called via the inventory service
         const inventoryServiceInstance = (InventoryService as any).mock.instances[0]
-        expect(inventoryServiceInstance.consumeIngredients).toHaveBeenCalledWith('prod-1', 2)
+        expect(inventoryServiceInstance.consumeIngredients).toHaveBeenCalledWith('prod-1', 2, expect.anything())
         expect(order.id).toBe('order-1')
     })
 })

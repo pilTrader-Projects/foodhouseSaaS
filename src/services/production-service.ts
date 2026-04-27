@@ -17,17 +17,24 @@ export class ProductionService extends BaseService {
     /**
      * Records a production batch by the Chef.
      * 1. Deducts raw ingredients from branch inventory.
-     * 2. Increases the prepared stock for the product.
+     * 2. Increases the prepared stock for the product based on BATCH YIELD.
      * 3. Logs the production event.
      */
-    async recordProduction(productId: string, quantity: number) {
-        // Enforce branch scope
+    async recordProduction(productId: string, numBatches: number) {
         if (!this.branchId) throw new Error('Branch context required for production')
 
-        // 1. Deduct Ingredients
-        await this.inventoryService.consumeIngredients(productId, quantity)
+        // 0. Fetch Product to get batchSize
+        const product = await prisma.product.findUnique({
+            where: { id: productId }
+        })
+        if (!product) throw new Error('Product not found')
 
-        // 2. Increase Prepared Stock
+        const yieldQuantity = numBatches * (product.batchSize || 1)
+
+        // 1. Deduct Ingredients (based on number of batches)
+        await this.inventoryService.consumeIngredients(productId, numBatches)
+
+        // 2. Increase Prepared Stock (based on total yield)
         await prisma.preparedStock.upsert({
             where: {
                 branchId_productId: {
@@ -36,12 +43,12 @@ export class ProductionService extends BaseService {
                 }
             },
             update: {
-                quantity: { increment: quantity }
+                quantity: { increment: yieldQuantity }
             },
             create: {
                 branchId: this.branchId,
                 productId,
-                quantity
+                quantity: yieldQuantity
             }
         })
 
@@ -50,7 +57,7 @@ export class ProductionService extends BaseService {
             data: {
                 branchId: this.branchId,
                 productId,
-                quantity
+                quantity: yieldQuantity
             }
         })
     }
@@ -59,10 +66,11 @@ export class ProductionService extends BaseService {
      * Deducts from prepared stock (finished goods) during a sale.
      * This is used for products with deductionModel = 'ON_PRODUCTION'.
      */
-    async consumePreparedStock(productId: string, quantity: number) {
+    async consumePreparedStock(productId: string, quantity: number, tx?: any) {
         if (!this.branchId) throw new Error('Branch context required for consumption')
+        const db = tx || prisma
 
-        return prisma.preparedStock.upsert({
+        return db.preparedStock.upsert({
             where: {
                 branchId_productId: {
                     branchId: this.branchId,

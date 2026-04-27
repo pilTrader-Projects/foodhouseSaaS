@@ -19,8 +19,6 @@ export class PosService extends BaseService {
 
     /**
      * Creates a new order. 
-     * This logic is wrapped in a Prisma transaction to ensure 
-     * that inventory is only deducted if the order is successfully created.
      */
     async createOrder(items: { productId: string; quantity: number; price: number }[]) {
         // 1. Feature Gate
@@ -34,7 +32,7 @@ export class PosService extends BaseService {
                 data: {
                     tenantId: this.tenantId,
                     branchId: this.branchId!,
-                    userId: 'user-admin', // Use the admin user created during seeding
+                    userId: 'user-admin',
                     totalAmount,
                     items: {
                         create: items.map((item) => ({
@@ -46,22 +44,50 @@ export class PosService extends BaseService {
                 },
             })
 
-            // 2. Delegate inventory consumption based on the hybrid model
+            // 2. Process recursives deductions for each item
             for (const item of items) {
-                const product = await tx.product.findUnique({
-                    where: { id: item.productId }
-                })
-
-                if (product?.deductionModel === 'ON_PRODUCTION') {
-                    // Logic for pre-cooked items: Deduct from PREPARED stock
-                    await this.productionService.consumePreparedStock(item.productId, item.quantity)
-                } else {
-                    // Logic for made-to-order items: Deduct raw ingredients directly
-                    await this.inventoryService.consumeIngredients(item.productId, item.quantity)
-                }
+                await this.handleDeduction(item.productId, item.quantity, tx)
             }
 
             return order
         })
+    }
+
+    /**
+     * Recursive deduction strategy resolver.
+     * Deducts from Prepared Stock or Ingredients based on product model.
+     * Then recursively deducts for any product components in the recipe.
+     */
+    private async handleDeduction(productId: string, quantity: number, tx: any) {
+        // 1. Resolve Product Model
+        const product = await tx.product.findUnique({
+            where: { id: productId },
+            include: {
+                ingredients: true // Recipe items
+            }
+        })
+
+        if (!product) return
+
+        // 2. Immediate Deduction (Hybrid Strategy)
+        if (product.deductionModel === 'ON_PRODUCTION') {
+            // Batch-cooked: Deduct from PREPARED stock
+            await this.productionService.consumePreparedStock(productId, quantity, tx)
+        } else {
+            // Made-to-order: Deduct raw materials directly
+            await this.inventoryService.consumeIngredients(productId, quantity, tx)
+        }
+
+        // 3. Composite Deduction (Recursive components)
+        // If this product has other products as components in its recipe, deduct them too
+        for (const recipeItem of product.ingredients) {
+            if (recipeItem.componentProductId) {
+                await this.handleDeduction(
+                    recipeItem.componentProductId,
+                    recipeItem.amount * quantity,
+                    tx
+                )
+            }
+        }
     }
 }
