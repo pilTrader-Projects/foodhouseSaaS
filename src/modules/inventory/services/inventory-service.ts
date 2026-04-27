@@ -51,6 +51,19 @@ export class InventoryService extends BaseService {
     }
 
     /**
+     * Creates a new ingredient for the tenant.
+     */
+    async createIngredient(data: { name: string; unit: string }) {
+        await this.ensureFeature('inventory')
+        return prisma.ingredient.create({
+            data: {
+                ...data,
+                tenantId: this.tenantId,
+            },
+        })
+    }
+
+    /**
      * Fetches all ingredients for the current tenant.
      */
     async getIngredients() {

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, Save, ShoppingCart, Truck, Search } from 'lucide-react';
-import { Badge, Button, Card } from '@/components/ui';
+import { Package, Plus, Trash2, Save, ShoppingCart, Truck, Search, PlusCircle } from 'lucide-react';
+import { Badge, Button, Card, Modal } from '@/components/ui';
 import { useToast } from '@/components/ui/toast';
 import { usePermissions } from '@/hooks/usePermissions';
 
@@ -32,24 +32,78 @@ export default function ReceiveDelivery() {
     const [items, setItems] = useState<DeliveryItem[]>([{ ingredientId: '', quantity: 1, unitCost: 0 }]);
     const [isSaving, setIsSaving] = useState(false);
 
+    // Quick Add States
+    const [showSuppModal, setShowSuppModal] = useState(false);
+    const [showIngModal, setShowIngModal] = useState(false);
+    const [newSuppData, setNewSuppData] = useState({ name: '', contact: '' });
+    const [newIngData, setNewIngData] = useState({ name: '', unit: '' });
+    const [isCreating, setIsCreating] = useState(false);
+
     const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
 
+    const fetchCatalogs = async () => {
+        try {
+            const [suppRes, ingRes] = await Promise.all([
+                fetch('/api/procurement/suppliers', { headers: { 'x-tenant-id': tenantId } }),
+                fetch('/api/inventory/ingredients', { headers: { 'x-tenant-id': tenantId } })
+            ]);
+            const [suppData, ingData] = await Promise.all([suppRes.json(), ingRes.json()]);
+            setSuppliers(Array.isArray(suppData) ? suppData : []);
+            setIngredients(Array.isArray(ingData) ? ingData : []);
+        } catch (e) {
+            toast("Failed to load catalogs", "error");
+        }
+    };
+
     useEffect(() => {
-        const fetchCatalogs = async () => {
-            try {
-                const [suppRes, ingRes] = await Promise.all([
-                    fetch('/api/procurement/suppliers', { headers: { 'x-tenant-id': tenantId } }),
-                    fetch('/api/inventory/ingredients', { headers: { 'x-tenant-id': tenantId } })
-                ]);
-                const [suppData, ingData] = await Promise.all([suppRes.json(), ingRes.json()]);
-                setSuppliers(Array.isArray(suppData) ? suppData : []);
-                setIngredients(Array.isArray(ingData) ? ingData : []);
-            } catch (e) {
-                toast("Failed to load catalogs", "error");
-            }
-        };
         fetchCatalogs();
     }, [tenantId]);
+
+    const handleQuickAddSupplier = async () => {
+        if (!newSuppData.name) return toast("Supplier name required", "error");
+        setIsCreating(true);
+        try {
+            const res = await fetch('/api/procurement/suppliers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+                body: JSON.stringify(newSuppData)
+            });
+            if (res.ok) {
+                const created = await res.json();
+                toast("Supplier added", "success");
+                setSelectedSupplier(created.id);
+                setShowSuppModal(false);
+                setNewSuppData({ name: '', contact: '' });
+                fetchCatalogs();
+            }
+        } catch (e) {
+            toast("Creation failed", "error");
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    const handleQuickAddIngredient = async () => {
+        if (!newIngData.name || !newIngData.unit) return toast("Name and Unit required", "error");
+        setIsCreating(true);
+        try {
+            const res = await fetch('/api/inventory/ingredients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+                body: JSON.stringify(newIngData)
+            });
+            if (res.ok) {
+                toast("Ingredient added", "success");
+                setShowIngModal(false);
+                setNewIngData({ name: '', unit: '' });
+                fetchCatalogs();
+            }
+        } catch (e) {
+            toast("Creation failed", "error");
+        } finally {
+            setIsCreating(false);
+        }
+    };
 
     const addItem = () => {
         setItems([...items, { ingredientId: '', quantity: 1, unitCost: 0 }]);
@@ -122,10 +176,13 @@ export default function ReceiveDelivery() {
 
             <Card className="p-0 overflow-hidden border-none shadow-none">
                 <div className="p-8 bg-slate-50 border-b border-slate-100">
-                    <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                        <Truck className="w-5 h-5 text-blue-600" />
-                        Supplier Information
-                    </h3>
+                    <div className="flex justify-between items-center pr-4">
+                        <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                            <Truck className="w-5 h-5 text-blue-600" />
+                            Supplier Information
+                        </h3>
+                        <Button variant="outline" size="xs" icon={PlusCircle} onClick={() => setShowSuppModal(true)}>Quick Add Supplier</Button>
+                    </div>
                     <div className="mt-6">
                         <select 
                             value={selectedSupplier}
@@ -142,7 +199,10 @@ export default function ReceiveDelivery() {
                 <div className="p-8 space-y-6">
                     <div className="flex justify-between items-center pr-12">
                         <h3 className="text-lg font-black text-slate-900">Delivery Line Items</h3>
-                        <Button variant="outline" onClick={addItem} icon={Plus} size="xs">Add Item</Button>
+                        <div className="flex gap-3">
+                            <Button variant="outline" onClick={() => setShowIngModal(true)} icon={PlusCircle} size="xs">Quick Add Item</Button>
+                            <Button variant="outline" onClick={addItem} icon={Plus} size="xs">Add Line</Button>
+                        </div>
                     </div>
 
                     <div className="space-y-4">
@@ -202,6 +262,60 @@ export default function ReceiveDelivery() {
                     </Button>
                 </div>
             </Card>
+
+            <Modal 
+                isOpen={showSuppModal} 
+                onClose={() => setShowSuppModal(false)}
+                title="Quick Add Supplier"
+                subtitle="Register a new vendor instantly"
+            >
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2">Company Name</label>
+                        <input 
+                            className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold"
+                            value={newSuppData.name}
+                            onChange={e => setNewSuppData({ ...newSuppData, name: e.target.value })}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2">Contact Details</label>
+                        <input 
+                            className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold"
+                            value={newSuppData.contact}
+                            onChange={e => setNewSuppData({ ...newSuppData, contact: e.target.value })}
+                        />
+                    </div>
+                    <Button className="w-full h-16" onClick={handleQuickAddSupplier} loading={isCreating} icon={PlusCircle}>Create Supplier</Button>
+                </div>
+            </Modal>
+
+            <Modal 
+                isOpen={showIngModal} 
+                onClose={() => setShowIngModal(false)}
+                title="Quick Add Ingredient"
+                subtitle="New raw material specification"
+            >
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2">Item Name</label>
+                        <input 
+                            className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold"
+                            value={newIngData.name}
+                            onChange={e => setNewIngData({ ...newIngData, name: e.target.value })}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-10 font-black text-slate-400 uppercase tracking-widest mb-2">Unit (e.g. KG, PCS, LITER)</label>
+                        <input 
+                            className="w-full h-14 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold"
+                            value={newIngData.unit}
+                            onChange={e => setNewIngData({ ...newIngData, unit: e.target.value })}
+                        />
+                    </div>
+                    <Button className="w-full h-16" onClick={handleQuickAddIngredient} loading={isCreating} icon={PlusCircle}>Register Item</Button>
+                </div>
+            </Modal>
         </div>
     );
 }
