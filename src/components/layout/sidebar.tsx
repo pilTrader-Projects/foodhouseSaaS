@@ -10,6 +10,7 @@ import {
   Package, 
   ChefHat, 
   Settings,
+  Settings2,
   ShieldCheck,
   Moon,
   Sun,
@@ -30,6 +31,7 @@ export function Sidebar() {
     { name: 'POS Terminal', icon: ShoppingCart, href: '/pos', perm: 'access:pos' },
     { name: 'Inventory', icon: Package, href: '/inventory', perm: 'access:inventory' },
     { name: 'Kitchen', icon: ChefHat, href: '/kitchen', perm: 'access:kitchen' },
+    { name: 'Menu', icon: Settings2, href: '/settings/menu', perm: 'access:menu' },
     { name: 'Team', icon: Users, href: '/settings/team', perm: 'access:team' },
     { name: 'Settings', icon: Settings, href: '/settings', perm: 'manage:settings' },
   ];

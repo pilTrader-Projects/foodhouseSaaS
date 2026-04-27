@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Package, RefreshCw, AlertTriangle, CheckCircle2, XCircle, Search, ArrowUpRight, Truck } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Package, RefreshCw, AlertTriangle, CheckCircle2, XCircle, Search, Truck, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge, Button, Card } from '@/components/ui';
-import { useToast } from '@/components/ui/toast';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useUser } from '@/context/user-context';
+import { useApi } from '@/hooks/use-api';
 
 interface StockItem {
     id: string;
@@ -16,36 +16,27 @@ interface StockItem {
 }
 
 export default function InventoryDashboard() {
-    const { branchId, user, loading: authLoading } = usePermissions();
-    const { toast } = useToast();
+    const { user, loading: authLoading } = useUser();
+    const { request, loading: apiLoading, error } = useApi();
     const [inventory, setInventory] = useState<StockItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
-
-    const fetchProfile = async () => {
-        if (!branchId) return;
-        setLoading(true);
+    const fetchProfile = useCallback(async () => {
+        if (!user?.branchId) return;
         try {
-            const res = await fetch('/api/inventory/profile', {
-                headers: {
-                    'x-tenant-id': tenantId,
-                    'x-branch-id': branchId
-                }
-            });
-            const data = await res.json();
+            const data = await request(`/api/inventory/profile?branchId=${user.branchId}`);
             setInventory(Array.isArray(data) ? data : []);
         } catch (e) {
-            toast("Failed to load inventory profile", "error");
+            console.error("Failed to load inventory profile", e);
         } finally {
-            setLoading(false);
+            setInitialLoading(false);
         }
-    };
+    }, [user?.branchId, request]);
 
     useEffect(() => {
-        if (!authLoading && branchId) fetchProfile();
-    }, [branchId, authLoading]);
+        if (user?.branchId) fetchProfile();
+    }, [user?.branchId, fetchProfile]);
 
     const filteredItems = inventory.filter(i => 
         i.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -61,16 +52,25 @@ export default function InventoryDashboard() {
         return { label: 'In Stock', variant: 'success' as any, icon: CheckCircle2 };
     };
 
+    if (authLoading || (initialLoading && !inventory.length)) {
+        return (
+          <div className="h-[60vh] flex-col flex-center text-slate-400">
+            <Loader2 className="w-12 h-12 rounded-full animate-spin mb-4 text-blue-600" />
+            <p className="font-black tracking-widest uppercase text-xs text-slate-900">Syncing Inventory...</p>
+          </div>
+        );
+    }
+
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-8 animate-fade-in">
             {/* Header Section */}
-            <div className="flex justify-between items-center bg-white p-8 rounded-4xl border-2 border-slate-100 shadow-sm">
+            <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
                 <div>
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                         <Package className="w-10 h-10 text-blue-600" />
                         Inventory Profile
                     </h1>
-                    <p className="text-10 font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Stock Monitoring & Control</p>
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Stock Monitoring & Control</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <Link href="/inventory/receive">
@@ -78,44 +78,51 @@ export default function InventoryDashboard() {
                     </Link>
                     <button 
                         onClick={fetchProfile}
-                        className="p-4 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-all border-2 border-transparent"
+                        disabled={apiLoading}
+                        className="p-4 rounded-md bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-all border border-transparent"
                     >
-                        <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`w-5 h-5 ${apiLoading ? 'animate-spin' : ''}`} />
                     </button>
                 </div>
             </div>
 
+            {error && (
+                <div className="p-4 bg-rose-50 text-rose-600 text-xs font-black uppercase tracking-widest rounded-sm border border-rose-100">
+                    Error: {error}
+                </div>
+            )}
+
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-white border-slate-100">
+                <Card className="bg-white border-slate-100 p-6">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-10 font-black text-slate-400 uppercase tracking-widest mb-1">Total Items</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Items</p>
                             <h2 className="text-4xl font-black text-slate-900">{inventory.length}</h2>
                         </div>
-                        <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
+                        <div className="p-3 bg-blue-50 rounded-lg text-blue-600">
                             <Package className="w-6 h-6" />
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-white border-slate-100">
+                <Card className="bg-white border-slate-100 p-6">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-10 font-black text-slate-400 uppercase tracking-widest mb-1">Low Stock</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Low Stock</p>
                             <h2 className="text-4xl font-black text-amber-600">{lowStockItems.length}</h2>
                         </div>
-                        <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
+                        <div className="p-3 bg-amber-50 rounded-lg text-amber-600">
                             <AlertTriangle className="w-6 h-6" />
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-white border-slate-100">
+                <Card className="bg-white border-slate-100 p-6">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-10 font-black text-slate-400 uppercase tracking-widest mb-1">Out of Stock</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Out of Stock</p>
                             <h2 className="text-4xl font-black text-rose-600">{outOfStockItems.length}</h2>
                         </div>
-                        <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
+                        <div className="p-3 bg-rose-50 rounded-lg text-rose-600">
                             <XCircle className="w-6 h-6" />
                         </div>
                     </div>
@@ -132,7 +139,7 @@ export default function InventoryDashboard() {
                             placeholder="Filter ingredients..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-12 pl-12 pr-4 bg-white border-2 border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:border-blue-300 transition-all"
+                            className="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-md font-bold text-slate-800 outline-none focus:border-blue-300 transition-all"
                         />
                     </div>
                 </div>
@@ -141,10 +148,10 @@ export default function InventoryDashboard() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-100">
-                                <th className="px-8 py-5 text-10 font-black text-slate-400 uppercase tracking-widest">Ingredient Name</th>
-                                <th className="px-8 py-5 text-10 font-black text-slate-400 uppercase tracking-widest text-center">Current Level</th>
-                                <th className="px-8 py-5 text-10 font-black text-slate-400 uppercase tracking-widest">Stock Status</th>
-                                <th className="px-8 py-5 text-10 font-black text-slate-400 uppercase tracking-widest">Last Movement</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ingredient Name</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Current Level</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Stock Status</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Movement</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -154,12 +161,12 @@ export default function InventoryDashboard() {
                                     <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                                         <td className="px-8 py-6">
                                             <p className="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</p>
-                                            <p className="text-10 font-bold text-slate-400 uppercase tracking-wider">{item.id}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.id}</p>
                                         </td>
                                         <td className="px-8 py-6 text-center">
-                                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl font-black text-slate-900">
+                                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg font-black text-slate-900">
                                                 {item.currentStock.toLocaleString()}
-                                                <span className="text-10 text-slate-500 uppercase">{item.unit}</span>
+                                                <span className="text-[10px] text-slate-500 uppercase">{item.unit}</span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
@@ -172,7 +179,7 @@ export default function InventoryDashboard() {
                                             <p className="text-sm font-bold text-slate-600">
                                                 {item.lastUpdated ? new Date(item.lastUpdated).toLocaleDateString() : 'No recorded activity'}
                                             </p>
-                                            <p className="text-10 font-bold text-slate-400 uppercase">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase">
                                                 {item.lastUpdated ? new Date(item.lastUpdated).toLocaleTimeString() : '-'}
                                             </p>
                                         </td>

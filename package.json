@@ -12,7 +12,8 @@
     "prisma:migrate": "prisma migrate dev",
     "tests": "vitest",
     "coverage": "vitest run --coverage",
-    "sanity": "tsx tests/sanity-check.ts"
+    "sanity": "tsx tests/sanity-check.ts",
+    "db:seed": "npx prisma db seed"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

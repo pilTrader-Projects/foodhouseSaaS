@@ -1,24 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   ChefHat, 
   PlayCircle, 
   CheckCircle2,
   Tally4,
-  RefreshCw,
-  LayoutDashboard
+  LayoutDashboard,
+  Loader2
 } from 'lucide-react';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useUser } from '@/context/user-context';
+import { useApi } from '@/hooks/use-api';
 import { Badge, Button, Card } from '@/components/ui';
 import { Modal } from '@/components/ui/modal';
-import { useToast } from '@/components/ui/toast';
 
 export default function KitchenPage() {
-  const { branchId, loading: authLoading } = usePermissions();
-  const { toast } = useToast();
+  const { user, loading: authLoading } = useUser();
+  const { request, loading: apiLoading, error } = useApi();
   const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   // Production Entry State
@@ -28,133 +28,102 @@ export default function KitchenPage() {
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
   const [productionLoading, setProductionLoading] = useState(false);
 
-  const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
-
-  const fetchOrders = async () => {
-    if (!branchId) return;
+  const fetchOrders = useCallback(async () => {
+    if (!user?.branchId) return;
     try {
-      const res = await fetch('/api/kitchen/orders', {
-        headers: { 
-          'x-tenant-id': tenantId,
-          'x-branch-id': branchId
-        }
-      });
-      const data = await res.json();
+      const data = await request(`/api/kitchen/orders?branchId=${user.branchId}`);
       setOrders(data.orders || []);
     } catch (e) {
       console.error("KDS Fetch Error:", e);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
     }
-  };
+  }, [user?.branchId, request]);
 
-  const fetchProductionProducts = async () => {
-    if (!branchId) return;
+  const fetchProductionProducts = useCallback(async () => {
+    if (!user?.branchId) return;
     try {
-        const res = await fetch('/api/products', {
-            headers: { 
-                'x-tenant-id': tenantId,
-                'x-branch-id': branchId
-            }
-        });
-        const data = await res.json();
+        const data = await request(`/api/products?branchId=${user.branchId}`);
         if (Array.isArray(data)) {
             setAvailableProducts(data.filter((p: any) => p.deductionModel === 'ON_PRODUCTION'));
         }
     } catch (e) {
-        toast("Failed to load production list", "error");
+        console.error("Failed to load production list", e);
     }
-  };
+  }, [user?.branchId, request]);
 
   useEffect(() => {
-    if (authLoading) return;
-    fetchOrders();
-    fetchProductionProducts();
-    const interval = setInterval(fetchOrders, 5000);
-    return () => clearInterval(interval);
-  }, [branchId, authLoading]);
+    if (user?.branchId) {
+        fetchOrders();
+        fetchProductionProducts();
+        const interval = setInterval(fetchOrders, 5000);
+        return () => clearInterval(interval);
+    }
+  }, [user?.branchId, fetchOrders, fetchProductionProducts]);
 
   const handleRecordProduction = async () => {
-    if (!prodProductId || !branchId) return;
+    if (!prodProductId || !user?.branchId) return;
     setProductionLoading(true);
     try {
-        const res = await fetch('/api/kitchen/production', {
+        await request('/api/kitchen/production', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'x-tenant-id': tenantId,
-                'x-branch-id': branchId 
-            },
+            headers: { 'x-branch-id': user.branchId },
             body: JSON.stringify({ productId: prodProductId, quantity: prodQty }),
         });
 
-        if (res.ok) {
-            setShowProductionModal(false);
-            const product = availableProducts.find(p => p.id === prodProductId);
-            const totalYield = prodQty * (product?.batchSize || 1);
-            toast(`Logged ${prodQty} batch(es). Yield: ${totalYield} units.`, "success");
-            setProdQty(1);
-            fetchOrders();
-        } else {
-            const err = await res.json();
-            toast(err.error, "error");
-        }
+        setShowProductionModal(false);
+        setProdQty(1);
+        fetchOrders();
+        alert("Production Logged Successfully");
     } catch (e) {
-        toast("Connection error", "error");
+        console.error("Connection error", e);
     } finally {
         setProductionLoading(false);
     }
   };
 
   const updateStatus = async (orderId: string, status: string) => {
+    if (!user?.branchId) return;
     setUpdatingId(orderId);
     try {
-      const res = await fetch('/api/kitchen/orders', {
+      await request('/api/kitchen/orders', {
         method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-tenant-id': tenantId,
-          'x-branch-id': branchId!
-        },
+        headers: { 'x-branch-id': user.branchId },
         body: JSON.stringify({ orderId, status }),
       });
-
-      if (res.ok) {
-        toast(`Order updated to ${status}`, "info");
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
-      }
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
     } catch (e) {
-      toast("Update failed", "error");
+      console.error("Update failed", e);
     } finally {
       setUpdatingId(null);
     }
   };
 
-  if (loading && !orders.length) {
+  if (authLoading || (initialLoading && !orders.length)) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center text-slate-400">
-        <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-blue-600 animate-spin mb-4" />
-        <p className="font-black tracking-widest uppercase text-xs">Syncing Kitchen...</p>
+      <div className="h-[60vh] flex-col flex-center text-slate-400">
+        <Loader2 className="w-12 h-12 rounded-full animate-spin mb-4 text-blue-600" />
+        <p className="font-black tracking-widest uppercase text-xs text-slate-900">Syncing Kitchen...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center bg-white p-8 rounded-4xl border-2 border-slate-100 shadow-sm">
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             <LayoutDashboard className="w-10 h-10 text-blue-600" />
             Kitchen Display
           </h1>
-          <p className="text-10 font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Order & Production Control</p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Order & Production Control</p>
         </div>
         
         <div className="flex gap-4">
           <Button onClick={() => setShowProductionModal(true)} icon={PlayCircle}>Produce Batch</Button>
-          <div className="bg-slate-900 px-6 py-3 rounded-2xl flex items-center gap-4 text-white">
+          <div className="bg-slate-900 px-6 py-3 rounded-md flex items-center gap-4 text-white">
             <div className="text-right">
-              <p className="text-10 font-black text-slate-500 uppercase tracking-widest">Active</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active</p>
               <p className="text-xl font-black">{orders.length}</p>
             </div>
             <Tally4 className="w-5 h-5 text-slate-400" />
@@ -162,15 +131,19 @@ export default function KitchenPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md-grid-cols-3 gap-6">
+      {error && (
+        <div className="p-4 bg-rose-50 text-rose-600 text-xs font-black uppercase tracking-widest rounded-sm border border-rose-100">
+            Error: {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {orders.map((order) => (
-          <Card key={order.id} className="relative group overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100 group-hover:bg-blue-600 transition-colors" style={{ height: '6px', position: 'absolute', top: 0, left: 0, right: 0 }} />
-            
-            <div className="flex justify-between items-start mb-6" style={{ marginTop: '0.5rem' }}>
+          <Card key={order.id} className="relative group overflow-hidden p-6">
+            <div className="flex justify-between items-start mb-6">
               <div>
                 <h3 className="text-lg font-black text-slate-900 leading-none">#{order.id.slice(-4).toUpperCase()}</h3>
-                <p className="text-10 font-black text-slate-400 mt-1 uppercase tracking-widest">{order.user?.name || 'POS SESSION'}</p>
+                <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">{order.user?.name || 'POS SESSION'}</p>
               </div>
               <Badge variant={order.status === 'READY' ? 'success' : order.status === 'PREPARING' ? 'info' : 'default'} size="xs">
                 {order.status}
@@ -179,9 +152,9 @@ export default function KitchenPage() {
 
             <div className="space-y-3 mb-8">
               {order.items.map((item: any) => (
-                <div key={item.id} className="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+                <div key={item.id} className="flex justify-between items-center bg-slate-50 p-3 rounded-lg">
                   <span className="font-black text-slate-800 text-sm">{item.product.name}</span>
-                  <span className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black text-xs text-slate-900 shadow-sm">{item.quantity}</span>
+                  <span className="w-8 h-8 rounded-md bg-white flex items-center justify-center font-black text-xs text-slate-900 shadow-sm">{item.quantity}</span>
                 </div>
               ))}
             </div>
@@ -199,6 +172,11 @@ export default function KitchenPage() {
             </div>
           </Card>
         ))}
+        {orders.length === 0 && !initialLoading && (
+            <div className="col-span-full p-20 text-center text-slate-400 text-xs font-black uppercase tracking-widest opacity-50">
+                No active orders in queue.
+            </div>
+        )}
       </div>
 
       <Modal 
@@ -208,8 +186,8 @@ export default function KitchenPage() {
         subtitle="Log batch cooking for standardized tracking"
       >
         {!availableProducts.length ? (
-          <div className="text-center p-8 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200" style={{ padding: '3rem' }}>
-            <p className="font-black text-slate-400">No batch products found.</p>
+          <div className="text-center p-12 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
+            <p className="font-black text-slate-400 uppercase tracking-widest text-xs">No batch products found.</p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -218,26 +196,20 @@ export default function KitchenPage() {
                 <button 
                   key={p.id}
                   onClick={() => setProdProductId(p.id)}
-                  className="p-4 rounded-2xl border-2 text-left transition-all"
-                  style={{ 
-                    backgroundColor: prodProductId === p.id ? '#eff6ff' : 'white', 
-                    borderColor: prodProductId === p.id ? '#2563eb' : '#f1f5f9',
-                    color: prodProductId === p.id ? '#2563eb' : '#94a3b8',
-                    cursor: 'pointer'
-                  }}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${prodProductId === p.id ? 'bg-blue-50 border-blue-600' : 'bg-white border-slate-100'}`}
                 >
                   <p className="font-black text-slate-800 text-sm">{p.name}</p>
-                  <p className="text-9 font-black text-slate-400 uppercase mt-1">Yield: {p.batchSize} / BATCH</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase mt-1">Yield: {p.batchSize} / BATCH</p>
                 </button>
               ))}
             </div>
 
             <div className="text-center">
-              <p className="text-10 font-black text-slate-400 uppercase tracking-widest mb-4">Number of Batches</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Number of Batches</p>
               <div className="flex items-center justify-center gap-8">
-                <button onClick={() => setProdQty(q => Math.max(1, q - 1))} className="bg-slate-100 flex items-center justify-center font-black" style={{ width: '3.5rem', height: '3.5rem', borderRadius: '1rem', border: 'none', fontSize: '1.25rem' }}>-</button>
+                <button onClick={() => setProdQty(q => Math.max(1, q - 1))} className="bg-slate-100 w-14 h-14 rounded-xl font-black text-xl hover:bg-slate-200 transition-all">-</button>
                 <span className="text-6xl font-black text-slate-900">{prodQty}</span>
-                <button onClick={() => setProdQty(q => q + 1)} className="bg-slate-900 text-white flex items-center justify-center font-black" style={{ width: '3.5rem', height: '3.5rem', borderRadius: '1rem', border: 'none', fontSize: '1.25rem' }}>+</button>
+                <button onClick={() => setProdQty(q => q + 1)} className="bg-slate-900 text-white w-14 h-14 rounded-xl font-black text-xl hover:bg-slate-800 transition-all">+</button>
               </div>
               {prodProductId && (
                 <p className="text-xs font-black text-blue-600 uppercase mt-6 tracking-widest">
@@ -248,10 +220,10 @@ export default function KitchenPage() {
 
             <Button 
               variant="dark"
-              style={{ width: '100%', height: '5rem' }} 
+              className="w-full h-20"
               onClick={handleRecordProduction} 
               loading={productionLoading} 
-              disabled={!prodProductId} 
+              disabled={!prodProductId || productionLoading} 
               icon={PlayCircle}
             >
               Confirm Production
