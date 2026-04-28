@@ -185,14 +185,41 @@ export default function PosTerminalPage() {
             {/* Quantity Modal */}
             <Modal isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} title="Select Quantity" subtitle={selectedProduct?.name}>
                 <div className="text-center py-6">
-                    <div className="flex items-center justify-center gap-8 mb-8">
-                        <button onClick={() => setQuantityInput(q => Math.max(1, q - 1))} className="bg-slate-100 w-16 h-16 rounded-xl flex-center text-2xl font-black transition-all hover:bg-slate-200">-</button>
-                        <span className="text-6xl font-black text-slate-900">{quantityInput}</span>
-                        <button onClick={() => setQuantityInput(q => q + 1)} className="bg-slate-900 text-white w-16 h-16 rounded-xl flex-center text-2xl font-black transition-all hover:bg-slate-800">+</button>
+                    <div className="flex items-center justify-center gap-6 mb-10">
+                        <button 
+                            onClick={() => setQuantityInput(q => Math.max(1, q - 1))} 
+                            className="bg-slate-100 w-20 h-20 rounded-3xl flex-center text-3xl font-black transition-all hover:bg-slate-200 active:scale-95"
+                        >
+                            -
+                        </button>
+                        
+                        <input 
+                            type="number"
+                            autoFocus
+                            value={quantityInput}
+                            onFocus={(e) => e.target.select()}
+                            onChange={(e) => setQuantityInput(Math.max(1, parseInt(e.target.value) || 1))}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') confirmAddToCart();
+                            }}
+                            className="w-32 text-center text-6xl font-black text-slate-900 bg-transparent border-none outline-none focus:ring-0"
+                        />
+
+                        <button 
+                            onClick={() => setQuantityInput(q => q + 1)} 
+                            className="bg-slate-900 text-white w-20 h-20 rounded-3xl flex-center text-3xl font-black transition-all hover:bg-slate-800 active:scale-95"
+                        >
+                            +
+                        </button>
                     </div>
-                    <Button variant="primary" className="w-full h-16" onClick={confirmAddToCart}>
-                        Add to Cart • ₱{(selectedProduct?.price * quantityInput).toLocaleString()}
+                    
+                    <Button variant="primary" className="w-full h-20 text-xl" onClick={confirmAddToCart}>
+                        Add to Cart • ₱{(selectedProduct?.price * (quantityInput || 0)).toLocaleString()}
                     </Button>
+                    
+                    <p className="mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest opacity-50">
+                        Press Enter to Confirm
+                    </p>
                 </div>
             </Modal>
 
