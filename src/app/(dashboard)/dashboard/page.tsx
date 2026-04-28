@@ -30,13 +30,12 @@ export default function PremiumDashboard() {
     if (authLoading) return;
 
     if (user) {
-        const role = user.role.name;
-        if (role === 'Chef') {
-            router.push('/kitchen');
-            return;
-        }
-        if (role === 'Staff') {
-            router.push('/pos');
+        const hasAccess = permissions.includes('access:dashboard') || permissions.includes('tenant:admin');
+        
+        if (!hasAccess) {
+            const role = user.role.name;
+            if (role === 'Chef') router.push('/kitchen');
+            else router.push('/pos');
             return;
         }
     }
