@@ -14,6 +14,7 @@ import {
 import { RBACGate } from '@/components/auth/rbac-gate';
 
 import { useUser } from '@/context/user-context';
+import { useApi } from '@/hooks/use-api';
 
 export default function PremiumDashboard() {
   const router = useRouter();
@@ -23,8 +24,7 @@ export default function PremiumDashboard() {
     performance: [] as any[],
     stockAlerts: [] as any[],
   });
-  const [loading, setLoading] = useState(true);
-  const [tenant, setTenant] = useState<any>(null);
+  const { request, loading: apiLoading, error: apiError } = useApi();
 
   useEffect(() => {
     if (authLoading) return;
@@ -42,33 +42,54 @@ export default function PremiumDashboard() {
     }
 
     async function fetchDashboardData() {
-      const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') || 'tenant-demo' : 'tenant-demo';
       try {
-        const [salesRes, perfRes, stockRes] = await Promise.all([
-          fetch('/api/analytics/global-sales', { headers: { 'x-tenant-id': tenantId } }),
-          fetch('/api/analytics/branch-performance', { headers: { 'x-tenant-id': tenantId } }),
-          fetch('/api/analytics/critical-stock', { headers: { 'x-tenant-id': tenantId } }),
+        const results = await Promise.allSettled([
+          request('/api/analytics/global-sales'),
+          request('/api/analytics/branch-performance'),
+          request('/api/analytics/critical-stock'),
         ]);
 
-        const [salesData, perfData, stockData] = await Promise.all([
-          salesRes.json(),
-          perfRes.json(),
-          stockRes.json(),
-        ]);
+        const [salesData, perfData, stockData] = results.map(r => 
+          r.status === 'fulfilled' ? r.value : null
+        );
 
         setData({
-          sales: salesData.totalSales || 0,
-          performance: perfData.performance || [],
-          stockAlerts: stockData.criticalStock || [],
+          sales: salesData?.totalSales || 0,
+          performance: perfData?.performance || [],
+          stockAlerts: stockData?.criticalStock || [],
         });
       } catch (e) {
-        console.error("Failed to fetch analytics", e);
-      } finally {
-        setLoading(false);
+        // Error is handled by apiError from useApi
       }
     }
     fetchDashboardData();
-  }, [authLoading, user, router]);
+  }, [authLoading, user, router, request]);
+
+  if (apiError) {
+    return (
+      <RBACGate permission="access:dashboard" redirectOnFail="/pos">
+        <div className="min-h-[60vh] flex-center">
+            <div className="card-minimal p-12 max-w-xl w-full text-center space-y-6 animate-fade-in border-rose-100 bg-rose-50/30">
+                <div className="w-20 h-20 bg-rose-100 rounded-full flex-center mx-auto">
+                    <AlertTriangle className="w-10 h-10 text-rose-600" />
+                </div>
+                <div className="space-y-2">
+                    <h2 className="text-2xl font-black text-main">Feature Restricted</h2>
+                    <p className="text-muted font-medium">{apiError}</p>
+                </div>
+                <div className="pt-4">
+                    <button 
+                        onClick={() => router.push('/settings/billing')}
+                        className="btn-minimal btn-accent px-8"
+                    >
+                        View Upgrade Options
+                    </button>
+                </div>
+            </div>
+        </div>
+      </RBACGate>
+    )
+  }
 
   return (
     <RBACGate permission="access:dashboard" redirectOnFail="/pos">
@@ -90,7 +111,7 @@ export default function PremiumDashboard() {
               <div>
                 <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Total Sales</h3>
                 <div className="text-3xl font-black text-main mt-1">
-                  {loading ? '---' : `₱${data.sales.toLocaleString()}`}
+                  {apiLoading ? '---' : `₱${data.sales.toLocaleString()}`}
                 </div>
               </div>
             </div>
@@ -100,7 +121,7 @@ export default function PremiumDashboard() {
                <div>
                   <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Active Branches</h3>
                   <div className="text-3xl font-black text-main mt-1">
-                    {loading ? '-' : data.performance.length}
+                    {apiLoading ? '-' : data.performance.length}
                   </div>
                </div>
             </div>
@@ -110,7 +131,7 @@ export default function PremiumDashboard() {
                <div>
                   <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Inventory Alerts</h3>
                   <div className={`text-3xl font-black mt-1 ${data.stockAlerts.length > 0 ? 'text-rose-600' : 'text-main'}`}>
-                    {loading ? '-' : data.stockAlerts.length}
+                    {apiLoading ? '-' : data.stockAlerts.length}
                   </div>
                </div>
             </div>

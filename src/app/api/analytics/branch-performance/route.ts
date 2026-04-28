@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { AnalyticsService } from '@/services/analytics-service'
-import { getApiContext, missingContextResponse } from '@/lib/api-context'
+import { getApiContext, missingContextResponse, serviceErrorResponse } from '@/lib/api-context'
 
 export async function GET(req: NextRequest) {
     const { tenantId } = await getApiContext(req)
@@ -12,6 +12,6 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({ performance })
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        return serviceErrorResponse(error)
     }
 }

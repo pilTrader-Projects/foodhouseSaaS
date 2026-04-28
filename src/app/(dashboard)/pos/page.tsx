@@ -12,14 +12,15 @@ import {
   Package,
   Loader2
 } from 'lucide-react';
-import { Badge, Button, Card } from '@/components/ui';
-import { Modal } from '@/components/ui/modal';
+import { Badge, Button, Card, Modal } from '@/components/ui';
 
 export default function PosTerminalPage() {
     const { user, permissions, loading: authLoading } = useUser();
     const { request, loading: apiLoading, error: apiError } = useApi();
     const [cart, setCart] = useState<any[]>([]);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [lastOrder, setLastOrder] = useState<any>(null);
     const [products, setProducts] = useState<any[]>([]);
     
     // Quantity Modal State
@@ -33,18 +34,21 @@ export default function PosTerminalPage() {
     const [change, setChange] = useState<number>(0);
 
     const fetchProducts = useCallback(async () => {
-        if (!user?.branchId) return;
+        if (!user?.tenantId) return;
         try {
-            const data = await request(`/api/products?branchId=${user.branchId}`);
+            const url = user.branchId
+                ? `/api/products?branchId=${user.branchId}`
+                : `/api/products`;
+            const data = await request(url);
             if (Array.isArray(data)) setProducts(data);
         } catch (e) {
             console.error("Failed to load products", e);
         }
-    }, [user?.branchId, request]);
+    }, [user?.tenantId, user?.branchId, request]);
 
     useEffect(() => {
-        if (user?.branchId) fetchProducts();
-    }, [user?.branchId, fetchProducts]);
+        if (user?.tenantId) fetchProducts();
+    }, [user?.tenantId, fetchProducts]);
 
     const confirmAddToCart = () => {
         if (selectedProduct && quantityInput > 0) {
@@ -71,10 +75,10 @@ export default function PosTerminalPage() {
     }, [amountTendered, total]);
 
     const handleCheckout = async () => {
-        if (!user?.branchId) return;
+        if (!user?.tenantId) return;
         setIsCheckingOut(true);
         try {
-            await request('/api/orders', {
+            const result = await request('/api/orders', {
                 method: 'POST',
                 headers: { 'x-branch-id': user.branchId },
                 body: JSON.stringify({
@@ -82,10 +86,11 @@ export default function PosTerminalPage() {
                 }),
             });
 
+            setLastOrder(result);
             setCart([]);
             setShowPaymentModal(false);
             setAmountTendered('');
-            alert("Order Successful!");
+            setShowSuccessModal(true);
         } catch (e) {
             console.error("Checkout failed", e);
         } finally {
@@ -103,20 +108,21 @@ export default function PosTerminalPage() {
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-            {/* Left: Product Selection */}
-            <div className="lg:col-span-2 space-y-6 overflow-y-auto">
-                <Card title="Product Menu" subtitle="Tap to add items to current order">
+        <div className="grid grid-cols-1 lg-grid-cols-3 gap-8 h-screen-pos overflow-hidden">
+            {/* Left: Product Selection (Independent Scroll) */}
+            <div className="lg-col-span-2 h-full overflow-y-auto pr-2 custom-scrollbar">
+                <Card title="Product Menu" subtitle="Tap to add items to current order" className="min-h-full">
                     {apiError && (
                         <div className="mb-4 text-xs font-black text-rose-600 uppercase tracking-widest p-4 bg-rose-50 rounded-sm">
                             {apiError}
                         </div>
                     )}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 md-grid-cols-3 gap-4">
                         {products.map(product => (
                             <div 
                                 key={product.id} 
                                 onClick={() => {
+                                    console.log("Product clicked:", product);
                                     setSelectedProduct(product);
                                     setQuantityInput(1);
                                 }}
@@ -131,15 +137,15 @@ export default function PosTerminalPage() {
                 </Card>
             </div>
 
-            {/* Right: Cart & Summary */}
-            <Card className="flex flex-col h-[calc(100vh-200px)]">
-                <div className="flex items-center gap-3 mb-6 border-b border-slate-50 pb-6">
+            {/* Right: Cart & Summary (Fixed Height, Internal Scroll) */}
+            <Card className="flex flex-col h-full overflow-hidden">
+                <div className="flex items-center gap-3 mb-6 border-b border-slate-50 pb-6 flex-shrink-0">
                     <ShoppingBag className="w-6 h-6 text-blue-600" />
                     <h3 className="text-xl font-black text-slate-900 uppercase">Cart</h3>
                     <Badge variant="dark" className="ml-auto">{cart.length}</Badge>
                 </div>
 
-                <div className="flex-1 overflow-y-auto space-y-3 mb-6">
+                <div className="flex-1 overflow-y-auto space-y-3 mb-6 pr-1 custom-scrollbar">
                     {cart.map(item => (
                         <div key={item.cartId} className="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
                             <div className="flex-1">
@@ -162,7 +168,7 @@ export default function PosTerminalPage() {
                     )}
                 </div>
 
-                <div className="border-t border-dashed border-slate-200 pt-6 mt-auto">
+                <div className="border-t border-dashed border-slate-200 pt-6 mt-auto flex-shrink-0">
                     <div className="flex justify-between items-center mb-6">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
                         <span className="text-3xl font-black text-slate-900">₱{total.toLocaleString()}</span>
@@ -182,14 +188,48 @@ export default function PosTerminalPage() {
             {/* Quantity Modal */}
             <Modal isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} title="Select Quantity" subtitle={selectedProduct?.name}>
                 <div className="text-center py-6">
-                    <div className="flex items-center justify-center gap-8 mb-8">
-                        <button onClick={() => setQuantityInput(q => Math.max(1, q - 1))} className="bg-slate-100 w-16 h-16 rounded-xl flex-center text-2xl font-black transition-all hover:bg-slate-200">-</button>
-                        <span className="text-6xl font-black text-slate-900">{quantityInput}</span>
-                        <button onClick={() => setQuantityInput(q => q + 1)} className="bg-slate-900 text-white w-16 h-16 rounded-xl flex-center text-2xl font-black transition-all hover:bg-slate-800">+</button>
+                    <div className="flex items-center justify-center gap-6 mb-10">
+                        <button 
+                            onClick={() => setQuantityInput(q => Math.max(1, q - 1))} 
+                            className="bg-slate-100 w-20 h-20 rounded-3xl flex-center text-3xl font-black transition-all hover:bg-slate-200 active:scale-95"
+                        >
+                            -
+                        </button>
+                        
+                        <input 
+                            type="number"
+                            autoFocus
+                            value={quantityInput}
+                            onFocus={(e) => e.target.select()}
+                            onChange={(e) => setQuantityInput(Math.max(1, parseInt(e.target.value) || 1))}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    confirmAddToCart();
+                                    setSelectedProduct(null); // Close modal on Enter
+                                }
+                            }}
+                            className="w-32 text-center text-6xl font-black text-slate-900 bg-transparent border-none outline-none focus:ring-0"
+                        />
+
+                        <button 
+                            onClick={() => setQuantityInput(q => q + 1)} 
+                            className="bg-slate-900 text-white w-20 h-20 rounded-3xl flex-center text-3xl font-black transition-all hover:bg-slate-800 active:scale-95"
+                        >
+                            +
+                        </button>
                     </div>
-                    <Button variant="primary" className="w-full h-16" onClick={confirmAddToCart}>
-                        Add to Cart • ₱{(selectedProduct?.price * quantityInput).toLocaleString()}
+                    
+                    <Button variant="primary" className="w-full h-20 text-xl" onClick={() => {
+                        confirmAddToCart();
+                        setSelectedProduct(null);
+                    }}>
+                        Add to Cart • ₱{(selectedProduct?.price * (quantityInput || 0)).toLocaleString()}
                     </Button>
+
+                    
+                    <p className="mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest opacity-50">
+                        Press Enter to Confirm
+                    </p>
                 </div>
             </Modal>
 
@@ -239,6 +279,35 @@ export default function PosTerminalPage() {
                         loading={isCheckingOut || apiLoading} icon={CheckCircle2}
                     >
                         Confirm Transaction
+                    </Button>
+                </div>
+            </Modal>
+
+            {/* Success Modal */}
+            <Modal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} title="Transaction Successful" subtitle="Order has been recorded and stock updated.">
+                <div className="text-center py-8">
+                    <div className="w-24 h-24 bg-green-50 rounded-full flex-center mx-auto mb-8">
+                        <CheckCircle2 className="w-12 h-12 text-green-600" />
+                    </div>
+                    
+                    <div className="space-y-2 mb-10">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order ID</p>
+                        <p className="text-xl font-black text-slate-900">#{lastOrder?.id?.slice(-8).toUpperCase()}</p>
+                    </div>
+
+                    <div className="bg-slate-50 p-6 rounded-3xl grid grid-cols-2 gap-4 mb-10">
+                        <div className="text-left">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
+                            <p className="text-xl font-black text-slate-900">₱{lastOrder?.totalAmount?.toLocaleString()}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Branch</p>
+                            <p className="text-xl font-black text-slate-900 uppercase">{user?.branch?.name || 'Local'}</p>
+                        </div>
+                    </div>
+
+                    <Button variant="primary" className="w-full h-20 text-xl" onClick={() => setShowSuccessModal(false)}>
+                        Start New Order
                     </Button>
                 </div>
             </Modal>

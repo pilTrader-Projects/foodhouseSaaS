@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ROLES } from '@/lib/constants';
 
@@ -20,12 +20,25 @@ export function InviteForm({ roles, branches, tenantId, onSuccess }: InviteFormP
     name: '',
     email: '',
     roleName: roles[0]?.name || ROLES.STAFF,
-    branchId: branches[0]?.id || '',
+    branchId: '',
   });
+
+  // Pre-select the first branch once the async list arrives from the parent
+  useEffect(() => {
+    if (branches.length > 0 && !formData.branchId) {
+      setFormData(prev => ({ ...prev, branchId: branches[0].id }));
+    }
+  }, [branches]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.branchId) {
+      alert('Please select a branch to assign this member to.');
+      return;
+    }
     setLoading(true);
+
+
     try {
       const res = await fetch('/api/team', {
         method: 'POST',
@@ -88,6 +101,7 @@ export function InviteForm({ roles, branches, tenantId, onSuccess }: InviteFormP
             onChange={e => setFormData(prev => ({ ...prev, branchId: e.target.value }))}
             className="input-minimal"
           >
+            <option value="" disabled>— Assign to Branch —</option>
             {branches.map(b => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
