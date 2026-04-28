@@ -43,7 +43,7 @@ export function useApi() {
         } finally {
             setLoading(false);
         }
-    }, [error]);
+    }, []);
 
     return { request, loading, error, setError };
 }
