@@ -105,16 +105,16 @@ export default function PosTerminalPage() {
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-            {/* Left: Product Selection */}
-            <div className="lg:col-span-2 space-y-6 overflow-y-auto">
-                <Card title="Product Menu" subtitle="Tap to add items to current order">
+        <div className="grid grid-cols-1 lg-grid-cols-3 gap-8 h-screen-pos overflow-hidden">
+            {/* Left: Product Selection (Independent Scroll) */}
+            <div className="lg-col-span-2 h-full overflow-y-auto pr-2 custom-scrollbar">
+                <Card title="Product Menu" subtitle="Tap to add items to current order" className="min-h-full">
                     {apiError && (
                         <div className="mb-4 text-xs font-black text-rose-600 uppercase tracking-widest p-4 bg-rose-50 rounded-sm">
                             {apiError}
                         </div>
                     )}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 md-grid-cols-3 gap-4">
                         {products.map(product => (
                             <div 
                                 key={product.id} 
@@ -134,15 +134,15 @@ export default function PosTerminalPage() {
                 </Card>
             </div>
 
-            {/* Right: Cart & Summary */}
-            <Card className="flex flex-col h-[calc(100vh-200px)]">
-                <div className="flex items-center gap-3 mb-6 border-b border-slate-50 pb-6">
+            {/* Right: Cart & Summary (Fixed Height, Internal Scroll) */}
+            <Card className="flex flex-col h-full overflow-hidden">
+                <div className="flex items-center gap-3 mb-6 border-b border-slate-50 pb-6 flex-shrink-0">
                     <ShoppingBag className="w-6 h-6 text-blue-600" />
                     <h3 className="text-xl font-black text-slate-900 uppercase">Cart</h3>
                     <Badge variant="dark" className="ml-auto">{cart.length}</Badge>
                 </div>
 
-                <div className="flex-1 overflow-y-auto space-y-3 mb-6">
+                <div className="flex-1 overflow-y-auto space-y-3 mb-6 pr-1 custom-scrollbar">
                     {cart.map(item => (
                         <div key={item.cartId} className="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
                             <div className="flex-1">
@@ -165,7 +165,7 @@ export default function PosTerminalPage() {
                     )}
                 </div>
 
-                <div className="border-t border-dashed border-slate-200 pt-6 mt-auto">
+                <div className="border-t border-dashed border-slate-200 pt-6 mt-auto flex-shrink-0">
                     <div className="flex justify-between items-center mb-6">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
                         <span className="text-3xl font-black text-slate-900">₱{total.toLocaleString()}</span>
@@ -200,7 +200,10 @@ export default function PosTerminalPage() {
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => setQuantityInput(Math.max(1, parseInt(e.target.value) || 1))}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter') confirmAddToCart();
+                                if (e.key === 'Enter') {
+                                    confirmAddToCart();
+                                    setSelectedProduct(null); // Close modal on Enter
+                                }
                             }}
                             className="w-32 text-center text-6xl font-black text-slate-900 bg-transparent border-none outline-none focus:ring-0"
                         />
@@ -213,9 +216,13 @@ export default function PosTerminalPage() {
                         </button>
                     </div>
                     
-                    <Button variant="primary" className="w-full h-20 text-xl" onClick={confirmAddToCart}>
+                    <Button variant="primary" className="w-full h-20 text-xl" onClick={() => {
+                        confirmAddToCart();
+                        setSelectedProduct(null);
+                    }}>
                         Add to Cart • ₱{(selectedProduct?.price * (quantityInput || 0)).toLocaleString()}
                     </Button>
+
                     
                     <p className="mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest opacity-50">
                         Press Enter to Confirm
