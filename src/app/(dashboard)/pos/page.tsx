@@ -19,6 +19,8 @@ export default function PosTerminalPage() {
     const { request, loading: apiLoading, error: apiError } = useApi();
     const [cart, setCart] = useState<any[]>([]);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [lastOrder, setLastOrder] = useState<any>(null);
     const [products, setProducts] = useState<any[]>([]);
     
     // Quantity Modal State
@@ -76,7 +78,7 @@ export default function PosTerminalPage() {
         if (!user?.tenantId) return;
         setIsCheckingOut(true);
         try {
-            await request('/api/orders', {
+            const result = await request('/api/orders', {
                 method: 'POST',
                 headers: { 'x-branch-id': user.branchId },
                 body: JSON.stringify({
@@ -84,10 +86,11 @@ export default function PosTerminalPage() {
                 }),
             });
 
+            setLastOrder(result);
             setCart([]);
             setShowPaymentModal(false);
             setAmountTendered('');
-            alert("Order Successful!");
+            setShowSuccessModal(true);
         } catch (e) {
             console.error("Checkout failed", e);
         } finally {
@@ -276,6 +279,35 @@ export default function PosTerminalPage() {
                         loading={isCheckingOut || apiLoading} icon={CheckCircle2}
                     >
                         Confirm Transaction
+                    </Button>
+                </div>
+            </Modal>
+
+            {/* Success Modal */}
+            <Modal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} title="Transaction Successful" subtitle="Order has been recorded and stock updated.">
+                <div className="text-center py-8">
+                    <div className="w-24 h-24 bg-green-50 rounded-full flex-center mx-auto mb-8">
+                        <CheckCircle2 className="w-12 h-12 text-green-600" />
+                    </div>
+                    
+                    <div className="space-y-2 mb-10">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order ID</p>
+                        <p className="text-xl font-black text-slate-900">#{lastOrder?.id?.slice(-8).toUpperCase()}</p>
+                    </div>
+
+                    <div className="bg-slate-50 p-6 rounded-3xl grid grid-cols-2 gap-4 mb-10">
+                        <div className="text-left">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
+                            <p className="text-xl font-black text-slate-900">₱{lastOrder?.totalAmount?.toLocaleString()}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Branch</p>
+                            <p className="text-xl font-black text-slate-900 uppercase">{user?.branch?.name || 'Local'}</p>
+                        </div>
+                    </div>
+
+                    <Button variant="primary" className="w-full h-20 text-xl" onClick={() => setShowSuccessModal(false)}>
+                        Start New Order
                     </Button>
                 </div>
             </Modal>
