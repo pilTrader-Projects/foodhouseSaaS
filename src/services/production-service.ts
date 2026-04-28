@@ -1,16 +1,19 @@
 import { BaseService } from './base-service'
 import prisma from '@/lib/prisma'
 import { DeductionService } from './deduction-service'
+import { InventoryService } from '@/modules/inventory/services/inventory-service'
 
 /**
  * ProductionService handles batch cooking and prepared stock management.
  */
 export class ProductionService extends BaseService {
     private deductionService: DeductionService
+    private inventoryService: InventoryService
 
     constructor(tenantId: string, branchId: string) {
         super(tenantId, branchId)
         this.deductionService = new DeductionService(tenantId, branchId)
+        this.inventoryService = new InventoryService(tenantId, branchId)
     }
 
     /**
@@ -28,10 +31,13 @@ export class ProductionService extends BaseService {
 
             const yieldQuantity = numBatches * (product.batchSize || 1)
 
-            // 1. Deduct Ingredients (recursive components only, skip self-deduction)
+            // 1. Deduct Raw Ingredients (The Fix)
+            await this.inventoryService.consumeIngredients(productId, numBatches, tx)
+
+            // 2. Deduct Sub-Product Ingredients (recursive components only)
             await this.deductionService.deductRecipeComponents(product, numBatches, tx)
 
-            // 2. Increase Prepared Stock
+            // 3. Increase Prepared Stock
             await tx.preparedStock.upsert({
                 where: {
                     branchId_productId: {
@@ -49,7 +55,7 @@ export class ProductionService extends BaseService {
                 }
             })
 
-            // 3. Log Production
+            // 4. Log Production
             return tx.productionRecord.create({
                 data: {
                     branchId: this.branchId!,
