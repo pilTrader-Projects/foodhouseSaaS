@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { ThemeProvider } from '@/context/theme-context'
 import { UserProvider } from '@/context/user-context'
 import { ToastProvider } from '@/components/ui/toast'

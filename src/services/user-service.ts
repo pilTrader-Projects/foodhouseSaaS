@@ -57,11 +57,14 @@ export class UserService extends BaseService {
     }
 
     /**
-     * Fetches all employees for the tenant.
+     * Fetches all employees for the tenant, optionally filtered by branch.
      */
-    async getTeam() {
+    async getTeam(branchId?: string) {
         return prisma.user.findMany({
-            where: { tenantId: this.tenantId },
+            where: { 
+                tenantId: this.tenantId,
+                ...(branchId ? { branchId } : {})
+            },
             include: { role: true, branch: true },
             orderBy: { createdAt: 'desc' }
         })

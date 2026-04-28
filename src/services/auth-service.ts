@@ -50,17 +50,21 @@ export class AuthService {
     async switchBranch(userId: string, branchId: string): Promise<Session | null> {
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            include: { role: true },
+            include: { 
+                role: {
+                    include: { permissions: true }
+                } 
+            },
         })
 
-        if (!user || user.tenantId !== user.tenantId) return null // Safety
+        if (!user) return null
 
-        // In a real app, verify user is assigned to this branch
         return {
             userId: user.id,
             tenantId: user.tenantId,
             branchId,
             role: user.role.name,
+            permissions: user.role.permissions.map(p => p.name)
         }
     }
 

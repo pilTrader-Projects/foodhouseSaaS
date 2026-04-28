@@ -41,6 +41,7 @@ export const Button = ({
   icon: Icon,
   className = '',
   size = 'md',
+  type = 'button',
   style
 }: { 
   children: React.ReactNode, 
@@ -51,6 +52,7 @@ export const Button = ({
   icon?: any,
   className?: string,
   size?: 'md' | 'xs',
+  type?: 'button' | 'submit' | 'reset',
   style?: React.CSSProperties
 }) => {
   const variants = {
@@ -67,6 +69,7 @@ export const Button = ({
 
   return (
     <button 
+      type={type}
       onClick={onClick}
       disabled={disabled || loading}
       className={`ui-btn ${variants[variant]} ${heightClass} ${className}`}
