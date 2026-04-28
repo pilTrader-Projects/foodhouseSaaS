@@ -60,7 +60,7 @@ async function runIntegrityTests() {
 
         // 3. POS-lite Creation
         const posService = new PosService('tenant-1', 'branch-1');
-        const order = await posService.createOrder([{ productId: 'prod-1', quantity: 1, price: 10 }]);
+        const order = await posService.createOrder('user-1', [{ productId: 'prod-1', quantity: 1, price: 10 }]);
         assert.strictEqual(order.id, 'order-1', '❌ Order Creation Failed');
         console.log('✅ POS-lite Workflow Verified');
 
