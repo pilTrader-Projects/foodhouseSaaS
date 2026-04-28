@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ROLES } from '@/lib/constants';
 
@@ -22,6 +22,13 @@ export function InviteForm({ roles, branches, tenantId, onSuccess }: InviteFormP
     roleName: roles[0]?.name || ROLES.STAFF,
     branchId: branches[0]?.id || '',
   });
+
+  // Backfill branchId once branches load asynchronously from the parent
+  useEffect(() => {
+    if (branches.length > 0 && !formData.branchId) {
+      setFormData(prev => ({ ...prev, branchId: branches[0].id }));
+    }
+  }, [branches]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
