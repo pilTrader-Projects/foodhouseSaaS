@@ -12,8 +12,7 @@ import {
   Package,
   Loader2
 } from 'lucide-react';
-import { Badge, Button, Card } from '@/components/ui';
-import { Modal } from '@/components/ui/modal';
+import { Badge, Button, Card, Modal } from '@/components/ui';
 
 export default function PosTerminalPage() {
     const { user, permissions, loading: authLoading } = useUser();
@@ -33,18 +32,21 @@ export default function PosTerminalPage() {
     const [change, setChange] = useState<number>(0);
 
     const fetchProducts = useCallback(async () => {
-        if (!user?.branchId) return;
+        if (!user?.tenantId) return;
         try {
-            const data = await request(`/api/products?branchId=${user.branchId}`);
+            const url = user.branchId
+                ? `/api/products?branchId=${user.branchId}`
+                : `/api/products`;
+            const data = await request(url);
             if (Array.isArray(data)) setProducts(data);
         } catch (e) {
             console.error("Failed to load products", e);
         }
-    }, [user?.branchId, request]);
+    }, [user?.tenantId, user?.branchId, request]);
 
     useEffect(() => {
-        if (user?.branchId) fetchProducts();
-    }, [user?.branchId, fetchProducts]);
+        if (user?.tenantId) fetchProducts();
+    }, [user?.tenantId, fetchProducts]);
 
     const confirmAddToCart = () => {
         if (selectedProduct && quantityInput > 0) {
@@ -71,7 +73,7 @@ export default function PosTerminalPage() {
     }, [amountTendered, total]);
 
     const handleCheckout = async () => {
-        if (!user?.branchId) return;
+        if (!user?.tenantId) return;
         setIsCheckingOut(true);
         try {
             await request('/api/orders', {
@@ -117,6 +119,7 @@ export default function PosTerminalPage() {
                             <div 
                                 key={product.id} 
                                 onClick={() => {
+                                    console.log("Product clicked:", product);
                                     setSelectedProduct(product);
                                     setQuantityInput(1);
                                 }}

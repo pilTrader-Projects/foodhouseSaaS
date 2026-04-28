@@ -5,7 +5,11 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 interface User {
   id: string;
   name: string;
+  email?: string;
+  tenantId?: string;
+  branchId?: string;
   role: {
+    id: string;
     name: string;
     permissions: { name: string }[];
   };

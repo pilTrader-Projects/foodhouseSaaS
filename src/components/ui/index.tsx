@@ -1,7 +1,8 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
 import './ui.css';
+
+// Re-export components
+export { Modal } from './modal';
 
 /**
  * Badge Component
@@ -92,75 +93,5 @@ export const Card = ({ children, title, subtitle, className = '', style }: { chi
       )}
       {children}
     </div>
-  );
-};
-
-/**
- * Modal Component
- */
-export const Modal = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  subtitle, 
-  children 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  title?: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) => {
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div 
-          className="modal-overlay"
-          style={{ 
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0, 
-            backgroundColor: 'rgba(0, 0, 0, 0.4)', 
-            backdropFilter: 'blur(8px)', 
-            zIndex: 2000, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            padding: '2rem'
-          }}
-        >
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="modal-content"
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '2.5rem', 
-              padding: '3rem', 
-              width: '100%', 
-              maxWidth: '32rem', 
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' 
-            }}
-          >
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                {title && <h2 className="text-2xl font-black text-slate-900 tracking-tight">{title}</h2>}
-                {subtitle && <p className="text-10 font-bold text-slate-400 uppercase tracking-widest mt-1">{subtitle}</p>}
-              </div>
-              <button 
-                onClick={onClose} 
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0.5rem' }}
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            {children}
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
   );
 };
