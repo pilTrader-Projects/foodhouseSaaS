@@ -5,47 +5,38 @@ import prisma from '../src/lib/prisma'
 describe('GlobalAdminService', () => {
     let adminService: GlobalAdminService
 
+    const testTenantIdA = 'admin-test-t1'
+    const testTenantIdB = 'admin-test-t2'
+
     beforeEach(async () => {
         adminService = new GlobalAdminService()
-        // Clear related data first to avoid FK constraints
-        const tenantWhere = { isSystem: false }
-        const branchWhere = { branch: { tenant: tenantWhere } }
         
-        await prisma.orderItem.deleteMany({ where: { order: { tenant: tenantWhere } } })
-        await prisma.order.deleteMany({ where: { tenant: tenantWhere } })
-        await prisma.stock.deleteMany({ where: branchWhere })
-        await prisma.branchProduct.deleteMany({ where: branchWhere })
-        await prisma.productionRecord.deleteMany({ where: branchWhere })
-        await prisma.purchaseRecord.deleteMany({ where: branchWhere })
-        await prisma.preparedStock.deleteMany({ where: branchWhere })
-        await prisma.user.deleteMany({ where: { tenant: tenantWhere } })
-        await prisma.branch.deleteMany({ where: { tenant: tenantWhere } })
-        await prisma.recipeItem.deleteMany({ where: { product: { tenant: tenantWhere } } })
-        await prisma.product.deleteMany({ where: { tenant: tenantWhere } })
-        await prisma.ingredient.deleteMany({ where: { tenant: tenantWhere } })
-        await prisma.role.deleteMany({ where: { tenant: tenantWhere } })
-        await prisma.supplier.deleteMany({ where: { tenant: tenantWhere } })
-        await prisma.tenant.deleteMany({ where: tenantWhere })
+        // Targeted cleanup of ONLY our test tenants
+        const testTenantIds = [testTenantIdA, testTenantIdB, 'admin-test-upgrade', 'admin-test-status', 'admin-test-stats']
+        
+        await prisma.branch.deleteMany({ where: { tenantId: { in: testTenantIds } } })
+        await prisma.user.deleteMany({ where: { tenantId: { in: testTenantIds } } })
+        await prisma.tenant.deleteMany({ where: { id: { in: testTenantIds } } })
     })
 
     it('should list all tenants', async () => {
         await prisma.tenant.create({
-            data: { name: 'Tenant A', plan: 'basic' }
+            data: { id: testTenantIdA, name: 'Admin Test A', plan: 'basic' }
         })
         await prisma.tenant.create({
-            data: { name: 'Tenant B', plan: 'pro' }
+            data: { id: testTenantIdB, name: 'Admin Test B', plan: 'pro' }
         })
 
         const tenants = await adminService.getTenants()
-        // Should include system tenant + 2 new ones
+        
         expect(tenants.length).toBeGreaterThanOrEqual(2)
-        expect(tenants.some(t => t.name === 'Tenant A')).toBe(true)
-        expect(tenants.some(t => t.name === 'Tenant B')).toBe(true)
+        expect(tenants.some(t => t.id === testTenantIdA)).toBe(true)
+        expect(tenants.some(t => t.id === testTenantIdB)).toBe(true)
     })
 
     it('should update tenant plan', async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Upgrade Test', plan: 'basic' }
+            data: { id: 'admin-test-upgrade', name: 'Upgrade Test', plan: 'basic' }
         })
 
         const updated = await adminService.updateTenantPlan(tenant.id, 'enterprise')
@@ -57,7 +48,7 @@ describe('GlobalAdminService', () => {
 
     it('should update tenant status', async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Status Test', status: 'ACTIVE' }
+            data: { id: 'admin-test-status', name: 'Status Test', status: 'ACTIVE' }
         })
 
         const updated = await adminService.updateTenantStatus(tenant.id, 'SUSPENDED')
@@ -66,7 +57,7 @@ describe('GlobalAdminService', () => {
 
     it('should fetch platform stats', async () => {
         await prisma.tenant.create({
-            data: { name: 'Stat Tenant', plan: 'basic' }
+            data: { id: 'admin-test-stats', name: 'Stat Tenant', plan: 'basic' }
         })
 
         const stats = await adminService.getPlatformStats()

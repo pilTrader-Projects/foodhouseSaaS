@@ -46,6 +46,11 @@
     border-radius: var(--radius-sm);
     color: var(--sidebar-text);
     transition: all 0.2s;
+    background: transparent;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .navItem:hover {
@@ -54,9 +59,24 @@
 }
 
 .active {
-    background: var(--primary);
+    background: var(--primary) !important;
     color: #fff !important;
     box-shadow: 0 4px 12px rgba(0, 106, 255, 0.3);
+}
+
+.placeholderCard {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 3rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.placeholderCard h3 {
+    color: var(--text-main);
+    margin-bottom: 1rem;
 }
 
 .sidebarFooter {
@@ -136,6 +156,20 @@
 
 .primaryBtn:hover {
     background: var(--primary-hover);
+}
+
+.errorBanner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 2rem;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
 .loader {
