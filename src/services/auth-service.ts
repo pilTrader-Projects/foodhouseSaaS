@@ -70,6 +70,7 @@ export class AuthService {
 
     /**
      * Checks if a user has a specific permission.
+     * Enforces strict separation between Tenant Admin and System Admin.
      */
     async hasPermission(userId: string, permissionName: string): Promise<boolean> {
         const user = await prisma.user.findUnique({
@@ -85,10 +86,23 @@ export class AuthService {
 
         if (!user) return false
 
-        // "tenant:admin" permission grants all access within tenant
-        // "system:admin" permission grants all access globally
-        return user.role.permissions.some(
-            (p) => p.name === permissionName || p.name === 'tenant:admin' || p.name === 'system:admin'
-        )
+        const permissions = user.role.permissions.map(p => p.name)
+
+        // 1. System Admins have absolute global access
+        if (permissions.includes('system:admin')) return true
+
+        // 2. Direct permission check
+        if (permissions.includes(permissionName)) return true
+
+        // 3. Tenant Admin escalation (Limited to non-system permissions)
+        if (permissions.includes('tenant:admin')) {
+            // Tenant admins are "gods" within their tenant, but cannot access global system routes
+            const isSystemPermission = permissionName.startsWith('system:') || permissionName.startsWith('access:admin')
+            if (!isSystemPermission) {
+                return true
+            }
+        }
+
+        return false
     }
 }
