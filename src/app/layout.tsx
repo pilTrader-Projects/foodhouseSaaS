@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { ThemeProvider } from '@/context/theme-context'
 import { UserProvider } from '@/context/user-context'
 import { ToastProvider } from '@/components/ui/toast'
@@ -8,6 +8,23 @@ import './modern.css'
 export const metadata: Metadata = {
   title: 'FoodHouse SaaS | Modern Management Platform',
   description: 'Multi-branch food business management SaaS platform.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'FoodHouse SaaS',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#000000',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({
