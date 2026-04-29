@@ -43,7 +43,11 @@ export default function LoginPage() {
                 // Explicitly refresh the global user context before redirecting
                 await refreshUser();
                 
-                router.push('/dashboard');
+                if (data.permissions?.includes('system:admin')) {
+                    router.push('/admin/dashboard');
+                } else {
+                    router.push('/dashboard');
+                }
             } else {
                 setError(data.error || 'Invalid credentials');
             }

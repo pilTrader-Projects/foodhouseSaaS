@@ -8,7 +8,9 @@ export async function POST(req: NextRequest) {
         const user = await prisma.user.findUnique({
             where: { email },
             include: {
-                role: true,
+                role: {
+                    include: { permissions: true }
+                },
                 branch: true
             }
         })
@@ -22,7 +24,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             userId: user.id,
             tenantId: user.tenantId,
-            role: user.role.name
+            role: user.role.name,
+            permissions: user.role.permissions.map(p => p.name)
         })
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })

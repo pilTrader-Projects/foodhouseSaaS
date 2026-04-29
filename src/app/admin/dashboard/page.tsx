@@ -142,11 +142,16 @@ export default function AdminDashboard() {
                 </nav>
                 <div className={styles.sidebarFooter}>
                     <button 
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => {
+                            localStorage.removeItem('userId');
+                            localStorage.removeItem('tenantId');
+                            localStorage.removeItem('branchId');
+                            router.push('/login');
+                        }}
                         className={styles.logoutBtn}
                     >
                         <LogOut size={20} />
-                        <span>Exit Admin</span>
+                        <span>Sign Out</span>
                     </button>
                 </div>
             </aside>

@@ -49,6 +49,12 @@ export default function PremiumDashboard() {
     if (authLoading) return;
 
     if (user) {
+        // SaaS Admin should go to admin panel
+        if (permissions.includes('system:admin')) {
+            router.push('/admin/dashboard');
+            return;
+        }
+
         const hasAccess = permissions.includes('access:dashboard') || permissions.includes('tenant:admin');
         
         if (!hasAccess) {
