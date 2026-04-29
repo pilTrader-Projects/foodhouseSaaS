@@ -27,15 +27,31 @@ export function missingContextResponse(message = 'Missing tenant ID') {
 
 /**
  * Standard error handler for services.
- * Detects feature-gating errors and returns 403 instead of 500.
+ * Detects feature-gating errors (403) vs Database/System errors (503/500).
  */
 export function serviceErrorResponse(error: any) {
     const message = error.message || 'An unexpected error occurred';
     
-    // Check if it's a feature-gating error
-    if (message.includes('not enabled') || message.includes('upgrade your plan')) {
-        return NextResponse.json({ error: message }, { status: 403 });
+    // 1. Feature Gating Errors (RBAC / Subscription)
+    if (message.includes('not enabled') || message.includes('upgrade your plan') || message.includes('Feature restricted')) {
+        return NextResponse.json({ 
+            error: message,
+            type: 'RESTRICTION'
+        }, { status: 403 });
     }
 
-    return NextResponse.json({ error: message }, { status: 500 });
+    // 2. Database Connection Errors (Prisma/Neon)
+    if (message.includes('Can\'t reach database server') || message.includes('PrismaClientInitializationError') || message.includes('P2024')) {
+        return NextResponse.json({ 
+            error: 'The system is temporarily unable to connect to the data core. Please verify your database status.',
+            type: 'DATABASE_CONNECTION',
+            rawError: process.env.NODE_ENV === 'development' ? message : undefined
+        }, { status: 503 });
+    }
+
+    // 3. Generic System Errors
+    return NextResponse.json({ 
+        error: message,
+        type: 'SYSTEM_ERROR'
+    }, { status: 500 });
 }

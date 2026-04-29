@@ -9,10 +9,12 @@ import { useState, useCallback } from 'react';
 export function useApi() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [errorType, setErrorType] = useState<string | null>(null);
 
     const request = useCallback(async (url: string, options: RequestInit = {}) => {
         setLoading(true);
         setError(null);
+        setErrorType(null);
 
         const tenantId = typeof window !== 'undefined' ? localStorage.getItem('tenantId') : null;
         const branchId = typeof window !== 'undefined' ? localStorage.getItem('branchId') : null;
@@ -33,6 +35,7 @@ export function useApi() {
             if (!res.ok) {
                 const errMsg = data.error || data.message || 'An unexpected error occurred';
                 setError(errMsg);
+                setErrorType(data.type || 'UNKNOWN');
                 throw new Error(errMsg);
             }
 
@@ -43,7 +46,7 @@ export function useApi() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [error]);
 
-    return { request, loading, error, setError };
+    return { request, loading, error, errorType, setError };
 }

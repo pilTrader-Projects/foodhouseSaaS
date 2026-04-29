@@ -6,53 +6,62 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  /* Light Theme Tokens (Modern Minimalist) */
-  --bg-app: #ffffff;
-  --bg-surface: #f8fafc;
-  --bg-card: #ffffff;
+  /* Light Theme Tokens (Premium Minimalist) */
+  --bg-app: #fdfdfd;
+  --bg-surface: #f4f7fa;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.5);
 
-  --text-main: #020617;
+  --text-main: #0f172a;
   --text-muted: #64748b;
   --text-accent: #006AFF;
+  --text-success: #10b981;
+  --text-danger: #ef4444;
 
-  --border-main: #f1f5f9;
-  --border-muted: #e2e8f0;
+  --border-main: #e2e8f0;
+  --border-muted: #f1f5f9;
 
   --primary: #006AFF;
   --primary-hover: #0058d6;
+  --primary-glow: rgba(0, 106, 255, 0.15);
 
-  --sidebar-bg: #020617;
+  --sidebar-bg: #0f172a;
   --sidebar-text: #94a3b8;
   --sidebar-active: #ffffff;
 
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
+  --radius-xs: 6px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+  --shadow-glow: 0 0 20px var(--primary-glow);
 
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
 }
 
 .dark {
-  /* Dark Theme Tokens */
+  /* Dark Theme Tokens (Deep Premium) */
   --bg-app: #020617;
-  --bg-surface: #0f172a;
-  --bg-card: #1e293b;
+  --bg-surface: #070c1b;
+  --bg-card: rgba(30, 41, 59, 0.7);
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.1);
 
-  --text-main: #f8fafc;
+  --text-main: #f1f5f9;
   --text-muted: #94a3b8;
-  --text-accent: #3b82f6;
+  --text-accent: #60a5fa;
 
   --border-main: #1e293b;
   --border-muted: #334155;
 
-  --sidebar-bg: #0f172a;
+  --sidebar-bg: #070c1b;
   --sidebar-text: #64748b;
-  --sidebar-active: #f8fafc;
+  --sidebar-active: #f1f5f9;
 }
 
 * {
