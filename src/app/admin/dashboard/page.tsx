@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { PlatformStats } from '@/modules/admin/components/PlatformStats';
 import { TenantTable } from '@/modules/admin/components/TenantTable';
 import styles from './page.module.css';
-import { LayoutDashboard, Users, Settings, LogOut, Loader2 } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, Loader2, ShieldAlert } from 'lucide-react';
 import { useUser } from '@/context/user-context';
 import { useRouter } from 'next/navigation';
 
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
                 <div className={styles.content}>
                     {error && (
                         <div className={styles.errorBanner}>
-                            <ShieldCheck size={20} />
+                            <ShieldAlert size={20} />
                             <span>{error}</span>
                         </div>
                     )}
