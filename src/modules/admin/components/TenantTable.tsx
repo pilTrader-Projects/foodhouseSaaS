@@ -20,9 +20,10 @@ interface TenantTableProps {
     tenants: Tenant[];
     onUpdatePlan: (id: string, plan: string) => void;
     onUpdateStatus: (id: string, status: string) => void;
+    onDeleteTenant: (id: string) => void;
 }
 
-export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan, onUpdateStatus }) => {
+export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan, onUpdateStatus, onDeleteTenant }) => {
     const [activeMenu, setActiveMenu] = React.useState<string | null>(null);
 
     // Close menu when clicking outside
@@ -127,7 +128,7 @@ export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan,
                                                 
                                                 <button 
                                                     className={`${styles.menuItem} ${styles.danger}`} 
-                                                    onClick={() => { if(confirm('Are you sure you want to delete this tenant? This action is irreversible.')) alert('Delete: ' + tenant.id); }}
+                                                    onClick={() => { if(confirm('Are you sure you want to delete this tenant? This action is irreversible.')) onDeleteTenant(tenant.id); setActiveMenu(null); }}
                                                 >
                                                     <Trash2 size={16} />
                                                     <span>Delete Tenant</span>
