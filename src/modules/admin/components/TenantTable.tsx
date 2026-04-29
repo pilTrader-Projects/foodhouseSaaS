@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MoreVertical, ExternalLink, ShieldAlert } from 'lucide-react';
+import { MoreVertical, ExternalLink, ShieldAlert, ShieldX, Eye, Trash2, CheckCircle } from 'lucide-react';
 import styles from './admin.module.css';
 
 interface Tenant {
@@ -23,6 +23,22 @@ interface TenantTableProps {
 }
 
 export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan, onUpdateStatus }) => {
+    const [activeMenu, setActiveMenu] = React.useState<string | null>(null);
+
+    // Close menu when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = () => setActiveMenu(null);
+        if (activeMenu) {
+            window.addEventListener('click', handleClickOutside);
+        }
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, [activeMenu]);
+
+    const handleActionClick = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation(); // Prevent immediate closing
+        setActiveMenu(activeMenu === id ? null : id);
+    };
+
     return (
         <div className={styles.tableContainer}>
             <table className={styles.table}>
@@ -44,7 +60,7 @@ export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan,
                                 <div className={styles.tenantNameCell}>
                                     <span>{tenant.name}</span>
                                     {tenant.status === 'SUSPENDED' && (
-                                        <ShieldAlert size={14} color="var(--text-danger)" />
+                                        <ShieldAlert size={14} color="#ef4444" />
                                     )}
                                 </div>
                             </td>
@@ -69,13 +85,56 @@ export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan,
                             <td>{new Date(tenant.createdAt).toLocaleDateString()}</td>
                             <td>
                                 <div className={styles.actionRow}>
-                                    <button 
-                                        className={styles.iconButton}
-                                        onClick={() => onUpdateStatus(tenant.id, tenant.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE')}
-                                        title={tenant.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                                    >
-                                        <MoreVertical size={18} />
-                                    </button>
+                                    <div className={styles.menuContainer}>
+                                        <button 
+                                            className={styles.iconButton}
+                                            onClick={(e) => handleActionClick(e, tenant.id)}
+                                        >
+                                            <MoreVertical size={18} />
+                                        </button>
+                                        
+                                        {activeMenu === tenant.id && (
+                                            <div className={styles.dropdownMenu} onClick={(e) => e.stopPropagation()}>
+                                                <button className={styles.menuItem} onClick={() => alert('View Details: ' + tenant.name)}>
+                                                    <Eye size={16} />
+                                                    <span>View Details</span>
+                                                </button>
+                                                
+                                                {tenant.status === 'ACTIVE' ? (
+                                                    <button 
+                                                        className={styles.menuItem} 
+                                                        onClick={() => { onUpdateStatus(tenant.id, 'SUSPENDED'); setActiveMenu(null); }}
+                                                    >
+                                                        <ShieldX size={16} />
+                                                        <span>Suspend Access</span>
+                                                    </button>
+                                                ) : (
+                                                    <button 
+                                                        className={styles.menuItem} 
+                                                        onClick={() => { onUpdateStatus(tenant.id, 'ACTIVE'); setActiveMenu(null); }}
+                                                    >
+                                                        <CheckCircle size={16} />
+                                                        <span>Reactivate Tenant</span>
+                                                    </button>
+                                                )}
+
+                                                <button className={styles.menuItem} onClick={() => window.open(`/${tenant.id}`, '_blank')}>
+                                                    <ExternalLink size={16} />
+                                                    <span>Live Preview</span>
+                                                </button>
+
+                                                <div className={styles.menuDivider} />
+                                                
+                                                <button 
+                                                    className={`${styles.menuItem} ${styles.danger}`} 
+                                                    onClick={() => { if(confirm('Are you sure you want to delete this tenant? This action is irreversible.')) alert('Delete: ' + tenant.id); }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                    <span>Delete Tenant</span>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </td>
                         </tr>
