@@ -13,6 +13,8 @@ model Tenant {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   plan        String           @default("basic")
+  status      String           @default("ACTIVE")
+  isSystem    Boolean          @default(false)
   features    String[]
   branches    Branch[]
   ingredients Ingredient[]

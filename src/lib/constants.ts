@@ -22,6 +22,10 @@ export const PERMISSIONS = {
     MANAGE_SETTINGS: 'manage:settings',
     MANAGE_ORGANIZATION: 'manage:organization',
 
+    // Global Admin Permissions
+    ACCESS_ADMIN: 'access:admin',
+    SYSTEM_ADMIN: 'system:admin',
+
     // Super Permission
     ADMIN: 'tenant:admin'
 } as const;

@@ -85,9 +85,10 @@ export class AuthService {
 
         if (!user) return false
 
-        // "tenant:admin" permission grants all access
+        // "tenant:admin" permission grants all access within tenant
+        // "system:admin" permission grants all access globally
         return user.role.permissions.some(
-            (p) => p.name === permissionName || p.name === 'tenant:admin'
+            (p) => p.name === permissionName || p.name === 'tenant:admin' || p.name === 'system:admin'
         )
     }
 }
