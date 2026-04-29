@@ -43,7 +43,7 @@ export default function PremiumDashboard() {
     performance: [] as any[],
     stockAlerts: [] as any[],
   });
-  const { request, loading: apiLoading, error: apiError } = useApi();
+  const { request, loading: apiLoading, error: apiError, errorType } = useApi();
 
   useEffect(() => {
     if (authLoading) return;
@@ -84,28 +84,41 @@ export default function PremiumDashboard() {
   }, [authLoading, user, router, request]);
 
   if (apiError) {
+    const isConnectionError = errorType === 'DATABASE_CONNECTION';
+
     return (
       <RBACGate permission="access:dashboard" redirectOnFail="/pos">
         <div className="min-h-[60vh] flex-center">
             <motion.div 
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="glass-card p-12 max-w-xl w-full text-center space-y-6 border-rose-100/50 bg-rose-50/10"
+                className={`glass-card p-12 max-w-xl w-full text-center space-y-6 ${isConnectionError ? 'border-amber-100/50 bg-amber-50/10' : 'border-rose-100/50 bg-rose-50/10'}`}
             >
-                <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/30 rounded-full flex-center mx-auto">
-                    <AlertTriangle className="w-10 h-10 text-rose-600" />
+                <div className={`w-20 h-20 rounded-full flex-center mx-auto ${isConnectionError ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-rose-100 dark:bg-rose-900/30'}`}>
+                    {isConnectionError ? <Activity className="w-10 h-10 text-amber-600" /> : <AlertTriangle className="w-10 h-10 text-rose-600" />}
                 </div>
                 <div className="space-y-2">
-                    <h2 className="text-2xl font-black text-main">Feature Restricted</h2>
-                    <p className="text-muted font-medium">{apiError}</p>
+                    <h2 className="text-2xl font-black text-main">
+                        {isConnectionError ? 'Connectivity Issue' : 'Feature Restricted'}
+                    </h2>
+                    <p className="text-muted font-medium leading-relaxed">{apiError}</p>
                 </div>
                 <div className="pt-4">
-                    <button 
-                        onClick={() => router.push('/settings/billing')}
-                        className="btn-minimal btn-accent px-8 hover-glow"
-                    >
-                        View Upgrade Options
-                    </button>
+                    {isConnectionError ? (
+                        <button 
+                            onClick={() => window.location.reload()}
+                            className="btn-minimal btn-accent px-8 hover-glow"
+                        >
+                            Retry Connection
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={() => router.push('/settings/billing')}
+                            className="btn-minimal btn-accent px-8 hover-glow"
+                        >
+                            View Upgrade Options
+                        </button>
+                    )}
                 </div>
             </motion.div>
         </div>
