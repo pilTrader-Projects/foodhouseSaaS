@@ -22,7 +22,10 @@ describe('API: Auth Login Route', () => {
             id: 'user-123',
             email: 'juan@test.com',
             tenantId: 'tenant-456',
-            role: { name: 'Owner' }
+            role: { 
+                name: 'Owner',
+                permissions: [{ name: 'pos:access' }]
+            }
         }
             ; (prisma.user.findUnique as any).mockResolvedValue(mockUser)
 
@@ -37,6 +40,7 @@ describe('API: Auth Login Route', () => {
         expect(response.status).toBe(200)
         expect(body.userId).toBe('user-123')
         expect(body.role).toBe('Owner')
+        expect(body.permissions).toContain('pos:access')
     })
 
     it('should return 404 if user is not found', async () => {

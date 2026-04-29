@@ -123,18 +123,41 @@ describe('Onboarding Transaction (TDD)', () => {
         // Here we just verify that the error propagates.
     })
 
-    it('should initialize all 4 standard roles for the tenant', async () => {
+    it('should initialize all 4 standard roles and EXCLUDE system permissions from Owner', async () => {
         const mockTenant = { id: 'tenant-123' }
-            ; (prisma.user.findUnique as any).mockResolvedValue(null)
-            ; (prisma.tenant.create as any).mockResolvedValue(mockTenant)
-            ; (prisma.role.create as any).mockResolvedValue({ id: 'owner-id', name: 'Owner' })
-            ; (prisma.user.create as any).mockResolvedValue({ id: 'user-id' })
-            ; (prisma.branch.create as any).mockResolvedValue({ id: 'branch-id' })
+        ; (prisma.user.findUnique as any).mockResolvedValue(null)
+        ; (prisma.tenant.create as any).mockResolvedValue(mockTenant)
+        ; (prisma.role.create as any).mockResolvedValue({ id: 'owner-id', name: 'Owner' })
+        ; (prisma.user.create as any).mockResolvedValue({ id: 'user-id' })
+        ; (prisma.branch.create as any).mockResolvedValue({ id: 'branch-id' })
+
+        // Add system permission to the available set
+        ; (prisma.permission.findMany as any).mockResolvedValue([
+            { id: 'p1', name: 'access:dashboard' },
+            { id: 'p_sys', name: 'system:admin' },
+            { id: 'p_acc', name: 'access:admin' }
+        ])
 
         await service.setupNewBusiness(mockOnboardingData)
 
-        // Verify standard roles creation
-        expect(prisma.role.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ name: 'Owner' }) }))
+        // Verify Owner role creation specifically
+        expect(prisma.role.create).toHaveBeenCalledWith(expect.objectContaining({
+            data: expect.objectContaining({
+                name: 'Owner',
+                permissions: {
+                    connect: [
+                        { id: 'p1' }
+                    ]
+                }
+            })
+        }))
+
+        // Verify system permissions were NOT connected (connect should not contain p_sys or p_acc)
+        const ownerCall = (prisma.role.create as any).mock.calls.find((call: any) => call[0].data.name === 'Owner')
+        const connectedPerms = ownerCall[0].data.permissions.connect
+        expect(connectedPerms).not.toContainEqual({ id: 'p_sys' })
+        expect(connectedPerms).not.toContainEqual({ id: 'p_acc' })
+
         expect(prisma.role.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ name: 'Manager' }) }))
         expect(prisma.role.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ name: 'Staff' }) }))
         expect(prisma.role.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ name: 'Chef' }) }))

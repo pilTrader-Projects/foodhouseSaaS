@@ -49,7 +49,12 @@ export class TenantService {
 
             // 3. Define Standard Roles with initial permission mapping
             const rolesData = [
-                { name: ROLES.OWNER, permissions: perms.map(p => ({ id: p.id })) },
+                { 
+                    name: ROLES.OWNER, 
+                    permissions: perms
+                        .filter(p => p.name !== PERMISSIONS.SYSTEM_ADMIN && p.name !== PERMISSIONS.ACCESS_ADMIN)
+                        .map(p => ({ id: p.id })) 
+                },
                 {
                     name: ROLES.MANAGER,
                     permissions: getPermIds(

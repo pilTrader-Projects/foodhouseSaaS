@@ -12,10 +12,11 @@ describe('GlobalAdminService', () => {
         adminService = new GlobalAdminService()
         
         // Targeted cleanup of ONLY our test tenants
-        const testTenantIds = [testTenantIdA, testTenantIdB, 'admin-test-upgrade', 'admin-test-status', 'admin-test-stats']
+        const testTenantIds = ['admin-test-delete', testTenantIdA, testTenantIdB, 'admin-test-upgrade', 'admin-test-status', 'admin-test-stats']
         
         await prisma.branch.deleteMany({ where: { tenantId: { in: testTenantIds } } })
         await prisma.user.deleteMany({ where: { tenantId: { in: testTenantIds } } })
+        await prisma.role.deleteMany({ where: { tenantId: { in: testTenantIds } } })
         await prisma.tenant.deleteMany({ where: { id: { in: testTenantIds } } })
     })
 
@@ -64,4 +65,27 @@ describe('GlobalAdminService', () => {
         expect(stats.totalTenants).toBeGreaterThanOrEqual(1)
         expect(stats.activeTenants).toBeGreaterThanOrEqual(1)
     })
+
+    it('should delete a tenant and all its data', async () => {
+        const id = 'admin-test-delete'
+        await prisma.tenant.create({ data: { id, name: 'Delete Me' } })
+        await prisma.branch.create({ data: { name: 'Delete Branch', tenantId: id } })
+        await prisma.user.create({ 
+            data: { 
+                name: 'Delete User', 
+                email: 'delete@test.com', 
+                password: 'p', 
+                tenant: { connect: { id } },
+                role: { create: { name: 'Owner', tenantId: id } }
+            } 
+        })
+
+        await adminService.deleteTenant(id)
+
+        const tenant = await prisma.tenant.findUnique({ where: { id } })
+        expect(tenant).toBeNull()
+
+        const branches = await prisma.branch.findMany({ where: { tenantId: id } })
+        expect(branches.length).toBe(0)
+    }, 30000)
 })
