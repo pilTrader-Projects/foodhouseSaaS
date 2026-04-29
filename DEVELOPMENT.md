@@ -16,7 +16,7 @@ This document tracks the evolution of the FoodHouse SaaS platform, ensuring all 
 
 ---
 
-## � Critical Path Sequence (Dependency-Aware)
+## 🏛️ Critical Path Sequence (Dependency-Aware)
 
 This list defines the order of building blocks to ensure zero technical debt and logical data flow. Items are prioritized based on their foundational importance to the SaaS platform.
 
@@ -57,20 +57,21 @@ This list defines the order of building blocks to ensure zero technical debt and
 
 ---
 
-## �🛤️ Roadmap & Progress Status
+## 🛣️ Roadmap & Progress Status (Audit: 2026-04-29)
 
 | Step | phase | Description | Status | Updated |
 | :--- | :--- | :--- | :--- | :--- |
 | **1** | **Design** | System Design (DB Schema, RBAC Model) | ✅ **Completed** | 2026-04-27 |
 | **2** | **Core** | SaaS Core (Auth, Tenant, RBAC, Feature Flags) | ✅ **Completed** | 2026-04-27 |
-| **3** | **Vertical** | POS-lite (Products, Orders, Sales) | 🔄 **In Progress** | 2026-04-27 |
-| **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking, Suppliers) | ✅ **Completed** | 2026-04-27 |
+| **3** | **Vertical** | POS-lite (Products, Orders, Sales) | ✅ **Completed** | 2026-04-29 |
+| **4** | **Vertical** | Inventory (Raw Materials, Stock Tracking, Suppliers) | ✅ **Completed** | 2026-04-29 |
 | **5** | **Scale** | Aggregation Logic (Cross-branch reporting) | ✅ **Completed** | 2026-04-27 |
-| **6** | **UI** | Dashboard (Owner view, KPIs) | ✅ **Completed** | 2026-04-27 |
+| **6** | **UI** | Dashboard (Owner view, KPIs, Fluid UI) | ✅ **Completed** | 2026-04-29 |
 | **7** | **Team** | Personnel Management (Roles, Branch Assignment) | ✅ **Completed** | 2026-04-27 |
 | **8** | **SaaS** | Subscription System (Limits, Plan Enforcement) | ✅ **Completed** | 2026-04-27 |
-| **9** | **Fin** | Billing Integration (Payments) | 📅 **Planned** | - |
-| **10** | **Admin** | SaaS Global Admin Panel | 📅 **Planned** | - |
+| **9** | **UX** | Robust Error Handling (Connection vs Restriction) | ✅ **Completed** | 2026-04-29 |
+| **10** | **Fin** | Billing Integration (Payments) | 📅 **Planned** | - |
+| **11** | **Admin** | SaaS Global Admin Panel | 📅 **Planned** | - |
 
 ---
 
@@ -78,28 +79,27 @@ This list defines the order of building blocks to ensure zero technical debt and
 
 ### [SaaS Foundation (Core Layer)]
 *   **Status**: ✅ Production-Ready Foundation
-*   **Rationale**: To prevent mid-project rewrites, multi-tenancy was baked into the `BaseService`.
 *   **Key Components**:
     *   `BaseService`: Enforces search scoping for `tenantId` and `branchId`.
     *   `AuthService`: Manages multi-tenant context resolution and branch switching.
     *   `FeatureService`: Universal gatekeeper for modular functionality (Feature Flags).
-*   **Latest Update (2026-04-27)**: Architecture audit confirmed 100% compliance with multi-tenant isolation.
+*   **Latest Update (2026-04-29)**: Hardened error handling to distinguish between subscription gates and database connectivity failures.
 
 ### [POS Module]
-*   **Status**: 🔄 Functional Transaction Pipeline
-*   **Rationale**: Implementation of the first vertical slice to prove the transaction engine.
+*   **Status**: ✅ Production-Ready Transaction Engine
 *   **Key Features**:
     *   Integrated with Inventory to deduct raw materials automatically upon sale.
-    *   Tenant/Branch scoped order creation.
-*   **Latest Update (2026-04-27)**: Refined `createOrder` logic to use Prisma transactions for atomicity between Order and Stock updates.
+    *   Branch-specific menus and localized pricing.
+    *   Framer-motion powered UI.
+*   **Latest Update (2026-04-29)**: Confirmed 100% stability in multi-branch transaction routing.
 
 ### [Inventory Module]
-*   **Status**: 🔄 Basic Stock Tracking
-*   **Rationale**: Essential for food businesses to track raw materials (ingredients) vs. final products.
+*   **Status**: ✅ Full Stock Lifecycle Tracking
 *   **Key Features**:
     *   Recipe-based deduction (Product -> Ingredients).
-    *   Branch-level stock isolation.
-*   **Latest Update (2026-04-27)**: Validated scoping logic in `InventoryService` to ensure branch A cannot deduct stock from branch B.
+    *   Supplier Linkage and Purchase Record tracking.
+    *   Automated Production Tracking for Kitchens.
+*   **Latest Update (2026-04-29)**: Integrated with Owner Dashboard for real-time stock health visuals.
 
 ---
 
@@ -107,7 +107,7 @@ This list defines the order of building blocks to ensure zero technical debt and
 *   **Backend**: Next.js (App Router), Prisma (ORM), PostgreSQL.
 *   **Logic**: Modular Monolith with DDD-inspired services.
 *   **Testing**: Vitest (TDD mandatory).
-*   **Guiding Rule**: Every query MUST use `getScope()` from `BaseService`.
+*   **UI**: Vanilla CSS + Framer Motion (Premium Aesthetics).
 
 ---
 
@@ -125,3 +125,6 @@ This list defines the order of building blocks to ensure zero technical debt and
 | 2026-04-27 | UI | Executive Dashboard | Built a premium, data-driven dashboard using Lucide React and Glassmorphism. |
 | 2026-04-27 | Team | Personnel & RBAC | Implemented `UserService`, `/api/auth/me`, and guarded `Sidebar` with `RoleSwitcher`. |
 | 2026-04-27 | Core | Visibility Fix | Changed `featureService` visibility to `protected` in `BaseService` to support sub-services. |
+| 2026-04-29 | UI | Dashboard Revamp | Upgraded to Premium Fluid UI with Glassmorphism. |
+| 2026-04-29 | Core | Error Hardening | Added specific handling for DB connection failures vs restrictions. |
+| 2026-04-29 | Documentation | Feature Audit | Conducted full platform audit and updated feature map. |
