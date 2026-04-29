@@ -4,11 +4,14 @@ import { UserService } from '@/services/user-service'
 import prisma from '@/lib/prisma'
 
 describe('Custom Position Integration', () => {
-    const tenantId = 'test-tenant-roles'
-    const roleService = new RoleService()
-    const userService = new UserService(tenantId)
+    let tenantId: string
+    let roleService: RoleService
+    let userService: UserService
 
     beforeEach(async () => {
+        tenantId = `test-role-${Math.random().toString(36).substring(7)}`
+        roleService = new RoleService()
+        userService = new UserService(tenantId)
         // Cleanup
         await prisma.user.deleteMany({ where: { tenantId } })
         await prisma.role.deleteMany({ where: { tenantId } })
@@ -30,9 +33,10 @@ describe('Custom Position Integration', () => {
         })
 
         // 3. Invite user with custom role
+        const userEmail = `juan-${Math.random().toString(36).substring(7)}@sommelier.com`
         const user = await userService.inviteUser({
             name: 'Juan Sommelier',
-            email: 'juan@sommelier.com',
+            email: userEmail,
             roleName: 'Senior Sommelier',
             branchId: branch.id
         })

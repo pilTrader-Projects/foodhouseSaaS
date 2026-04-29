@@ -4,16 +4,22 @@ import { ProductionService } from '../src/services/production-service'
 import prisma from '../src/lib/prisma'
 
 describe('Combo Meal Deductions (K-2+)', () => {
-    const tenantId = 'tenant-combo-test'
-    const branchId = 'branch-combo-1'
+    let tenantId: string
+    let branchId: string
+    let userId: string
     let posService: PosService
     let productionService: ProductionService
 
     beforeEach(async () => {
+        tenantId = `tenant-combo-${Math.random().toString(36).substring(7)}`
+        branchId = `branch-combo-${Math.random().toString(36).substring(7)}`
+        userId = `user-combo-${Math.random().toString(36).substring(7)}`
+        const userEmail = `test-${Math.random().toString(36).substring(7)}@user.com`
+        
         posService = new PosService(tenantId, branchId)
         productionService = new ProductionService(tenantId, branchId)
 
-        // Cleanup (High-fidelity deep cleanup)
+        // Cleanup
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
         await prisma.productionRecord.deleteMany({ where: { branch: { tenantId } } })
@@ -32,8 +38,8 @@ describe('Combo Meal Deductions (K-2+)', () => {
         const role = await prisma.role.create({ data: { name: 'OWNER', tenantId } })
         await prisma.user.create({
             data: {
-                id: 'user-123',
-                email: 'test@user.com',
+                id: userId,
+                email: userEmail,
                 name: 'Test User',
                 password: 'dummy',
                 tenantId: tenantId,
@@ -79,7 +85,7 @@ describe('Combo Meal Deductions (K-2+)', () => {
         expect(stockBefore?.quantity).toBe(30)
 
         // 4. Cashier sells 2 Solo Chicken Meals
-        await posService.createOrder('user-123', [
+        await posService.createOrder(userId, [
             { productId: combo.id, quantity: 2, price: 150 }
         ])
 

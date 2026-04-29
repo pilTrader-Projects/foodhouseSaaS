@@ -36,6 +36,7 @@ export function Sidebar() {
     { name: 'Menu', icon: Settings2, href: '/settings/menu', perm: 'access:menu' },
     { name: 'Team', icon: Users, href: '/settings/team', perm: 'access:team' },
     { name: 'Settings', icon: Settings, href: '/settings', perm: 'manage:settings' },
+    { name: 'SaaS Admin', icon: ShieldCheck, href: '/admin/dashboard', perm: 'system:admin' },
   ];
 
   const visibleItems = menuItems.filter(item => {
