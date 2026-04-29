@@ -16,6 +16,7 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     const [activeTab, setActiveTab] = useState<'overview' | 'tenants' | 'settings'>('overview');
+    const [error, setError] = useState<string | null>(null);
 
     // Hardcoded admin ID for prototype was here - now using user.id from context
 
