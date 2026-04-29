@@ -45,3 +45,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         return NextResponse.json({ error: error.message }, { status: error.message.includes('Forbidden') ? 403 : 500 })
     }
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params
+        const userId = req.headers.get('x-user-id')
+        if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+        await rbacGuard(userId, PERMISSIONS.SYSTEM_ADMIN)
+
+        const adminService = new GlobalAdminService()
+        const result = await adminService.deleteTenant(id)
+        
+        return NextResponse.json({ success: true, deleted: result.id })
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: error.message.includes('Forbidden') ? 403 : 500 })
+    }
+}

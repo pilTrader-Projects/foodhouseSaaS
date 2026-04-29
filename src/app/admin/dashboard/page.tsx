@@ -91,6 +91,24 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleDeleteTenant = async (id: string) => {
+        try {
+            const res = await fetch(`/api/admin/tenants/${id}`, {
+                method: 'DELETE',
+                headers: { 'x-user-id': user?.id as string }
+            });
+            if (res.ok) {
+                setTenants(tenants.filter(t => t.id !== id));
+                alert('Tenant and all associated data deleted successfully');
+            } else {
+                const data = await res.json();
+                alert(`Error: ${data.error || 'Failed to delete tenant'}`);
+            }
+        } catch (e) {
+            alert('Failed to connect to server');
+        }
+    };
+
     if (loading) return <div className={styles.loader}>Loading Platform Dashboard...</div>;
 
     return (
@@ -166,6 +184,7 @@ export default function AdminDashboard() {
                                 tenants={tenants} 
                                 onUpdatePlan={handleUpdatePlan}
                                 onUpdateStatus={handleUpdateStatus}
+                                onDeleteTenant={handleDeleteTenant}
                             />
                         </section>
                     )}

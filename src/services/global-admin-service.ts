@@ -97,4 +97,35 @@ export class GlobalAdminService {
             totalRevenue: totalRevenue._sum.totalAmount || 0
         }
     }
+
+    /**
+     * Performs a cascading delete of a tenant and all its associated data.
+     * WARNING: Irreversible action.
+     */
+    async deleteTenant(tenantId: string) {
+        return prisma.$transaction(async (tx) => {
+            // 1. Delete transactional data (Deepest in the FK chain)
+            await tx.orderItem.deleteMany({ where: { order: { tenantId } } })
+            await tx.order.deleteMany({ where: { tenantId } })
+            await tx.productionRecord.deleteMany({ where: { branch: { tenantId } } })
+            await tx.preparedStock.deleteMany({ where: { branch: { tenantId } } })
+            await tx.purchaseRecord.deleteMany({ where: { tenantId } })
+            await tx.stock.deleteMany({ where: { tenantId } })
+            
+            // 2. Delete structural data
+            await tx.recipeItem.deleteMany({ where: { product: { tenantId } } })
+            await tx.branchProduct.deleteMany({ where: { branch: { tenantId } } })
+            await tx.product.deleteMany({ where: { tenantId } })
+            await tx.ingredient.deleteMany({ where: { tenantId } })
+            await tx.supplier.deleteMany({ where: { tenantId } })
+            
+            // 3. Delete organization data
+            await tx.user.deleteMany({ where: { tenantId } })
+            await tx.branch.deleteMany({ where: { tenantId } })
+            await tx.role.deleteMany({ where: { tenantId } })
+            
+            // 4. Finally delete the tenant
+            return tx.tenant.delete({ where: { id: tenantId } })
+        })
+    }
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET as GET_STATS } from '@/app/api/admin/stats/route'
 import { GET as GET_TENANTS } from '@/app/api/admin/tenants/route'
-import { PATCH as PATCH_TENANT } from '@/app/api/admin/tenants/[id]/route'
+import { PATCH as PATCH_TENANT, DELETE as DELETE_TENANT } from '@/app/api/admin/tenants/[id]/route'
 import { GlobalAdminService } from '@/services/global-admin-service'
 import { AuthService } from '@/services/auth-service'
 import { NextRequest } from 'next/server'
@@ -68,10 +68,25 @@ describe('API: Admin Routes', () => {
             body: JSON.stringify({ plan: 'pro' })
         })
 
-        const response = await PATCH_TENANT(req, { params: { id: 't1' } } as any)
+        const response = await PATCH_TENANT(req, { params: Promise.resolve({ id: 't1' }) } as any)
         const body = await response.json()
 
         expect(response.status).toBe(200)
         expect(body.plan).toBe('pro')
+    })
+
+    it('should delete tenant and associated data', async () => {
+        vi.spyOn(GlobalAdminService.prototype, 'deleteTenant').mockResolvedValue({ id: 't1' } as any)
+
+        const req = new NextRequest('http://localhost/api/admin/tenants/t1', {
+            method: 'DELETE',
+            headers: { 'x-user-id': 'admin-123' }
+        })
+
+        const response = await DELETE_TENANT(req, { params: Promise.resolve({ id: 't1' }) } as any)
+        const body = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(body.success).toBe(true)
     })
 })
