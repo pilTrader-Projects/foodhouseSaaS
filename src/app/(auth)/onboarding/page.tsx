@@ -85,10 +85,10 @@ export default function OnboardingPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-white flex-col flex-center p-4 animate-fade-in">
+        <div className="min-h-screen bg-app flex-col flex-center p-4 animate-fade-in">
             <div className="max-w-xl w-full">
                 {/* Progress Indicators */}
-                <div className="flex gap-10 mb-20 border-b pb-4">
+                <div className="flex gap-10 mb-20 border-b border-white/5 pb-4">
                     {steps.map((s) => (
                         <div 
                             key={s.id} 
@@ -100,7 +100,7 @@ export default function OnboardingPage() {
                               transition: 'all 0.5s'
                             }}
                         >
-                            <span className="text-xs font-black uppercase tracking-widest">{s.title}</span>
+                            <span className="text-xs font-black uppercase tracking-widest text-main">{s.title}</span>
                             {step === s.id && <div style={{ width: '4px', height: '4px', background: 'var(--primary)', borderRadius: '50%' }} />}
                         </div>
                     ))}
@@ -117,8 +117,8 @@ export default function OnboardingPage() {
                                 className="flex-col gap-8"
                             >
                                 <div>
-                                    <h2 className="font-serif text-5xl font-black text-slate-900 tracking-tight">Identity</h2>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-4">Personal Owner Credentials</p>
+                                    <h2 className="font-serif text-5xl font-black text-main tracking-tight">Identity</h2>
+                                    <p className="text-xs font-bold text-muted uppercase tracking-widest mt-4">Personal Owner Credentials</p>
                                 </div>
                                 
                                 <div className="flex-col gap-4">
@@ -126,21 +126,21 @@ export default function OnboardingPage() {
                                         autoFocus
                                         type="text" 
                                         placeholder="Full Name"
-                                        className="input-minimal"
+                                        className="input-minimal bg-white/5 border-white/10 text-main focus:border-primary/50 transition-colors"
                                         value={formData.user.name}
                                         onChange={(e) => updateFormData('user', 'name', e.target.value)}
                                     />
                                     <input 
                                         type="email" 
                                         placeholder="Business Email"
-                                        className="input-minimal"
+                                        className="input-minimal bg-white/5 border-white/10 text-main focus:border-primary/50 transition-colors"
                                         value={formData.user.email}
                                         onChange={(e) => updateFormData('user', 'email', e.target.value)}
                                     />
                                     <input 
                                         type="password" 
                                         placeholder="Secure Password"
-                                        className="input-minimal"
+                                        className="input-minimal bg-white/5 border-white/10 text-main focus:border-primary/50 transition-colors"
                                         value={formData.user.password}
                                         onChange={(e) => updateFormData('user', 'password', e.target.value)}
                                     />
@@ -157,8 +157,8 @@ export default function OnboardingPage() {
                                 className="flex-col gap-8"
                             >
                                 <div>
-                                    <h2 className="font-serif text-5xl font-black text-slate-900 tracking-tight">Organization</h2>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-4">Brand & Infrastructure Selection</p>
+                                    <h2 className="font-serif text-5xl font-black text-main tracking-tight">Organization</h2>
+                                    <p className="text-xs font-bold text-muted uppercase tracking-widest mt-4">Brand & Infrastructure Selection</p>
                                 </div>
                                 
                                 <div className="flex-col gap-6">
@@ -166,7 +166,7 @@ export default function OnboardingPage() {
                                         autoFocus
                                         type="text" 
                                         placeholder="Organization Name"
-                                        className="input-minimal"
+                                        className="input-minimal bg-white/5 border-white/10 text-main focus:border-primary/50 transition-colors"
                                         value={formData.business.name}
                                         onChange={(e) => updateFormData('business', 'name', e.target.value)}
                                     />
@@ -178,13 +178,14 @@ export default function OnboardingPage() {
                                               cursor: 'pointer',
                                               padding: '2rem',
                                               border: '1px solid',
-                                              borderColor: formData.business.plan === 'basic' ? 'var(--primary)' : 'var(--border-light)',
-                                              background: formData.business.plan === 'basic' ? '#eff6ff' : 'white',
-                                              transition: 'all 0.3s'
+                                              borderColor: formData.business.plan === 'basic' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                                              background: formData.business.plan === 'basic' ? 'rgba(var(--primary-rgb), 0.1)' : 'rgba(255,255,255,0.02)',
+                                              transition: 'all 0.3s',
+                                              borderRadius: '12px'
                                             }}
                                         >
-                                            <h3 className="text-xs font-black uppercase tracking-widest">Standard</h3>
-                                            <p className="text-xs text-slate-500 mt-2">Single branch context initialization.</p>
+                                            <h3 className="text-xs font-black uppercase tracking-widest text-main">Standard</h3>
+                                            <p className="text-xs text-muted mt-2">Single branch context initialization.</p>
                                         </div>
                                         <div 
                                             onClick={() => updateFormData('business', 'plan', 'pro')}
@@ -192,13 +193,14 @@ export default function OnboardingPage() {
                                               cursor: 'pointer',
                                               padding: '2rem',
                                               border: '1px solid',
-                                              borderColor: formData.business.plan === 'pro' ? 'var(--primary)' : 'var(--border-light)',
-                                              background: formData.business.plan === 'pro' ? '#eff6ff' : 'white',
-                                              transition: 'all 0.3s'
+                                              borderColor: formData.business.plan === 'pro' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                                              background: formData.business.plan === 'pro' ? 'rgba(var(--primary-rgb), 0.1)' : 'rgba(255,255,255,0.02)',
+                                              transition: 'all 0.3s',
+                                              borderRadius: '12px'
                                             }}
                                         >
-                                            <h3 className="text-xs font-black uppercase tracking-widest">Scale</h3>
-                                            <p className="text-xs text-slate-500 mt-2">Multi-tenant management enabled.</p>
+                                            <h3 className="text-xs font-black uppercase tracking-widest text-main">Scale</h3>
+                                            <p className="text-xs text-muted mt-2">Multi-tenant management enabled.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -214,8 +216,8 @@ export default function OnboardingPage() {
                                 className="flex-col gap-8"
                             >
                                 <div>
-                                    <h2 className="font-serif text-5xl font-black text-slate-900 tracking-tight">Deployment</h2>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-4">Primary Branch Configuration</p>
+                                    <h2 className="font-serif text-5xl font-black text-main tracking-tight">Deployment</h2>
+                                    <p className="text-xs font-bold text-muted uppercase tracking-widest mt-4">Primary Branch Configuration</p>
                                 </div>
                                 
                                 <div className="flex-col gap-4">
@@ -223,17 +225,17 @@ export default function OnboardingPage() {
                                         autoFocus
                                         type="text" 
                                         placeholder="Branch Name (e.g. Headquarters)"
-                                        className="input-minimal"
+                                        className="input-minimal bg-white/5 border-white/10 text-main focus:border-primary/50 transition-colors"
                                         value={formData.branch.name}
                                         onChange={(e) => updateFormData('branch', 'name', e.target.value)}
                                     />
-                                    <div className="p-10 border flex-col gap-4 items-center text-center">
-                                        <div className="text-accent">
+                                    <div className="p-10 border border-white/5 bg-white/2 flex-col gap-4 items-center text-center rounded-2xl">
+                                        <div className="text-primary">
                                             <CheckCircle2 style={{ width: '2rem', height: '2rem' }} />
                                         </div>
                                         <div>
-                                            <h4 className="text-xs font-black uppercase tracking-widest">Automated Setup</h4>
-                                            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                                            <h4 className="text-xs font-black uppercase tracking-widest text-main">Automated Setup</h4>
+                                            <p className="text-xs text-muted mt-2 leading-relaxed">
                                                 The system will provision standard roles, inventory structures, and security protocols for your new branch.
                                             </p>
                                         </div>
@@ -248,14 +250,14 @@ export default function OnboardingPage() {
                         <button 
                             disabled={isLoading}
                             onClick={nextStep}
-                            className="btn-minimal btn-accent px-10"
+                            className="btn-minimal bg-primary text-white hover:shadow-glow px-10 h-12 rounded-full"
                         >
                             {isLoading ? 'Finalizing...' : step === 3 ? 'Deploy SaaS' : 'Next Phase'}
                         </button>
                         {step > 1 && (
                             <button 
                                 onClick={prevStep}
-                                className="btn-minimal btn-outline px-6"
+                                className="btn-minimal border border-white/10 text-main hover:bg-white/5 px-6 h-12 rounded-full"
                             >
                                 Back
                             </button>
@@ -263,7 +265,7 @@ export default function OnboardingPage() {
                     </div>
 
                     {error && (
-                        <div className="text-rose-600 text-xs font-black uppercase tracking-widest mt-6">
+                        <div className="text-rose-500 text-xs font-black uppercase tracking-widest mt-6">
                            Error: {error}
                         </div>
                     )}

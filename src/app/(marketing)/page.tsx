@@ -20,9 +20,6 @@ import { MockupDashboard } from '@/components/ui/mockup-dashboard';
 
 export default function LandingPage() {
   const { theme, toggleTheme } = useTheme();
-  const { scrollY } = useScroll();
-  const navBg = useTransform(scrollY, [0, 50], ['rgba(0,0,0,0)', 'rgba(2, 6, 23, 0.8)']);
-  const navBlur = useTransform(scrollY, [0, 50], ['blur(0px)', 'blur(16px)']);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -47,37 +44,6 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-app text-main relative overflow-x-hidden">
       <MeshGradient />
-
-      {/* Navigation */}
-      <motion.nav 
-        style={{ backgroundColor: navBg, backdropFilter: navBlur }}
-        className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
-      >
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-gradient-to-br from-primary to-accent-glow rounded-xl text-white shadow-glow">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <h1 className="text-2xl font-black tracking-tighter uppercase font-sans">FoodHouse</h1>
-          </div>
-          
-          <div className="flex items-center gap-10">
-            <a href="#features" className="text-[11px] font-black text-muted hover:text-white uppercase tracking-[0.2em] transition-colors">Features</a>
-            <button 
-              onClick={toggleTheme}
-              className="p-2 text-muted hover:text-white bg-white/5 rounded-full transition-all hover:scale-110"
-            >
-              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-            </button>
-            <Link href="/login" className="text-[10px] font-black text-muted hover:text-white flex items-center gap-2 uppercase tracking-widest transition-colors">
-              <Lock className="w-3 h-3" /> Login
-            </Link>
-            <Link href="/onboarding" className="btn-minimal bg-white text-black hover:bg-white/90 transition-all rounded-full px-6">
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </motion.nav>
 
       {/* Hero Section */}
       <header className="max-w-7xl mx-auto px-6 pt-40 pb-20 grid lg:grid-cols-2 gap-16 items-center">
