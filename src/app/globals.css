@@ -6,9 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  /* Light Theme Tokens (Premium Minimalist) */
+  /* Light Theme Tokens (Premium Glass-Fluid) */
   --bg-app: #fdfdfd;
-  --bg-surface: #f4f7fa;
+  --bg-surface: #f8fafc;
   --bg-card: rgba(255, 255, 255, 0.8);
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.5);
@@ -24,21 +24,22 @@
 
   --primary: #006AFF;
   --primary-hover: #0058d6;
-  --primary-glow: rgba(0, 106, 255, 0.15);
+  --primary-glow: rgba(0, 106, 255, 0.3);
+  --accent-glow: rgba(139, 92, 246, 0.3); /* Purple glow */
 
-  --sidebar-bg: #0f172a;
-  --sidebar-text: #94a3b8;
-  --sidebar-active: #ffffff;
+  --gradient-primary: linear-gradient(135deg, #006AFF 0%, #8B5CF6 100%);
+  --gradient-glow: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 70%);
 
-  --radius-xs: 6px;
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 24px;
+  --radius-xs: 8px;
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
 
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-lg: 0 10px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-  --shadow-glow: 0 0 20px var(--primary-glow);
+  --shadow-lg: 0 10px 40px -10px rgb(0 0 0 / 0.1), 0 8px 20px -12px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 30px var(--primary-glow);
+  --shadow-accent: 0 0 30px var(--accent-glow);
 
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
@@ -48,16 +49,19 @@
   /* Dark Theme Tokens (Deep Premium) */
   --bg-app: #020617;
   --bg-surface: #070c1b;
-  --bg-card: rgba(30, 41, 59, 0.7);
-  --glass-bg: rgba(15, 23, 42, 0.6);
+  --bg-card: rgba(15, 23, 42, 0.8);
+  --glass-bg: rgba(7, 12, 27, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
 
-  --text-main: #f1f5f9;
+  --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --text-accent: #60a5fa;
 
   --border-main: #1e293b;
   --border-muted: #334155;
+
+  --primary-glow: rgba(96, 165, 250, 0.2);
+  --accent-glow: rgba(139, 92, 246, 0.2);
 
   --sidebar-bg: #070c1b;
   --sidebar-text: #64748b;

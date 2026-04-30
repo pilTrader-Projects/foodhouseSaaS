@@ -8,155 +8,173 @@ import {
   ShoppingCart, 
   ChefHat, 
   Package,
-  CheckCircle2,
   Lock,
   Moon,
   Sun
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useTheme } from '@/context/theme-context';
+import { MeshGradient } from '@/components/ui/mesh-gradient';
+import { GlassCard } from '@/components/ui/glass-card';
+import { MockupDashboard } from '@/components/ui/mockup-dashboard';
 
 export default function LandingPage() {
   const { theme, toggleTheme } = useTheme();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-app text-main animate-fade-in" style={{ overflowX: 'hidden' }}>
-      {/* Navigation */}
-      <nav className="max-w-7xl mx-auto px-6 py-8 flex-between border-b">
-        <div className="flex-center gap-3">
-          <div className="p-2 bg-black rounded-sm text-white">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <h1 className="text-xl font-black tracking-tight uppercase">FoodHouse</h1>
-        </div>
-        
-        <div className="md:flex items-center gap-10">
-          <a href="#features" className="text-xs font-black text-muted hover-main uppercase tracking-widest">Features</a>
-          <button 
-            onClick={toggleTheme}
-            className="p-2 text-muted hover-main bg-surface rounded-sm"
-          >
-            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-          </button>
-          <Link href="/login" className="text-xs font-black text-muted hover-main flex-center gap-2 uppercase tracking-widest">
-            <Lock className="w-3 h-3" /> Login
-          </Link>
-          <Link href="/onboarding" className="btn-minimal btn-accent">
-            Get Started
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-app text-main relative overflow-x-hidden">
+      <MeshGradient />
 
       {/* Hero Section */}
-      <header className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-2 gap-16 items-center">
+      <header className="max-w-7xl mx-auto px-6 pt-40 pb-20 grid lg:grid-cols-2 gap-16 items-center">
         <motion.div 
-          initial={{ opacity: 0, x: -20 }} 
-          animate={{ opacity: 1, x: 0 }}
-          className="flex-col gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="flex flex-col gap-8"
         >
-          <div className="text-accent text-xs font-black uppercase tracking-widest">
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
             SaaS for Modern Gastronomy
-          </div>
+          </motion.div>
           
-          <h1 className="text-5xl lg:text-6xl font-serif font-black leading-tight tracking-tight">
+          <motion.h1 variants={itemVariants} className="text-6xl lg:text-8xl font-serif font-black leading-[0.9] tracking-tighter">
             Elevate Your <br />
-            <span className="text-accent">Operation.</span>
-          </h1>
+            <span className="text-gradient">Operation.</span>
+          </motion.h1>
           
-          <p className="text-lg text-muted font-medium leading-relaxed max-w-xl">
+          <motion.p variants={itemVariants} className="text-lg text-muted font-medium leading-relaxed max-w-xl">
             The minimalist OS for multi-branch restaurants. <br />
             Precision POS, smart inventory, and real-time oversight.
-          </p>
+          </motion.p>
           
-          <div className="flex gap-4 pt-6">
-            <Link href="/onboarding" className="btn-minimal btn-accent px-10">
-              Start Free <ArrowRight className="w-4 h-4" />
+          <motion.div variants={itemVariants} className="flex flex-wrap gap-4 pt-4">
+            <Link href="/onboarding" className="btn-minimal bg-primary text-white hover:shadow-glow px-10 rounded-full h-14 text-sm group">
+              Start Free <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="/dashboard" className="btn-minimal btn-outline px-10">
+            <Link href="/dashboard" className="btn-minimal border border-white/10 hover:bg-white/5 px-10 rounded-full h-14 text-sm">
               Live Demo
             </Link>
-          </div>
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="flex items-center gap-10 mt-4 opacity-50 grayscale transition-all hover:grayscale-0">
+             <div className="text-[10px] font-black uppercase tracking-widest">Trusted By</div>
+             <div className="h-4 w-24 bg-white/10 rounded-full" />
+             <div className="h-4 w-24 bg-white/10 rounded-full" />
+          </motion.div>
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative hidden md:flex flex-center"
+          initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          className="relative flex justify-center"
         >
-          <div className="bg-black p-1 shadow-lg rounded-sm">
-             <div className="bg-app p-10 flex-col gap-6 w-96 rounded-xs">
-                <div className="flex-between border-b pb-4">
-                   <div className="flex-col gap-1">
-                      <div className="h-1 w-8 bg-accent" />
-                      <div className="text-xs font-black uppercase tracking-widest">Dashboard</div>
-                   </div>
-                   <div className="w-4 h-4 bg-surface rounded-full" />
-                </div>
-                <div className="flex-col gap-4">
-                   <div className="h-8 w-3/4 bg-main opacity-10" />
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="h-16 border rounded-xs" />
-                      <div className="h-16 border rounded-xs" />
-                   </div>
-                </div>
-             </div>
-          </div>
-
-          <div className="absolute bg-app p-4 border shadow-md flex items-center gap-4 -top-8 -left-8 rounded-sm">
-            <div className="p-2 bg-accent text-white">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-            <div className="pr-4">
-              <p className="text-xs font-black uppercase tracking-widest text-muted">System Ready</p>
-              <p className="text-sm font-black">99.9% Uptime</p>
-            </div>
-          </div>
+          <MockupDashboard />
         </motion.div>
       </header>
 
       {/* Features Grid */}
-      <section id="features" className="py-20 border-t">
+      <section id="features" className="py-32 relative">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex-col items-center gap-4 mb-20 text-center">
-            <h2 className="text-4xl">The Modern Standard</h2>
-            <p className="text-sm text-muted font-bold uppercase tracking-widest">Efficiency through minimalism.</p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col items-center gap-6 mb-24 text-center"
+          >
+            <h2 className="text-5xl lg:text-6xl tracking-tight">The Modern Standard</h2>
+            <p className="text-xs text-primary font-black uppercase tracking-[0.3em] flex items-center gap-3">
+              <span className="h-px w-8 bg-primary/30" />
+              Efficiency through minimalism
+              <span className="h-px w-8 bg-primary/30" />
+            </p>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'POS Terminal', desc: 'Lightning fast and invisible checkout.', icon: ShoppingCart },
-              { title: 'Smart Inventory', desc: 'Automated tracking with zero noise.', icon: Package },
-              { title: 'Kitchen Display', desc: 'Precise coordination for busy lines.', icon: ChefHat },
-              { title: 'Executive Insights', desc: 'The data you need, nothing else.', icon: BarChart3 }
+              { title: 'POS Terminal', desc: 'Lightning fast and invisible checkout.', icon: ShoppingCart, color: 'primary' },
+              { title: 'Smart Inventory', desc: 'Automated tracking with zero noise.', icon: Package, color: 'accent-glow' },
+              { title: 'Kitchen Display', desc: 'Precise coordination for busy lines.', icon: ChefHat, color: 'success' },
+              { title: 'Executive Insights', desc: 'The data you need, nothing else.', icon: BarChart3, color: 'primary' }
             ].map((f, i) => (
-              <div key={i} className="card-minimal p-8">
-                <div className="mb-6 text-accent">
+              <GlassCard 
+                key={i} 
+                className="p-8 group hover:border-primary/30 transition-all hover:-translate-y-2"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <div className={`mb-8 p-3 rounded-2xl bg-${f.color}/10 text-primary w-fit group-hover:scale-110 transition-transform shadow-sm`}>
                   <f.icon className="w-6 h-6" />
                 </div>
-                <h4 className="text-sm font-black uppercase tracking-widest mb-3">{f.title}</h4>
+                <h4 className="text-sm font-black uppercase tracking-widest mb-4">{f.title}</h4>
                 <p className="text-sm text-muted font-medium leading-relaxed">{f.desc}</p>
-              </div>
+                <div className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                  Learn More <ArrowRight className="w-3 h-3" />
+                </div>
+              </GlassCard>
             ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto px-6 py-10 text-center border-t mt-20">
-        <p className="text-xs font-bold text-muted uppercase tracking-widest">&copy; 2026 FoodHouse SaaS &bull; Modern Minimalist</p>
+      <footer className="max-w-7xl mx-auto px-6 py-20 border-t border-white/5 mt-20">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex items-center gap-3 grayscale opacity-50">
+             <div className="p-2 bg-white/10 rounded-lg">
+                <ShieldCheck className="w-4 h-4" />
+             </div>
+             <h1 className="text-sm font-black tracking-tight uppercase">FoodHouse</h1>
+          </div>
+          <p className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">&copy; 2026 FoodHouse SaaS &bull; Modern Minimalist Excellence</p>
+          <div className="flex gap-8">
+             <a href="#" className="text-[10px] font-black text-muted hover:text-white uppercase tracking-widest transition-colors">Privacy</a>
+             <a href="#" className="text-[10px] font-black text-muted hover:text-white uppercase tracking-widest transition-colors">Terms</a>
+          </div>
+        </div>
       </footer>
 
       <style jsx>{`
-        .hover-main:hover { color: var(--text-main); }
         .bg-app { background-color: var(--bg-app); }
-        .bg-surface { background-color: var(--bg-surface); }
-        .bg-black { background-color: #020617; } /* Constant for visual mock */
         .text-main { color: var(--text-main); }
         .text-muted { color: var(--text-muted); }
-        .text-accent { color: var(--text-accent); }
-        .border-b { border-bottom: 1px solid var(--border-main); }
-        .border-t { border-top: 1px solid var(--border-main); }
-        .rounded-xs { border-radius: 2px; }
+        .text-primary { color: var(--primary); }
+        .text-success { color: #10b981; }
+        .text-gradient {
+          background: var(--gradient-primary);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .shadow-glow { box-shadow: var(--shadow-glow); }
+        .shadow-accent { box-shadow: var(--shadow-accent); }
+        .perspective-1000 { perspective: 1000px; }
       `}</style>
     </div>
   );
