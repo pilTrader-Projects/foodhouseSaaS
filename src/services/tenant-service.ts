@@ -48,8 +48,14 @@ export class TenantService {
             const getPermIds = (...names: string[]) => perms.filter(p => names.includes(p.name)).map(p => ({ id: p.id }))
 
             // 3. Define Standard Roles with initial permission mapping
+            // [STRICT] Tenant Owners should NOT receive global system:admin or access:admin perms
+            const tenantPerms = perms.filter(p => 
+                !p.name.includes('system:') && 
+                !p.name.includes('access:admin')
+            ).map(p => ({ id: p.id }))
+
             const rolesData = [
-                { name: ROLES.OWNER, permissions: perms.map(p => ({ id: p.id })) },
+                { name: ROLES.OWNER, permissions: tenantPerms },
                 {
                     name: ROLES.MANAGER,
                     permissions: getPermIds(
