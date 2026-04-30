@@ -48,8 +48,8 @@ describe('ProductionService (K-2 Hybrid)', () => {
             // 1. Verify Raw Ingredient Deduction (The Fix)
             expect(InventoryService.prototype.consumeIngredients).toHaveBeenCalledWith(productId, numBatches, expect.anything())
 
-            // 2. Verify Sub-Product Deduction
-            expect(DeductionService.prototype.deductRecipeComponents).toHaveBeenCalledWith(expect.objectContaining({ id: productId }), numBatches, expect.anything())
+            // 2. Verify Sub-Product Deduction (The Fix: should use totalYield/quantity, not batch count)
+            expect(DeductionService.prototype.deductRecipeComponents).toHaveBeenCalledWith(expect.objectContaining({ id: productId }), totalYield, expect.anything())
 
             // 3. Verify PreparedStock update
             expect(prisma.preparedStock.upsert).toHaveBeenCalledWith(expect.objectContaining({
