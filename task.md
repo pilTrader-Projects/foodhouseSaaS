@@ -15,8 +15,13 @@ Localize the app to PHP and implement Menu Management so customers can input the
   - Verified logic for custom product creation via `tests/MenuService.test.ts`.
 - [x] **Task 8.4: POS Integration Test (QA)**
   - Verified end-to-end flow (Custom Item -> PHP Sale) via `tests/CustomMenuPOS.test.ts`.
+- [x] **Task 8.5: Branch & Outlet Management (Developer)**
+  - Implemented multi-branch creation and limit enforcement.
+  - Updated Analytics Service to include zero-sales branches on the dashboard.
 
 ## Success Criteria
 - [x] Currency is displayed as ₱ throughout the app.
 - [x] User can add a new item (e.g., "Adobo Rice") and see it appear in the POS.
+- [x] Business owner can add new branches up to their plan limit.
+- [x] Dashboard reflects all branches in real-time oversight.
 - [x] 100% TDD compliance: All new logic covered by unit and integration tests.

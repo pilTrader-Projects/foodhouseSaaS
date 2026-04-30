@@ -33,7 +33,7 @@ export function serviceErrorResponse(error: any) {
     const message = error.message || 'An unexpected error occurred';
     
     // 1. Feature Gating Errors (RBAC / Subscription)
-    if (message.includes('not enabled') || message.includes('upgrade your plan') || message.includes('Feature restricted')) {
+    if (message.includes('not enabled') || message.includes('upgrade your plan') || message.includes('Feature restricted') || message.includes('limit reached')) {
         return NextResponse.json({ 
             error: message,
             type: 'RESTRICTION'

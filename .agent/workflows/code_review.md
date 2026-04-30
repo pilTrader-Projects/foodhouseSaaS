@@ -17,7 +17,12 @@ This workflow is triggered when a Developer completes a task.
     - Check against `docs/standards.md` (SOLID, Clean Code).
     - Check against `docs/design_patterns.md`.
     - Check against `docs/guardrails.md` (Security, Error handling).
-4.  **Sanity Check**: Run `ts-node tests/sanity_check.ts`.
-5.  **Feedback**:
+4.  **Sanity Check**: Run `npm run sanity`.
+5.  **UI/UX Verification (If UI change)**:
+    - Use `browser_subagent` to navigate to the affected pages.
+    - Confirm no Build Error overlays are present.
+    - Check for console errors.
+    - Capture a recording to document visual integrity.
+6.  **Feedback**:
     - If issues found: Provide specific instructions to the Developer and return to Step 4 of TDD Workflow.
     - If approved: Document approval in the task status and notify the User.

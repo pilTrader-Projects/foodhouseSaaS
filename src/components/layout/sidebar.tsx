@@ -35,6 +35,7 @@ export function Sidebar() {
     { name: 'Kitchen', icon: ChefHat, href: '/kitchen', perm: 'access:kitchen' },
     { name: 'Menu', icon: Settings2, href: '/settings/menu', perm: 'access:menu' },
     { name: 'Team', icon: Users, href: '/settings/team', perm: 'access:team' },
+    { name: 'Branches', icon: MapPin, href: '/settings/branches', perm: 'manage:organization' },
     { name: 'Settings', icon: Settings, href: '/settings', perm: 'manage:settings' },
     { name: 'SaaS Admin', icon: ShieldCheck, href: '/admin/dashboard', perm: 'system:admin' },
   ];
