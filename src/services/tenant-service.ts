@@ -97,6 +97,8 @@ export class TenantService {
             })
 
             return { tenant, user, branch }
+        }, {
+            timeout: 15000
         })
     }
 
