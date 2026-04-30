@@ -100,6 +100,14 @@ export class TenantService {
         })
     }
 
+    /**
+     * Provisions a new branch for a tenant.
+     * 
+     * [STRICT] New branches must be initialized in a clean state:
+     * - No employees assigned.
+     * - No initial inventory.
+     * - No transaction history.
+     */
     async createBranch(data: { name: string; tenantId: string }) {
         const currentBranches = await prisma.branch.count({ where: { tenantId: data.tenantId } })
         const canCreate = await this.featureService.checkLimit(data.tenantId, 'max_branches', currentBranches)

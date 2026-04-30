@@ -17,7 +17,15 @@ export async function GET(req: NextRequest) {
         })
 
         const branches = await prisma.branch.findMany({
-            where: { tenantId }
+            where: { tenantId },
+            include: {
+                _count: {
+                    select: {
+                        users: true,
+                        stocks: true,
+                    }
+                }
+            }
         })
 
         const limits = PLAN_LIMITS[tenant?.plan || 'basic']
@@ -45,8 +53,14 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Branch name is required' }, { status: 400 })
         }
 
+        /**
+         * [STRICT ISOLATION] 
+         * Ensuring the branch is created in a clean state.
+         * Only 'name' and 'tenantId' are passed to the service to prevent 
+         * accidental inheritance of related records.
+         */
         const branch = await tenantService.createBranch({
-            name,
+            name: String(name),
             tenantId
         })
 

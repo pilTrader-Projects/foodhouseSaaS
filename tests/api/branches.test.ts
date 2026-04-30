@@ -63,4 +63,36 @@ describe('API: Branches Route', () => {
         expect(response.status).toBe(403)
         expect(body.error).toContain('limit reached')
     })
+
+    it('should enforce strict isolation: no related records on creation', async () => {
+        const createSpy = vi.spyOn(TenantService.prototype, 'createBranch').mockResolvedValue({ id: 'new-id' } as any)
+
+        const req = new NextRequest('http://localhost/api/branches', {
+            method: 'POST',
+            headers: { 
+                'x-tenant-id': 'tenant-123',
+                'Content-Type': 'application/json'
+            },
+            // Attempt to inject related records (should be ignored by API)
+            body: JSON.stringify({ 
+                name: 'Clean Branch', 
+                users: [{ name: 'Admin' }], 
+                stocks: [{ item: 'Sugar' }] 
+            })
+        })
+
+        await POST(req)
+
+        // Verify ONLY name and tenantId were passed to the service
+        expect(createSpy).toHaveBeenCalledWith({
+            name: 'Clean Branch',
+            tenantId: 'tenant-123'
+        })
+        
+        // Ensure no other keys were leaked
+        const callArgs = createSpy.mock.calls[0][0]
+        expect(Object.keys(callArgs)).toHaveLength(2)
+        expect(Object.keys(callArgs)).not.toContain('users')
+        expect(Object.keys(callArgs)).not.toContain('stocks')
+    })
 })

@@ -68,11 +68,11 @@ export function BranchList({ branches, loading }: BranchListProps) {
             <div className="flex gap-8">
               <div>
                 <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Stock Points</p>
-                <p className="text-xs font-black text-slate-900">12 Items</p>
+                <p className="text-xs font-black text-slate-900">{branch._count?.stocks || 0} Items</p>
               </div>
               <div>
                 <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Active Staff</p>
-                <p className="text-xs font-black text-slate-900">4 Personnel</p>
+                <p className="text-xs font-black text-slate-900">{branch._count?.users || 0} Personnel</p>
               </div>
             </div>
             
