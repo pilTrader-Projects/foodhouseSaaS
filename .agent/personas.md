@@ -39,3 +39,12 @@
     - Define clear user tasks and success criteria.
     - Prioritize work in `task.md`.
     - Ensure context is maintained throughout the development cycle.
+
+## UI/UX Designer
+- **Role**: UI Aesthetics and User Experience Specialist.
+- **Responsibilities**:
+    - Evaluate UI layout with user experience in mind.
+    - In-charge of UI aesthetics, ensuring premium, state-of-the-art designs.
+    - Implement latest design trends (vibrant colors, dark modes, glassmorphism, dynamic animations).
+    - Audit interface for responsiveness and "alive" feel (hover effects, micro-animations).
+    - Ensure visual excellence and use of high-quality typography and color palettes.

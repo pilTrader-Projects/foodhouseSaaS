@@ -18,11 +18,12 @@ This workflow is triggered when a Developer completes a task.
     - Check against `docs/design_patterns.md`.
     - Check against `docs/guardrails.md` (Security, Error handling).
 4.  **Sanity Check**: Run `npm run sanity`.
-5.  **UI/UX Verification (If UI change)**:
+5.  **UI/UX Aesthetic Audit (If UI change)**:
+    - **UI/UX Designer** must evaluate the layout and aesthetics.
+    - Confirm premium look (glassmorphism, vibrant colors, dynamic animations).
     - Use `browser_subagent` to navigate to the affected pages.
-    - Confirm no Build Error overlays are present.
-    - Check for console errors.
-    - Capture a recording to document visual integrity.
+    - Confirm no Build Error overlays or console errors.
+    - Capture a recording to document visual integrity and "alive" feel.
 6.  **Feedback**:
     - If issues found: Provide specific instructions to the Developer and return to Step 4 of TDD Workflow.
     - If approved: Document approval in the task status and notify the User.
