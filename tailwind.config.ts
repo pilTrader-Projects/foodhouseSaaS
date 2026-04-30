@@ -10,7 +10,17 @@ const config: Config = {
     './src/lib/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: 'var(--primary)',
+        main: 'var(--text-main)',
+        muted: 'var(--text-muted)',
+      },
+      fontFamily: {
+        serif: ['var(--font-serif)', 'serif'],
+        sans: ['var(--font-sans)', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 }

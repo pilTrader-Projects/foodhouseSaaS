@@ -29,12 +29,14 @@ export class DeductionService extends BaseService {
         // 1. Deduct the top-level item based on its strategy
         if (product.deductionModel === 'ON_PRODUCTION') {
             await this.consumePreparedStock(productId, quantity, tx)
+            // STOP RECURSION: Components for batch-cooked items are deducted during production
+            return;
         } else {
             // Standard raw ingredient deduction
             await this.inventoryService.consumeIngredients(productId, quantity, tx)
         }
 
-        // 2. Recursively deduct recipe components (sub-products)
+        // 2. Recursively deduct recipe components (sub-products) for ON_ORDER items
         await this.deductRecipeComponents(product, quantity, tx)
     }
 
