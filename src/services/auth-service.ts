@@ -105,4 +105,26 @@ export class AuthService {
 
         return false
     }
+
+    /**
+     * Resolves the data boundary for a user.
+     * Owners are scoped to the tenant (can see all branches).
+     * Managers and others are strictly scoped to their assigned branch.
+     */
+    async getUserScope(userId: string) {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { role: true }
+        })
+
+        if (!user) throw new Error('User context invalid: User not found')
+
+        const isOwner = user.role.name === 'Owner' || user.role.name === 'Admin'
+        
+        return {
+            tenantId: user.tenantId,
+            branchId: isOwner ? undefined : (user.branchId || undefined),
+            role: user.role.name
+        }
+    }
 }

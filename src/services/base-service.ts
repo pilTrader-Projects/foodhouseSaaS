@@ -21,11 +21,23 @@ export class BaseService {
 
     /**
      * Helper to append tenant and branch scoping to Prisma queries.
+     * Use this for models that have a 'branchId' field (Order, Stock, etc).
      */
     protected getScope() {
         return {
             tenantId: this.tenantId,
             ...(this.branchId ? { branchId: this.branchId } : {}),
+        }
+    }
+
+    /**
+     * Helper to scope Branch model queries.
+     * Uses 'id' instead of 'branchId'.
+     */
+    protected getBranchScope() {
+        return {
+            tenantId: this.tenantId,
+            ...(this.branchId ? { id: this.branchId } : {}),
         }
     }
 

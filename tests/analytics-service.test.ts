@@ -86,4 +86,60 @@ describe('AnalyticsService (Consolidation - Phase 4 TDD)', () => {
             }
         }))
     })
+
+    describe('Branch Scoping (Manager Role)', () => {
+        const branchId = 'branch-mgr-1'
+        let scopedService: AnalyticsService
+
+        beforeEach(() => {
+            scopedService = new AnalyticsService(tenantId, branchId)
+        })
+
+        it('should aggregate sales ONLY for the assigned branch', async () => {
+            ;(prisma.order.aggregate as any).mockResolvedValue({
+                _sum: { totalAmount: 1500 }
+            })
+
+            const total = await scopedService.getGlobalSales()
+
+            expect(total).toBe(1500)
+            expect(prisma.order.aggregate).toHaveBeenCalledWith(expect.objectContaining({
+                where: { tenantId, branchId },
+            }))
+        })
+
+        it('should return ONLY the assigned branch in performance reports', async () => {
+             const mockBranches = [
+                { id: 'branch-mgr-1', name: 'Manager Branch' },
+            ]
+            const mockSales = [
+                { branchId: 'branch-mgr-1', _sum: { totalAmount: 1500 } },
+            ]
+            
+            ;(prisma.branch.findMany as any).mockResolvedValue(mockBranches)
+            ;(prisma.order.groupBy as any).mockResolvedValue(mockSales)
+
+            const performance = await scopedService.getBranchPerformance()
+
+            expect(performance).toHaveLength(1)
+            expect(performance[0].branchId).toBe(branchId)
+            expect(prisma.branch.findMany).toHaveBeenCalledWith(expect.objectContaining({
+                where: { tenantId, id: branchId }
+            }))
+        })
+
+        it('should filter critical stock ONLY for the assigned branch', async () => {
+            ;(prisma.stock.findMany as any).mockResolvedValue([])
+
+            await scopedService.getGlobalCriticalStock()
+
+            expect(prisma.stock.findMany).toHaveBeenCalledWith(expect.objectContaining({
+                where: {
+                    tenantId,
+                    branchId,
+                    quantity: { lte: 10 }
+                }
+            }))
+        })
+    })
 })

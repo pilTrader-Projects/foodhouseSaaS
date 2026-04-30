@@ -137,10 +137,15 @@ export default function PremiumDashboard() {
           <motion.div variants={item} className="flex justify-between items-end">
             <div>
               <h1 className="text-4xl font-black text-main leading-tight tracking-tight">
-                <span className="text-gradient">Operational</span> Intelligence
+                <span className="text-gradient">
+                  {user?.role.name === 'Owner' || user?.role.name === 'Admin' ? 'Operational' : 'Branch'}
+                </span> Intelligence
               </h1>
               <p className="text-muted font-medium mt-1">
-                Real-time oversight across <span className="text-main font-bold">{data.performance.length} {data.performance.length === 1 ? 'branch' : 'branches'}</span>.
+                {user?.role.name === 'Owner' || user?.role.name === 'Admin' 
+                  ? `Real-time oversight across ${data.performance.length} ${data.performance.length === 1 ? 'branch' : 'branches'}.`
+                  : `Real-time performance analytics for ${user?.branch?.name || 'your branch'}.`
+                }
               </p>
             </div>
             <div className="flex gap-3">
@@ -163,7 +168,9 @@ export default function PremiumDashboard() {
                  </div>
               </div>
               <div>
-                <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Total Revenue</h3>
+                <h3 className="text-muted text-xs font-bold uppercase tracking-widest">
+                  {user?.role.name === 'Owner' || user?.role.name === 'Admin' ? 'Total Revenue' : 'Branch Revenue'}
+                </h3>
                 <div className="text-3xl font-black text-main mt-1 tracking-tight">
                   {apiLoading ? <span className="opacity-20">₱0,000</span> : `₱${data.sales.toLocaleString()}`}
                 </div>
@@ -178,9 +185,16 @@ export default function PremiumDashboard() {
                   <Store className="w-6 h-6 text-purple-500" />
                </div>
                <div>
-                  <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Network Nodes</h3>
+                  <h3 className="text-muted text-xs font-bold uppercase tracking-widest">
+                    {user?.role.name === 'Owner' || user?.role.name === 'Admin' ? 'Network Nodes' : 'Branch Status'}
+                  </h3>
                   <div className="text-3xl font-black text-main mt-1 tracking-tight">
-                    {apiLoading ? '-' : data.performance.length} <span className="text-sm font-medium text-muted">{data.performance.length === 1 ? 'Branch' : 'Branches'}</span>
+                    {apiLoading ? '-' : data.performance.length} <span className="text-sm font-medium text-muted">
+                      {user?.role.name === 'Owner' || user?.role.name === 'Admin' 
+                        ? (data.performance.length === 1 ? 'Branch' : 'Branches')
+                        : 'Active'
+                      }
+                    </span>
                   </div>
                </div>
             </motion.div>
@@ -193,7 +207,9 @@ export default function PremiumDashboard() {
                   <AlertTriangle className={`w-6 h-6 ${data.stockAlerts.length > 0 ? 'text-rose-600' : 'text-emerald-500'}`} />
                </div>
                <div>
-                  <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Inventory Health</h3>
+                  <h3 className="text-muted text-xs font-bold uppercase tracking-widest">
+                    {user?.role.name === 'Owner' || user?.role.name === 'Admin' ? 'Inventory Health' : 'Stock Alerts'}
+                  </h3>
                   <div className={`text-3xl font-black mt-1 tracking-tight ${data.stockAlerts.length > 0 ? 'text-rose-600' : 'text-main'}`}>
                     {apiLoading ? '-' : data.stockAlerts.length} <span className="text-sm font-medium text-muted">{data.stockAlerts.length === 1 ? 'Alert' : 'Alerts'}</span>
                   </div>
