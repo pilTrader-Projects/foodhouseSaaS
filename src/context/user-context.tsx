@@ -17,6 +17,10 @@ interface User {
     id: string;
     name: string;
   };
+  tenant?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface UserContextType {
