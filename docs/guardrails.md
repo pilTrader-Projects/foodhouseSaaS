@@ -18,3 +18,8 @@
 - **Mandatory Peer Review**: All code must be reviewed by the Senior Lead agent before submission.
 - **Sanity Checks**: Every change must trigger a sanity check test.
 - **Zero-Failure Policy**: No code with failing tests should ever be proposed for review.
+- **Zero Build Errors**: Any code that breaks the build or causes a runtime crash is an automatic failure.
+- **Mandatory Visual Proof**: For UI changes, a browser verification recording or screenshot must be part of the review process.
+
+## Domain Rules
+- **Branch Isolation**: When adding a new branch/outlet, it MUST be initialized in a "clean" state. This means no associated employees, no physical inventory, and no transaction records should be created or inherited automatically during the provisioning process.

@@ -140,7 +140,7 @@ export default function PremiumDashboard() {
                 <span className="text-gradient">Operational</span> Intelligence
               </h1>
               <p className="text-muted font-medium mt-1">
-                Real-time oversight across <span className="text-main font-bold">{data.performance.length} branches</span>.
+                Real-time oversight across <span className="text-main font-bold">{data.performance.length} {data.performance.length === 1 ? 'branch' : 'branches'}</span>.
               </p>
             </div>
             <div className="flex gap-3">
@@ -161,10 +161,6 @@ export default function PremiumDashboard() {
                  <div className="p-3 bg-blue-500/10 rounded-lg">
                    <CreditCard className="w-6 h-6 text-blue-500" />
                  </div>
-                 <div className="flex items-center gap-1 text-emerald-500 text-xs font-black bg-emerald-500/10 px-2 py-1 rounded-full">
-                    <ArrowUpRight size={14} />
-                    <span>12.5%</span>
-                 </div>
               </div>
               <div>
                 <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Total Revenue</h3>
@@ -175,7 +171,7 @@ export default function PremiumDashboard() {
             </motion.div>
 
             <motion.div variants={item} className="glass-card p-8 flex flex-col gap-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
-               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Store size={80} />
               </div>
                <div className="p-3 bg-purple-500/10 rounded-lg self-start">
@@ -184,7 +180,7 @@ export default function PremiumDashboard() {
                <div>
                   <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Network Nodes</h3>
                   <div className="text-3xl font-black text-main mt-1 tracking-tight">
-                    {apiLoading ? '-' : data.performance.length} <span className="text-sm font-medium text-muted">Branches</span>
+                    {apiLoading ? '-' : data.performance.length} <span className="text-sm font-medium text-muted">{data.performance.length === 1 ? 'Branch' : 'Branches'}</span>
                   </div>
                </div>
             </motion.div>
@@ -199,7 +195,7 @@ export default function PremiumDashboard() {
                <div>
                   <h3 className="text-muted text-xs font-bold uppercase tracking-widest">Inventory Health</h3>
                   <div className={`text-3xl font-black mt-1 tracking-tight ${data.stockAlerts.length > 0 ? 'text-rose-600' : 'text-main'}`}>
-                    {apiLoading ? '-' : data.stockAlerts.length} <span className="text-sm font-medium text-muted">Alerts</span>
+                    {apiLoading ? '-' : data.stockAlerts.length} <span className="text-sm font-medium text-muted">{data.stockAlerts.length === 1 ? 'Alert' : 'Alerts'}</span>
                   </div>
                </div>
             </motion.div>
@@ -223,13 +219,13 @@ export default function PremiumDashboard() {
                     </div>
                     <div className="flex-1">
                       <div className="flex-between mb-1">
-                        <span className="text-sm font-bold text-main">Branch ID: {p.branchId.slice(-4)}</span>
+                        <span className="text-sm font-bold text-main">{p.branchName || `Branch ${p.branchId.slice(-4)}`}</span>
                         <span className="text-xs font-black text-main">₱{p._sum.totalAmount?.toLocaleString()}</span>
                       </div>
                       <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden">
                         <motion.div 
                           initial={{ width: 0 }}
-                          animate={{ width: `${(p._sum.totalAmount / data.sales) * 100}%` }}
+                          animate={{ width: data.sales > 0 ? `${(p._sum.totalAmount / data.sales) * 100}%` : '0%' }}
                           transition={{ duration: 1, delay: 0.5 }}
                           className="h-full bg-primary"
                         />

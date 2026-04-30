@@ -30,3 +30,9 @@ Unit tests must cover:
 ## Documentation
 - Use JSDoc for all public methods and complex logic.
 - Maintain an up-to-date `README.md` and `docs/`.
+
+## UI & Frontend Verification
+- **Visual Audit**: Every UI change MUST be verified in the browser.
+- **Console Hygiene**: No console errors or warnings should be present in the final submission.
+- **Build Integrity**: Ensure no syntax errors (e.g., stray characters) exist that break the Next.js build.
+- **Responsive Check**: Verify changes across mobile, tablet, and desktop views.

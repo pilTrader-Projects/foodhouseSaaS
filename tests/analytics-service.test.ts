@@ -12,6 +12,9 @@ vi.mock('@/lib/prisma', () => ({
         },
         stock: {
             findMany: vi.fn(),
+        },
+        branch: {
+            findMany: vi.fn(),
         }
     },
 }))
@@ -48,20 +51,27 @@ describe('AnalyticsService (Consolidation - Phase 4 TDD)', () => {
         await expect(service.getGlobalSales()).rejects.toThrow(/Feature 'dashboard' is not enabled/)
     })
 
-    it('should return branch performance ranked by sales', async () => {
-        const mockPerformance = [
+    it('should return branch performance ranked by sales including zero sales branches', async () => {
+        const mockBranches = [
+            { id: 'branch-A', name: 'Branch A' },
+            { id: 'branch-B', name: 'Branch B' },
+            { id: 'branch-C', name: 'Branch C' },
+        ]
+        const mockSales = [
             { branchId: 'branch-A', _sum: { totalAmount: 1000 } },
             { branchId: 'branch-B', _sum: { totalAmount: 500 } },
         ]
-        ;(prisma.order.groupBy as any).mockResolvedValue(mockPerformance)
+        
+        ;(prisma.branch.findMany as any).mockResolvedValue(mockBranches)
+        ;(prisma.order.groupBy as any).mockResolvedValue(mockSales)
 
         const performance = await service.getBranchPerformance()
 
-        expect(performance).toHaveLength(2)
-        expect(prisma.order.groupBy).toHaveBeenCalledWith(expect.objectContaining({
-            by: ['branchId'],
-            where: { tenantId }
-        }))
+        expect(performance).toHaveLength(3)
+        expect(performance[0].branchId).toBe('branch-A')
+        expect(performance[0]._sum.totalAmount).toBe(1000)
+        expect(performance[2].branchId).toBe('branch-C')
+        expect(performance[2]._sum.totalAmount).toBe(0)
     })
 
     it('should fetch critical stock across all branches', async () => {

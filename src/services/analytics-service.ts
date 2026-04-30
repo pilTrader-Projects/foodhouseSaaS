@@ -25,25 +25,39 @@ export class AnalyticsService extends BaseService {
     }
 
     /**
-     * Compares performance across branches.
+     * Compares performance across all branches, including those with zero sales.
      */
     async getBranchPerformance() {
         await this.ensureFeature('dashboard')
 
-        return prisma.order.groupBy({
+        // 1. Fetch all branches for the tenant
+        const branches = await prisma.branch.findMany({
+            where: { tenantId: this.tenantId },
+            select: { id: true, name: true }
+        })
+
+        // 2. Fetch aggregated sales per branch
+        const sales = await prisma.order.groupBy({
             by: ['branchId'],
             where: {
                 tenantId: this.tenantId,
             },
             _sum: {
                 totalAmount: true,
-            },
-            orderBy: {
-                _sum: {
-                    totalAmount: 'desc',
-                },
-            },
+            }
         })
+
+        // 3. Merge branches with sales data
+        return branches.map(branch => {
+            const branchSales = sales.find(s => s.branchId === branch.id)
+            return {
+                branchId: branch.id,
+                branchName: branch.name,
+                _sum: {
+                    totalAmount: branchSales?._sum?.totalAmount || 0
+                }
+            }
+        }).sort((a, b) => (b._sum.totalAmount || 0) - (a._sum.totalAmount || 0))
     }
 
     /**
