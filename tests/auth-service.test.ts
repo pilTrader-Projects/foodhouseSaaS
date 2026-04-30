@@ -85,4 +85,41 @@ describe('AuthService (RBAC)', () => {
         const hasAccess = await authService.hasPermission('user-3', 'accounting:view')
         expect(hasAccess).toBe(false)
     })
+
+    describe('getUserScope', () => {
+        it('should return tenantId and undefined branchId for an Owner', async () => {
+            const mockUser = {
+                id: 'owner-1',
+                tenantId: 'tenant-1',
+                branchId: 'branch-1',
+                role: { name: 'Owner' }
+            }
+            ;(prisma.user.findUnique as any).mockResolvedValue(mockUser)
+
+            const scope = await authService.getUserScope('owner-1')
+            expect(scope.tenantId).toBe('tenant-1')
+            expect(scope.branchId).toBeUndefined()
+            expect(scope.role).toBe('Owner')
+        })
+
+        it('should return tenantId and specific branchId for a Manager', async () => {
+            const mockUser = {
+                id: 'mgr-1',
+                tenantId: 'tenant-1',
+                branchId: 'branch-1',
+                role: { name: 'Manager' }
+            }
+            ;(prisma.user.findUnique as any).mockResolvedValue(mockUser)
+
+            const scope = await authService.getUserScope('mgr-1')
+            expect(scope.tenantId).toBe('tenant-1')
+            expect(scope.branchId).toBe('branch-1')
+            expect(scope.role).toBe('Manager')
+        })
+
+        it('should throw error if user is not found', async () => {
+            ;(prisma.user.findUnique as any).mockResolvedValue(null)
+            await expect(authService.getUserScope('invalid')).rejects.toThrow(/User not found/)
+        })
+    })
 })
