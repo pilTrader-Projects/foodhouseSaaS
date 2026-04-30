@@ -25,7 +25,8 @@ export class ProductionService extends BaseService {
         return await prisma.$transaction(async (tx) => {
             // 0. Fetch Product to get batchSize
             const product = await tx.product.findUnique({
-                where: { id: productId }
+                where: { id: productId },
+                include: { ingredients: true }
             })
             if (!product) throw new Error('Product not found')
 
@@ -35,7 +36,7 @@ export class ProductionService extends BaseService {
             await this.inventoryService.consumeIngredients(productId, numBatches, tx)
 
             // 2. Deduct Sub-Product Ingredients (recursive components only)
-            await this.deductionService.deductRecipeComponents(product, numBatches, tx)
+            await this.deductionService.deductRecipeComponents(product, yieldQuantity, tx)
 
             // 3. Increase Prepared Stock
             await tx.preparedStock.upsert({

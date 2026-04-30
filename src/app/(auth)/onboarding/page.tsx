@@ -2,18 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
-  User, 
-  Store, 
-  MapPin, 
-  ArrowRight, 
   CheckCircle2,
-  ChevronRight,
-  Loader2,
-  ShieldCheck
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@/context/user-context';
+import { AuthContainer } from '@/components/auth/auth-container';
 
 export default function OnboardingPage() {
     const [step, setStep] = useState(1);
@@ -54,9 +50,7 @@ export default function OnboardingPage() {
                 localStorage.setItem('tenantId', data.tenantId);
                 localStorage.setItem('userId', data.userId);
                 
-                // Refresh context before redirect
                 await refreshUser();
-                
                 router.push('/dashboard');
             } else {
                 setError(data.error || 'Something went wrong');
@@ -84,29 +78,35 @@ export default function OnboardingPage() {
         { id: 3, title: 'Outlet' }
     ];
 
+    const stepTitles = {
+        1: { main: 'Identity', sub: 'Personal Owner Credentials' },
+        2: { main: 'Organization', sub: 'Brand & Infrastructure Selection' },
+        3: { main: 'Deployment', sub: 'Primary Branch Configuration' }
+    };
+
+    const { main, sub } = stepTitles[step as keyof typeof stepTitles];
+
     return (
-        <div className="min-h-screen bg-app flex-col flex-center p-4 animate-fade-in">
-            <div className="max-w-xl w-full">
+        <AuthContainer 
+            title={main} 
+            subtitle={sub} 
+            maxWidth="xl"
+        >
+            <div className="flex flex-col gap-10">
                 {/* Progress Indicators */}
-                <div className="flex gap-10 mb-20 border-b border-white/5 pb-4">
+                <div className="flex gap-10 border-b border-white/5 pb-4">
                     {steps.map((s) => (
                         <div 
                             key={s.id} 
-                            style={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '0.5rem', 
-                              opacity: step >= s.id ? 1 : 0.3,
-                              transition: 'all 0.5s'
-                            }}
+                            className={`flex items-center gap-2 transition-all duration-500 ${step >= s.id ? 'opacity-100' : 'opacity-30'}`}
                         >
                             <span className="text-xs font-black uppercase tracking-widest text-main">{s.title}</span>
-                            {step === s.id && <div style={{ width: '4px', height: '4px', background: 'var(--primary)', borderRadius: '50%' }} />}
+                            {step === s.id && <div className="w-1 h-1 bg-primary rounded-full shadow-glow" />}
                         </div>
                     ))}
                 </div>
 
-                <div className="flex-col gap-10">
+                <div className="flex flex-col gap-10">
                     <AnimatePresence mode="wait">
                         {step === 1 && (
                             <motion.div 
@@ -114,14 +114,9 @@ export default function OnboardingPage() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="flex-col gap-8"
+                                className="flex flex-col gap-8"
                             >
-                                <div>
-                                    <h2 className="font-serif text-5xl font-black text-main tracking-tight">Identity</h2>
-                                    <p className="text-xs font-bold text-muted uppercase tracking-widest mt-4">Personal Owner Credentials</p>
-                                </div>
-                                
-                                <div className="flex-col gap-4">
+                                <div className="flex flex-col gap-4">
                                     <input 
                                         autoFocus
                                         type="text" 
@@ -154,14 +149,9 @@ export default function OnboardingPage() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="flex-col gap-8"
+                                className="flex flex-col gap-8"
                             >
-                                <div>
-                                    <h2 className="font-serif text-5xl font-black text-main tracking-tight">Organization</h2>
-                                    <p className="text-xs font-bold text-muted uppercase tracking-widest mt-4">Brand & Infrastructure Selection</p>
-                                </div>
-                                
-                                <div className="flex-col gap-6">
+                                <div className="flex flex-col gap-6">
                                     <input 
                                         autoFocus
                                         type="text" 
@@ -172,36 +162,37 @@ export default function OnboardingPage() {
                                     />
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div 
-                                            onClick={() => updateFormData('business', 'plan', 'basic')}
-                                            style={{ 
-                                              cursor: 'pointer',
-                                              padding: '2rem',
-                                              border: '1px solid',
-                                              borderColor: formData.business.plan === 'basic' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-                                              background: formData.business.plan === 'basic' ? 'rgba(var(--primary-rgb), 0.1)' : 'rgba(255,255,255,0.02)',
-                                              transition: 'all 0.3s',
-                                              borderRadius: '12px'
-                                            }}
-                                        >
-                                            <h3 className="text-xs font-black uppercase tracking-widest text-main">Standard</h3>
-                                            <p className="text-xs text-muted mt-2">Single branch context initialization.</p>
-                                        </div>
-                                        <div 
-                                            onClick={() => updateFormData('business', 'plan', 'pro')}
-                                            style={{ 
-                                              cursor: 'pointer',
-                                              padding: '2rem',
-                                              border: '1px solid',
-                                              borderColor: formData.business.plan === 'pro' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-                                              background: formData.business.plan === 'pro' ? 'rgba(var(--primary-rgb), 0.1)' : 'rgba(255,255,255,0.02)',
-                                              transition: 'all 0.3s',
-                                              borderRadius: '12px'
-                                            }}
-                                        >
-                                            <h3 className="text-xs font-black uppercase tracking-widest text-main">Scale</h3>
-                                            <p className="text-xs text-muted mt-2">Multi-tenant management enabled.</p>
-                                        </div>
+                                        {[
+                                            { id: 'basic', label: 'Standard', desc: 'Single branch context initialization.' },
+                                            { id: 'pro', label: 'Scale', desc: 'Multi-tenant management enabled.' }
+                                        ].map((plan) => (
+                                            <div 
+                                                key={plan.id}
+                                                onClick={() => updateFormData('business', 'plan', plan.id)}
+                                                className="cursor-pointer transition-all duration-300 relative flex flex-col"
+                                                style={{ 
+                                                    padding: '2rem',
+                                                    borderRadius: '16px',
+                                                    border: formData.business.plan === plan.id ? '3px solid var(--primary)' : '1px solid var(--glass-border)',
+                                                    backgroundColor: formData.business.plan === plan.id ? 'var(--primary-glow)' : 'transparent',
+                                                    boxShadow: formData.business.plan === plan.id ? 'var(--shadow-glow)' : 'none'
+                                                }}
+                                            >
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <h3 className="text-xs font-black uppercase tracking-widest text-main">{plan.label}</h3>
+                                                    {formData.business.plan === plan.id && (
+                                                        <div className="w-2 h-2 bg-primary rounded-full shadow-glow" />
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-muted leading-relaxed mb-4">{plan.desc}</p>
+                                                
+                                                {formData.business.plan === plan.id && (
+                                                    <div className="text-[10px] font-black text-primary uppercase tracking-widest mt-auto">
+                                                        Selected
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </motion.div>
@@ -213,14 +204,9 @@ export default function OnboardingPage() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="flex-col gap-8"
+                                className="flex flex-col gap-8"
                             >
-                                <div>
-                                    <h2 className="font-serif text-5xl font-black text-main tracking-tight">Deployment</h2>
-                                    <p className="text-xs font-bold text-muted uppercase tracking-widest mt-4">Primary Branch Configuration</p>
-                                </div>
-                                
-                                <div className="flex-col gap-4">
+                                <div className="flex flex-col gap-4">
                                     <input 
                                         autoFocus
                                         type="text" 
@@ -229,9 +215,9 @@ export default function OnboardingPage() {
                                         value={formData.branch.name}
                                         onChange={(e) => updateFormData('branch', 'name', e.target.value)}
                                     />
-                                    <div className="p-10 border border-white/5 bg-white/2 flex-col gap-4 items-center text-center rounded-2xl">
+                                    <div className="p-10 border border-white/5 bg-white/2 flex flex-col gap-4 items-center text-center rounded-2xl">
                                         <div className="text-primary">
-                                            <CheckCircle2 style={{ width: '2rem', height: '2rem' }} />
+                                            <CheckCircle2 className="w-8 h-8" />
                                         </div>
                                         <div>
                                             <h4 className="text-xs font-black uppercase tracking-widest text-main">Automated Setup</h4>
@@ -248,29 +234,35 @@ export default function OnboardingPage() {
                     {/* Navigation */}
                     <div className="flex gap-4 items-center">
                         <button 
+                            disabled={step === 1 || isLoading}
+                            onClick={prevStep}
+                            className={`btn-minimal border border-white/10 text-black px-8 h-12 rounded-full transition-opacity ${
+                                step === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/5'
+                            }`}
+                        >
+                            Back
+                        </button>
+                        
+                        <button 
                             disabled={isLoading}
                             onClick={nextStep}
-                            className="btn-minimal bg-primary text-white hover:shadow-glow px-10 h-12 rounded-full"
+                            className="btn-minimal bg-primary text-black hover:shadow-glow px-10 h-12 rounded-full flex-1"
                         >
-                            {isLoading ? 'Finalizing...' : step === 3 ? 'Deploy SaaS' : 'Next Phase'}
+                            {isLoading ? (
+                                <Loader2 className="animate-spin w-4 h-4" />
+                            ) : (
+                                step === 3 ? 'Deploy SaaS' : 'Next Phase'
+                            )}
                         </button>
-                        {step > 1 && (
-                            <button 
-                                onClick={prevStep}
-                                className="btn-minimal border border-white/10 text-main hover:bg-white/5 px-6 h-12 rounded-full"
-                            >
-                                Back
-                            </button>
-                        )}
                     </div>
 
                     {error && (
-                        <div className="text-rose-500 text-xs font-black uppercase tracking-widest mt-6">
+                        <div className="text-rose-500 text-xs font-black uppercase tracking-widest">
                            Error: {error}
                         </div>
                     )}
                 </div>
             </div>
-        </div>
+        </AuthContainer>
     );
 }

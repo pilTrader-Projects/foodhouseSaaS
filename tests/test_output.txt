@@ -1,0 +1,46 @@
+
+ RUN  v4.1.5 /Users/user/dev/projects/nocode/foodhouseSaaS
+
+ ❯ tests/combo-deduction.test.ts (3 tests | 1 failed) 13757ms
+     ✓ should prevent double-deduction by stopping recursion at the ON_PRODUCTION boundary  7730ms
+     ✓ should recursively deduct raw ingredients for nested ON_ORDER components  4504ms
+     × should NOT deduct sub-components during a sale if the parent component is ON_PRODUCTION 1521ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/combo-deduction.test.ts > Combo Meal Deductions (K-2+) > should NOT deduct sub-components during a sale if the parent component is ON_PRODUCTION
+PrismaClientValidationError: 
+Invalid `prisma.product.create()` invocation:
+
+{
+  data: {
+    name: "Special Sauce (Batch)",
+    tenantId: "tenant-combo-4jqjpm",
+    deductionModel: "ON_PRODUCTION",
+    batchSize: 50,
++   price: Float
+  }
+}
+
+Argument `price` is missing.
+ ❯ wn node_modules/@prisma/client/runtime/library.js:29:1363
+ ❯ $n.handleRequestError node_modules/@prisma/client/runtime/library.js:121:6958
+ ❯ $n.handleAndLogRequestError node_modules/@prisma/client/runtime/library.js:121:6623
+ ❯ $n.request node_modules/@prisma/client/runtime/library.js:121:6307
+ ❯ l node_modules/@prisma/client/runtime/library.js:130:9633
+ ❯ tests/combo-deduction.test.ts:171:23
+    169|     it('should NOT deduct sub-components during a sale if the parent c…
+    170|         // 1. Create Component B (e.g. Special Sauce) - ON_PRODUCTION
+    171|         const sauce = await prisma.product.create({
+       |                       ^
+    172|             data: {
+    173|                 name: 'Special Sauce (Batch)',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  21:43:44
+   Duration  15.35s (transform 158ms, setup 0ms, import 394ms, tests 13.76s, environment 834ms)
+
