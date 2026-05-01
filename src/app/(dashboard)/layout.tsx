@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react'
 import { Sidebar } from '@/components/layout/sidebar'
 import { useUser } from '@/context/user-context'
 import { motion } from 'framer-motion'
@@ -9,7 +10,13 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user } = useUser();
+  const { user, loading } = useUser();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="dashboard-container">
       <Sidebar />
@@ -18,8 +25,8 @@ export default function DashboardLayout({
         <header className="header glass-card !rounded-none !border-t-0 !border-x-0 sticky top-0 z-40">
           <div className="flex items-center gap-3">
              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-             <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted">
-               Terminal <span className="opacity-20 px-2">/</span> Console
+             <div className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
+               {(mounted && user?.tenant?.name) ? user.tenant.name : 'Terminal'} <span className="opacity-20 px-2">/</span> Console
              </div>
           </div>
           

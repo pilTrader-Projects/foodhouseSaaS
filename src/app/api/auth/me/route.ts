@@ -13,7 +13,18 @@ export async function GET(req: NextRequest) {
                         permissions: true
                     }
                 },
-                branch: true
+                branch: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                tenant: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
             }
         })
 
