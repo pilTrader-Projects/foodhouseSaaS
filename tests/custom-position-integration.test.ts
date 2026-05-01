@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { RoleService } from '@/services/role-service'
 import { UserService } from '@/services/user-service'
 import prisma from '@/lib/prisma'
+import { cleanupTenant } from './utils/cleanup'
 
 describe('Custom Position Integration', () => {
     let tenantId: string
@@ -12,14 +13,13 @@ describe('Custom Position Integration', () => {
         tenantId = `test-role-${Math.random().toString(36).substring(7)}`
         roleService = new RoleService()
         userService = new UserService(tenantId)
-        // Cleanup
-        await prisma.user.deleteMany({ where: { tenantId } })
-        await prisma.role.deleteMany({ where: { tenantId } })
-        await prisma.branch.deleteMany({ where: { tenantId } })
-        await prisma.tenant.deleteMany({ where: { id: tenantId } })
 
         // Setup
         await prisma.tenant.create({ data: { id: tenantId, name: 'Test Food Corp' } })
+    })
+
+    afterEach(async () => {
+        await cleanupTenant(tenantId)
     })
 
     it('should allow creating a custom role and assigning it to a new staff member', async () => {

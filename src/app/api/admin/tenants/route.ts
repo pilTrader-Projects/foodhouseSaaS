@@ -18,3 +18,24 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: error.message.includes('Forbidden') ? 403 : 500 })
     }
 }
+
+export async function PATCH(req: NextRequest) {
+    try {
+        const userId = req.headers.get('x-user-id')
+        if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+        await rbacGuard(userId, PERMISSIONS.SYSTEM_ADMIN)
+
+        const { ids, status } = await req.json()
+        if (!ids || !Array.isArray(ids) || !status) {
+            return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+        }
+
+        const adminService = new GlobalAdminService()
+        await adminService.bulkUpdateTenantStatus(ids, status)
+        
+        return NextResponse.json({ message: 'Tenants updated successfully' })
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: error.message.includes('Forbidden') ? 403 : 500 })
+    }
+}

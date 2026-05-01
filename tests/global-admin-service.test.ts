@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { GlobalAdminService } from '../src/services/global-admin-service'
 import prisma from '../src/lib/prisma'
 
@@ -8,12 +8,19 @@ describe('GlobalAdminService', () => {
     const testTenantIdA = 'admin-test-t1'
     const testTenantIdB = 'admin-test-t2'
 
+    const testTenantIds = [testTenantIdA, testTenantIdB, 'admin-test-upgrade', 'admin-test-status', 'admin-test-stats']
+
     beforeEach(async () => {
         adminService = new GlobalAdminService()
         
         // Targeted cleanup of ONLY our test tenants
-        const testTenantIds = [testTenantIdA, testTenantIdB, 'admin-test-upgrade', 'admin-test-status', 'admin-test-stats']
-        
+        await prisma.branch.deleteMany({ where: { tenantId: { in: testTenantIds } } })
+        await prisma.user.deleteMany({ where: { tenantId: { in: testTenantIds } } })
+        await prisma.tenant.deleteMany({ where: { id: { in: testTenantIds } } })
+    })
+
+    afterAll(async () => {
+        // Final sweep cleanup
         await prisma.branch.deleteMany({ where: { tenantId: { in: testTenantIds } } })
         await prisma.user.deleteMany({ where: { tenantId: { in: testTenantIds } } })
         await prisma.tenant.deleteMany({ where: { id: { in: testTenantIds } } })
