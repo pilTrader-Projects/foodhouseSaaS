@@ -44,28 +44,12 @@ describe('Onboarding Permission Isolation (Regression Prevention)', () => {
         // 3. STRICT ASSERTIONS:
         expect(permissionNames).toContain(PERMISSIONS.ACCESS_DASHBOARD)
         expect(permissionNames).not.toContain('system:admin')
-<<<<<<< Updated upstream
-=======
         expect(permissionNames).not.toContain('access:admin')
->>>>>>> Stashed changes
         
         console.log('✅ Onboarding Isolation Verified: No permission leakage detected.')
     }, 30000)
 
     afterAll(async () => {
-<<<<<<< Updated upstream
-        // CLEANUP PROCESS: Remove all data created during this integration test
-        if (createdTenantId) {
-            console.log(`🧹 Cleaning up test data for Tenant: ${createdTenantId}...`)
-            // Delete in reverse order of dependencies
-            await prisma.user.deleteMany({ where: { tenantId: createdTenantId } })
-            await prisma.branch.deleteMany({ where: { tenantId: createdTenantId } })
-            await prisma.role.deleteMany({ where: { tenantId: createdTenantId } })
-            await prisma.tenant.delete({ where: { id: createdTenantId } })
-            console.log('✨ Test database is clean.')
-        }
-=======
         await cleanupTenant(createdTenantId)
->>>>>>> Stashed changes
     })
 })
