@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { TenantService } from '@/services/tenant-service'
 import { PERMISSIONS } from '@/lib/constants'
 import prisma from '@/lib/prisma'
+import { cleanupTenant } from './utils/cleanup'
 
 describe('Onboarding Permission Isolation (Regression Prevention)', () => {
     const tenantService = new TenantService()
@@ -43,11 +44,16 @@ describe('Onboarding Permission Isolation (Regression Prevention)', () => {
         // 3. STRICT ASSERTIONS:
         expect(permissionNames).toContain(PERMISSIONS.ACCESS_DASHBOARD)
         expect(permissionNames).not.toContain('system:admin')
+<<<<<<< Updated upstream
+=======
+        expect(permissionNames).not.toContain('access:admin')
+>>>>>>> Stashed changes
         
         console.log('✅ Onboarding Isolation Verified: No permission leakage detected.')
     }, 30000)
 
     afterAll(async () => {
+<<<<<<< Updated upstream
         // CLEANUP PROCESS: Remove all data created during this integration test
         if (createdTenantId) {
             console.log(`🧹 Cleaning up test data for Tenant: ${createdTenantId}...`)
@@ -58,5 +64,8 @@ describe('Onboarding Permission Isolation (Regression Prevention)', () => {
             await prisma.tenant.delete({ where: { id: createdTenantId } })
             console.log('✨ Test database is clean.')
         }
+=======
+        await cleanupTenant(createdTenantId)
+>>>>>>> Stashed changes
     })
 })

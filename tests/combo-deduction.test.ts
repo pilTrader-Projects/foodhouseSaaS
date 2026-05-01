@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { PosService } from '../src/modules/pos/services/pos-service'
 import { ProductionService } from '../src/services/production-service'
 import prisma from '../src/lib/prisma'
+import { cleanupTenant } from './utils/cleanup'
 
 describe('Combo Meal Deductions (K-2+)', () => {
     let tenantId: string
@@ -19,19 +20,6 @@ describe('Combo Meal Deductions (K-2+)', () => {
         posService = new PosService(tenantId, branchId)
         productionService = new ProductionService(tenantId, branchId)
 
-        // Cleanup
-        await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
-        await prisma.order.deleteMany({ where: { tenantId } })
-        await prisma.productionRecord.deleteMany({ where: { branch: { tenantId } } })
-        await prisma.preparedStock.deleteMany({ where: { branch: { tenantId } } })
-        await prisma.recipeItem.deleteMany({ where: { product: { tenantId } } })
-        await prisma.recipeItem.deleteMany({ where: { componentProduct: { tenantId } } })
-        await prisma.product.deleteMany({ where: { tenantId } })
-        await prisma.user.deleteMany({ where: { tenantId } })
-        await prisma.role.deleteMany({ where: { tenantId } })
-        await prisma.branch.deleteMany({ where: { tenantId } })
-        await prisma.tenant.deleteMany({ where: { id: tenantId } })
-
         // Setup
         await prisma.tenant.create({ data: { id: tenantId, name: 'Combo Test Tenant', features: ['pos', 'inventory'] } })
         await prisma.branch.create({ data: { id: branchId, name: 'Branch 1', tenantId } })
@@ -46,6 +34,10 @@ describe('Combo Meal Deductions (K-2+)', () => {
                 roleId: role.id
             }
         })
+    })
+
+    afterEach(async () => {
+        await cleanupTenant(tenantId)
     })
 
     it('should prevent double-deduction by stopping recursion at the ON_PRODUCTION boundary', async () => {
