@@ -98,14 +98,29 @@ export function Sidebar() {
             <Link 
               key={item.name} 
               href={item.href}
-              className={`sidebar-link group ${isActive ? 'active' : ''}`}
+              className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group border border-transparent ${
+                isActive 
+                  ? 'bg-primary/10 text-primary shadow-sm border-primary/20' 
+                  : 'text-slate-500 hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-active)] hover:translate-x-1 hover:border-white/5 hover:shadow-lg'
+              }`}
             >
-              <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'group-hover:bg-white/10'}`}>
-                <item.icon size={18} />
+              <div className={`p-2 rounded-lg transition-all duration-300 ${
+                isActive 
+                  ? 'bg-primary text-white shadow-glow' 
+                  : 'bg-slate-500/10 group-hover:bg-primary/30 group-hover:text-primary group-hover:scale-110'
+              }`}>
+                <item.icon size={20} />
               </div>
-              <span className="flex-1">{item.name}</span>
+              <span className={`text-xs font-black uppercase tracking-widest transition-colors ${
+                isActive ? 'text-primary' : 'text-[var(--sidebar-text)] group-hover:text-[var(--sidebar-active)]'
+              }`}>
+                {item.name}
+              </span>
               {isActive && (
-                <motion.div layoutId="active-pill" className="w-1.5 h-1.5 rounded-full bg-primary" />
+                <motion.div 
+                  layoutId="active-indicator"
+                  className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-glow" 
+                />
               )}
             </Link>
           );
@@ -113,18 +128,26 @@ export function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <button onClick={toggleTheme} className="theme-toggle group">
-          <div className="p-2 rounded-lg group-hover:bg-white/10 transition-colors">
+        <button 
+          onClick={toggleTheme} 
+          className="flex items-center gap-4 px-4 py-3 rounded-xl text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-active)] transition-all duration-300 group w-full text-left"
+        >
+          <div className="p-2 rounded-lg bg-slate-500/5 group-hover:bg-primary/20 group-hover:text-primary transition-all duration-300">
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </div>
-          <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+          <span className="text-xs font-black uppercase tracking-widest">
+            {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+          </span>
         </button>
         
-        <button onClick={handleLogout} className="theme-toggle group opacity-50 hover:opacity-100 transition-opacity">
-          <div className="p-2 rounded-lg group-hover:bg-rose-500/10 group-hover:text-rose-500 transition-colors">
+        <button 
+          onClick={handleLogout} 
+          className="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-rose-500/10 hover:text-rose-500 transition-all duration-300 group w-full text-left"
+        >
+          <div className="p-2 rounded-lg bg-slate-500/5 group-hover:bg-rose-500/20 transition-all duration-300">
             <LogOut size={18} />
           </div>
-          <span>Sign Out</span>
+          <span className="text-xs font-black uppercase tracking-widest">Sign Out</span>
         </button>
       </div>
 
@@ -157,56 +180,12 @@ export function Sidebar() {
           gap: 0.5rem;
         }
 
-        .sidebar-link {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 0.5rem 1rem;
-          border-radius: var(--radius-sm);
-          font-size: 0.75rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          color: var(--sidebar-text);
-        }
-
-        .sidebar-link:hover {
-          color: var(--sidebar-active);
-          background-color: rgba(255,255,255,0.03);
-        }
-
-        .sidebar-link.active {
-          color: var(--sidebar-active);
-          background-color: rgba(255,255,255,0.05);
-        }
-
         .sidebar-footer {
           padding: 2rem 1.5rem;
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
-        }
-
-        .theme-toggle {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 0.5rem 1rem;
-          width: 100%;
-          background: none;
-          border: none;
-          color: var(--sidebar-text);
-          font-size: 0.75rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .theme-toggle:hover {
-          color: var(--sidebar-active);
+          border-top: 1px solid rgba(255,255,255,0.05);
         }
       `}</style>
     </aside>
