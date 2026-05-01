@@ -98,28 +98,28 @@ export function Sidebar() {
             <Link 
               key={item.name} 
               href={item.href}
-              className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group border border-transparent ${
+              className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group ${
                 isActive 
-                  ? 'bg-primary/10 text-primary shadow-sm border-primary/20' 
-                  : 'text-slate-500 hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-active)] hover:translate-x-1 hover:border-white/5 hover:shadow-lg'
+                  ? 'bg-primary text-white shadow-glow' 
+                  : 'text-slate-500 hover:bg-white/5 hover:text-white'
               }`}
             >
               <div className={`p-2 rounded-lg transition-all duration-300 ${
                 isActive 
-                  ? 'bg-primary text-white shadow-glow' 
-                  : 'bg-slate-500/10 group-hover:bg-primary/30 group-hover:text-primary group-hover:scale-110'
+                  ? 'bg-white/10' 
+                  : 'bg-white/5 group-hover:bg-white/10'
               }`}>
                 <item.icon size={20} />
               </div>
               <span className={`text-xs font-black uppercase tracking-widest transition-colors ${
-                isActive ? 'text-primary' : 'text-[var(--sidebar-text)] group-hover:text-[var(--sidebar-active)]'
+                isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'
               }`}>
                 {item.name}
               </span>
               {isActive && (
                 <motion.div 
                   layoutId="active-indicator"
-                  className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-glow" 
+                  className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" 
                 />
               )}
             </Link>
@@ -130,9 +130,9 @@ export function Sidebar() {
       <div className="sidebar-footer">
         <button 
           onClick={toggleTheme} 
-          className="flex items-center gap-4 px-4 py-3 rounded-xl text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-active)] transition-all duration-300 group w-full text-left"
+          className="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-white/5 hover:text-white transition-all duration-300 group w-full text-left"
         >
-          <div className="p-2 rounded-lg bg-slate-500/5 group-hover:bg-primary/20 group-hover:text-primary transition-all duration-300">
+          <div className="p-2 rounded-lg bg-white/5 group-hover:bg-white/10 transition-all duration-300">
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </div>
           <span className="text-xs font-black uppercase tracking-widest">
@@ -144,7 +144,7 @@ export function Sidebar() {
           onClick={handleLogout} 
           className="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-rose-500/10 hover:text-rose-500 transition-all duration-300 group w-full text-left"
         >
-          <div className="p-2 rounded-lg bg-slate-500/5 group-hover:bg-rose-500/20 transition-all duration-300">
+          <div className="p-2 rounded-lg bg-white/5 group-hover:bg-rose-500/20 transition-all duration-300">
             <LogOut size={18} />
           </div>
           <span className="text-xs font-black uppercase tracking-widest">Sign Out</span>

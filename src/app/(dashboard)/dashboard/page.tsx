@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
   Store, 
@@ -18,7 +18,7 @@ import {
 import { RBACGate } from '@/components/auth/rbac-gate';
 
 import { useUser } from '@/context/user-context';
-import { useApi } from '@/hooks/use-api';
+import { useDashboardStats } from '@/hooks/use-dashboard-stats';
 
 const container = {
   hidden: { opacity: 0 },
@@ -38,50 +38,19 @@ const item = {
 export default function PremiumDashboard() {
   const router = useRouter();
   const { user, permissions, loading: authLoading } = useUser();
-  const [data, setData] = useState({
-    sales: 0,
-    performance: [] as any[],
-    stockAlerts: [] as any[],
-  });
-  const { request, loading: apiLoading, error: apiError, errorType } = useApi();
+  const { data, loading: apiLoading, error: apiError, errorType } = useDashboardStats(30000);
 
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || !user) return;
 
-    if (user) {
-        const hasAccess = permissions.includes('access:dashboard') || permissions.includes('tenant:admin');
-        
-        if (!hasAccess) {
-            const role = user.role.name;
-            if (role === 'Chef') router.push('/kitchen');
-            else router.push('/pos');
-            return;
-        }
+    const hasAccess = permissions.includes('access:dashboard') || permissions.includes('tenant:admin');
+    
+    if (!hasAccess) {
+        const role = user.role.name;
+        if (role === 'Chef') router.push('/kitchen');
+        else router.push('/pos');
     }
-
-    async function fetchDashboardData() {
-      try {
-        const results = await Promise.allSettled([
-          request('/api/analytics/global-sales'),
-          request('/api/analytics/branch-performance'),
-          request('/api/analytics/critical-stock'),
-        ]);
-
-        const [salesData, perfData, stockData] = results.map(r => 
-          r.status === 'fulfilled' ? r.value : null
-        );
-
-        setData({
-          sales: salesData?.totalSales || 0,
-          performance: perfData?.performance || [],
-          stockAlerts: stockData?.criticalStock || [],
-        });
-      } catch (e) {
-        // Error is handled by apiError from useApi
-      }
-    }
-    fetchDashboardData();
-  }, [authLoading, user, router, request]);
+  }, [authLoading, user, permissions, router]);
 
   if (apiError) {
     const isConnectionError = errorType === 'DATABASE_CONNECTION';

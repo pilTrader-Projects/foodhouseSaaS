@@ -44,11 +44,8 @@
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
 
-  /* Sidebar Tokens (Light Mode Defaults) */
-  --sidebar-bg: #fdfdfd;
-  --sidebar-text: #64748b;
-  --sidebar-active: #0f172a;
-  --sidebar-hover: rgba(0, 106, 255, 0.15);
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
 }
 
 .dark {
@@ -70,9 +67,8 @@
   --accent-glow: rgba(139, 92, 246, 0.2);
 
   --sidebar-bg: #070c1b;
-  --sidebar-text: #94a3b8;
-  --sidebar-active: #c1d5e9;
-  --sidebar-hover: rgba(255, 255, 255, 0.15);
+  --sidebar-text: #64748b;
+  --sidebar-active: #f1f5f9;
 }
 
 * {
