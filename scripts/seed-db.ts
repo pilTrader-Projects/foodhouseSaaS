@@ -1,5 +1,6 @@
 import { loadEnvFile } from 'node:process';
 import { DEMO_BRANCH, DEMO_INGREDIENTS, DEMO_PRODUCTS, INITIAL_STOCK } from '../src/lib/demo-data.js';
+import { PERMISSIONS, ROLES } from '../src/lib/constants.js';
 
 // Load environment variables from .env file (Native in Node 20.6+)
 try {
@@ -13,9 +14,28 @@ const { default: prisma } = await import('../src/lib/prisma.js');
 
 async function seed() {
     try {
-        console.log('Starting seed...');
+        console.log('🚀 Starting Comprehensive System Seed...');
 
-        // 1. Create Demo Tenant
+        // 1. Seed Permissions (Global)
+        console.log('🌱 Seeding Global Permissions...');
+        const permissionData = Object.values(PERMISSIONS).map(name => ({
+            name,
+            description: `Allows user to ${name.replace(':', ' ').replace('manage', 'manage the')}`
+        }));
+
+        for (const data of permissionData) {
+            await prisma.permission.upsert({
+                where: { name: data.name },
+                update: {},
+                create: data
+            });
+        }
+
+        const allPermissions = await prisma.permission.findMany();
+        const permissionConnect = allPermissions.map(p => ({ id: p.id }));
+
+        // 2. Create Demo Tenant
+        console.log('🏢 Creating Demo Tenant...');
         const tenant = await prisma.tenant.upsert({
             where: { id: 'tenant-demo' },
             update: {},
@@ -23,36 +43,28 @@ async function seed() {
                 id: 'tenant-demo',
                 name: 'FoodHouse Demo Corp',
                 plan: 'pro',
-                features: ['dashboard', 'inventory', 'pos']
+                status: 'ACTIVE',
+                features: ['dashboard', 'inventory', 'pos', 'analytics']
             }
         });
-        console.log('Tenant created/found:', tenant.id);
 
-        // 2. Create Default Role & User
+        // 3. Create Default Role (Owner) with all permissions
+        console.log('🔑 Creating Admin Roles...');
         const role = await prisma.role.upsert({
             where: { id: 'role-admin' },
-            update: {},
+            update: {
+                permissions: { set: [], connect: permissionConnect }
+            },
             create: {
                 id: 'role-admin',
-                name: 'Admin',
-                tenantId: tenant.id
-            }
-        });
-
-        const user = await prisma.user.upsert({
-            where: { email: 'admin@demo.com' },
-            update: {},
-            create: {
-                id: 'user-admin',
-                email: 'admin@demo.com',
-                name: 'Demo Admin',
-                password: 'password123',
+                name: ROLES.OWNER,
                 tenantId: tenant.id,
-                roleId: role.id
+                permissions: { connect: permissionConnect }
             }
         });
 
-        // 3. Create Demo Branch
+        // 4. Create Demo Branch
+        console.log('📍 Creating Demo Branch...');
         const branch = await prisma.branch.upsert({
             where: { id: DEMO_BRANCH.id },
             update: {},
@@ -63,7 +75,27 @@ async function seed() {
             }
         });
 
-        // 4. Create Ingredients
+        // 5. Create Default Admin User
+        console.log('👤 Creating Demo Admin User...');
+        const user = await prisma.user.upsert({
+            where: { email: 'admin@demo.com' },
+            update: {
+                branchId: branch.id,
+                roleId: role.id
+            },
+            create: {
+                id: 'user-admin',
+                email: 'admin@demo.com',
+                name: 'Demo Admin',
+                password: 'password123',
+                tenantId: tenant.id,
+                roleId: role.id,
+                branchId: branch.id
+            }
+        });
+
+        // 6. Create Ingredients & Initialize Stock
+        console.log('📦 Initializing Ingredients & Stock...');
         for (const ing of DEMO_INGREDIENTS) {
             await prisma.ingredient.upsert({
                 where: { id: ing.id },
@@ -76,7 +108,6 @@ async function seed() {
                 }
             });
 
-            // Initialize Stock
             await prisma.stock.upsert({
                 where: {
                     branchId_ingredientId: {
@@ -93,9 +124,9 @@ async function seed() {
                 }
             });
         }
-        console.log('Ingredients and Stock initialized');
 
-        // 5. Create Products & Recipes
+        // 7. Create Products & Recipes
+        console.log('🍔 Seeding Products & Recipes...');
         for (const prod of DEMO_PRODUCTS) {
             const product = await prisma.product.upsert({
                 where: { id: prod.id },
@@ -105,12 +136,14 @@ async function seed() {
                     name: prod.name,
                     price: prod.price,
                     tenantId: tenant.id,
-                    branchId: branch.id
+                    branchId: branch.id,
+                    deductionModel: 'ON_ORDER',
+                    batchSize: 1
                 }
             });
 
+            // Refresh recipes
             await prisma.recipeItem.deleteMany({ where: { productId: product.id } });
-
             for (const item of prod.recipe) {
                 await prisma.recipeItem.create({
                     data: {
@@ -121,10 +154,10 @@ async function seed() {
                 });
             }
         }
-        console.log('Products and Recipes seeded');
-        console.log('Seed completed successfully!');
+
+        console.log('✨ Seed completed successfully!');
     } catch (e) {
-        console.error('Seed failed:', e);
+        console.error('❌ Seed failed:', e);
         process.exit(1);
     } finally {
         await prisma.$disconnect();
