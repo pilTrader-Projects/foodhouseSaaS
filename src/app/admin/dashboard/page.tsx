@@ -16,6 +16,8 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     const [activeTab, setActiveTab] = useState<'overview' | 'tenants' | 'settings'>('overview');
+    const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'SUSPENDED'>('ALL');
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     // Hardcoded admin ID for prototype was here - now using user.id from context
@@ -99,6 +101,7 @@ export default function AdminDashboard() {
             });
             if (res.ok) {
                 setTenants(tenants.filter(t => t.id !== id));
+                setSelectedIds(selectedIds.filter(sid => sid !== id));
                 alert('Tenant and all associated data deleted successfully');
             } else {
                 const data = await res.json();
@@ -108,6 +111,38 @@ export default function AdminDashboard() {
             alert('Failed to connect to server');
         }
     };
+
+    const handleBulkStatusUpdate = async (status: string) => {
+        if (selectedIds.length === 0) return;
+        
+        try {
+            const res = await fetch('/api/admin/tenants', {
+                method: 'PATCH',
+                headers: { 
+                    'x-user-id': user?.id as string,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ids: selectedIds, status })
+            });
+
+            if (res.ok) {
+                setTenants(tenants.map(t => 
+                    selectedIds.includes(t.id) ? { ...t, status } : t
+                ));
+                setSelectedIds([]);
+                alert(`Bulk update successful: ${selectedIds.length} tenants ${status.toLowerCase()}`);
+            } else {
+                const data = await res.json();
+                alert(`Error: ${data.error || 'Failed to perform bulk update'}`);
+            }
+        } catch (e) {
+            alert('Failed to connect to server');
+        }
+    };
+
+    const filteredTenants = tenants.filter(t => 
+        filterStatus === 'ALL' ? true : t.status === filterStatus
+    );
 
     if (loading) return <div className={styles.loader}>Loading Platform Dashboard...</div>;
 
@@ -177,11 +212,54 @@ export default function AdminDashboard() {
                     {(activeTab === 'overview' || activeTab === 'tenants') && (
                         <section className={styles.section}>
                             <div className={styles.sectionHeader}>
-                                <h2>Active Businesses</h2>
-                                <button className={styles.primaryBtn}>Export Data</button>
+                                <div className={styles.headerLeft}>
+                                    <h2>Client Directory</h2>
+                                    <div className={styles.filterTabs}>
+                                        <button 
+                                            onClick={() => setFilterStatus('ALL')}
+                                            className={`${styles.filterBtn} ${filterStatus === 'ALL' ? styles.active : ''}`}
+                                        >
+                                            All ({tenants.length})
+                                        </button>
+                                        <button 
+                                            onClick={() => setFilterStatus('ACTIVE')}
+                                            className={`${styles.filterBtn} ${filterStatus === 'ACTIVE' ? styles.active : ''}`}
+                                        >
+                                            Active ({tenants.filter(t => t.status === 'ACTIVE').length})
+                                        </button>
+                                        <button 
+                                            onClick={() => setFilterStatus('SUSPENDED')}
+                                            className={`${styles.filterBtn} ${filterStatus === 'SUSPENDED' ? styles.active : ''}`}
+                                        >
+                                            Suspended ({tenants.filter(t => t.status === 'SUSPENDED').length})
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className={styles.headerActions}>
+                                    {selectedIds.length > 0 && (
+                                        <div className={styles.bulkActions}>
+                                            <span className={styles.selectionCount}>{selectedIds.length} Selected</span>
+                                            <button 
+                                                onClick={() => handleBulkStatusUpdate('SUSPENDED')}
+                                                className={`${styles.actionBtn} ${styles.suspend}`}
+                                            >
+                                                Bulk Suspend
+                                            </button>
+                                            <button 
+                                                onClick={() => handleBulkStatusUpdate('ACTIVE')}
+                                                className={`${styles.actionBtn} ${styles.activate}`}
+                                            >
+                                                Bulk Activate
+                                            </button>
+                                        </div>
+                                    )}
+                                    <button className={styles.primaryBtn}>Export Data</button>
+                                </div>
                             </div>
                             <TenantTable 
-                                tenants={tenants} 
+                                tenants={filteredTenants} 
+                                selectedIds={selectedIds}
+                                onSelectionChange={setSelectedIds}
                                 onUpdatePlan={handleUpdatePlan}
                                 onUpdateStatus={handleUpdateStatus}
                                 onDeleteTenant={handleDeleteTenant}

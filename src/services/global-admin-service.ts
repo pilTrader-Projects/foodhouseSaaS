@@ -80,6 +80,16 @@ export class GlobalAdminService {
     }
 
     /**
+     * Updates multiple tenants' operational status at once.
+     */
+    async bulkUpdateTenantStatus(tenantIds: string[], status: string) {
+        return prisma.tenant.updateMany({
+            where: { id: { in: tenantIds } },
+            data: { status }
+        })
+    }
+
+    /**
      * Aggregates platform-wide Key Performance Indicators.
      */
     async getPlatformStats() {

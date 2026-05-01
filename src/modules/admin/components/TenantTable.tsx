@@ -18,13 +18,38 @@ interface Tenant {
 
 interface TenantTableProps {
     tenants: Tenant[];
+    selectedIds: string[];
+    onSelectionChange: (ids: string[]) => void;
     onUpdatePlan: (id: string, plan: string) => void;
     onUpdateStatus: (id: string, status: string) => void;
     onDeleteTenant: (id: string) => void;
 }
 
-export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan, onUpdateStatus, onDeleteTenant }) => {
+export const TenantTable: React.FC<TenantTableProps> = ({ 
+    tenants, 
+    selectedIds,
+    onSelectionChange,
+    onUpdatePlan, 
+    onUpdateStatus, 
+    onDeleteTenant 
+}) => {
     const [activeMenu, setActiveMenu] = React.useState<string | null>(null);
+
+    const toggleAll = () => {
+        if (selectedIds.length === tenants.length) {
+            onSelectionChange([]);
+        } else {
+            onSelectionChange(tenants.map(t => t.id));
+        }
+    };
+
+    const toggleOne = (id: string) => {
+        if (selectedIds.includes(id)) {
+            onSelectionChange(selectedIds.filter(i => i !== id));
+        } else {
+            onSelectionChange([...selectedIds, id]);
+        }
+    };
 
     // Close menu when clicking outside
     React.useEffect(() => {
@@ -45,6 +70,13 @@ export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan,
             <table className={styles.table}>
                 <thead>
                     <tr>
+                        <th style={{ width: '40px' }}>
+                            <input 
+                                type="checkbox" 
+                                checked={tenants.length > 0 && selectedIds.length === tenants.length}
+                                onChange={toggleAll}
+                            />
+                        </th>
                         <th>Business Name</th>
                         <th>Plan</th>
                         <th>Status</th>
@@ -56,7 +88,14 @@ export const TenantTable: React.FC<TenantTableProps> = ({ tenants, onUpdatePlan,
                 </thead>
                 <tbody>
                     {tenants.map((tenant) => (
-                        <tr key={tenant.id}>
+                        <tr key={tenant.id} className={selectedIds.includes(tenant.id) ? styles.selectedRow : ''}>
+                            <td>
+                                <input 
+                                    type="checkbox" 
+                                    checked={selectedIds.includes(tenant.id)}
+                                    onChange={() => toggleOne(tenant.id)}
+                                />
+                            </td>
                             <td>
                                 <div className={styles.tenantNameCell}>
                                     <span>{tenant.name}</span>
