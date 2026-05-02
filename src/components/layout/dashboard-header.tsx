@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useUser } from '@/context/user-context';
 import Link from 'next/link';
+import { UserAvatar } from '../ui/user-avatar';
 
 export function DashboardHeader() {
   const { user } = useUser();
@@ -33,9 +34,7 @@ export function DashboardHeader() {
               <div className="text-[10px] font-black text-main uppercase tracking-tight leading-none">{user.name}</div>
               <div className="text-[9px] font-bold text-muted uppercase tracking-widest mt-1">Authorized</div>
             </div>
-            <div className="w-8 h-8 bg-surface rounded-lg flex items-center justify-center font-black text-primary text-xs border border-primary/10 shadow-sm">
-              {user.name.charAt(0)}
-            </div>
+            <UserAvatar name={user.name} size="sm" className="!rounded-lg border border-primary/10 shadow-sm" />
           </motion.div>
         )}
         <div className="w-px h-6 bg-muted opacity-20"></div>

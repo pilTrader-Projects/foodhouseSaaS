@@ -1,16 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-
-interface User {
-  id: string;
-  role: {
-    name: string;
-    permissions: { name: string }[];
-  };
-}
+import { useUser } from '@/context/user-context';
 
 interface RBACGateProps {
   permission: string;
@@ -19,11 +12,8 @@ interface RBACGateProps {
   redirectOnFail?: string;
 }
 
-import { useUser } from '@/context/user-context';
-
 /**
  * RBACGate protects child components based on user permissions.
- * Now consumes global UserProvider state.
  */
 export function RBACGate({ 
   permission, 
