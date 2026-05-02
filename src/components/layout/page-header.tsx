@@ -6,13 +6,13 @@ import { useUser } from '@/context/user-context';
 import Link from 'next/link';
 import { UserAvatar } from '../ui/user-avatar';
 
-export function DashboardHeader() {
+export function PageHeader() {
   const { user, loading, mounted } = useUser();
 
   const isLoading = !mounted || loading;
 
   return (
-    <header className="dashboard-header">
+    <header className="page-header">
       <div className="flex items-center gap-3">
         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
         <div className="text-[10px] font-black uppercase tracking-[0.2em] text-main">

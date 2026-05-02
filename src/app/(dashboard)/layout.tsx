@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Sidebar } from '@/components/layout/sidebar';
-import { DashboardHeader } from '@/components/layout/dashboard-header';
+import { PageHeader } from '@/components/layout/page-header';
 
 export default function DashboardLayout({
   children,
@@ -14,7 +14,7 @@ export default function DashboardLayout({
       <Sidebar />
       
       <main className="main-content">
-        <DashboardHeader />
+        <PageHeader />
         
         <section className="content-area">
           {children}

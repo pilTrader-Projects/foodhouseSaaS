@@ -187,7 +187,7 @@ export default function AdminDashboard() {
             </aside>
 
             <main className={styles.main}>
-                <header className="dashboard-header">
+                <header className="page-header">
                     <h1>
                         {activeTab === 'overview' && 'Platform Executive Overview'}
                         {activeTab === 'tenants' && 'Tenant Directory & Management'}
