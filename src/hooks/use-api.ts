@@ -11,8 +11,9 @@ export function useApi() {
     const [error, setError] = useState<string | null>(null);
     const [errorType, setErrorType] = useState<string | null>(null);
 
-    const request = useCallback(async (url: string, options: RequestInit = {}) => {
-        setLoading(true);
+    const request = useCallback(async (url: string, options: RequestInit & { silent?: boolean } = {}) => {
+        const { silent, ...fetchOptions } = options;
+        if (!silent) setLoading(true);
         setError(null);
         setErrorType(null);
 
@@ -25,11 +26,11 @@ export function useApi() {
             ...(tenantId ? { 'x-tenant-id': tenantId } : {}),
             ...(branchId ? { 'x-branch-id': branchId } : {}),
             ...(userId ? { 'x-user-id': userId } : {}),
-            ...options.headers,
+            ...fetchOptions.headers,
         } as any;
 
         try {
-            const res = await fetch(url, { ...options, headers });
+            const res = await fetch(url, { ...fetchOptions, headers });
             const data = await res.json();
 
             if (!res.ok) {
@@ -44,7 +45,7 @@ export function useApi() {
             if (!error) setError(e.message);
             throw e;
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     }, [error]);
 

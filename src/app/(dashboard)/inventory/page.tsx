@@ -66,9 +66,9 @@ export default function InventoryDashboard() {
             {/* Header Section */}
             <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                        <Package className="w-10 h-10 text-blue-600" />
-                        Inventory Profile
+                    <h1 className="page-title flex items-center gap-3">
+                        <Package className="w-10 h-10 text-accent" />
+                        <span className="text-gradient">Inventory</span> Profile
                     </h1>
                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Stock Monitoring & Control</p>
                 </div>

@@ -1,57 +1,24 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import React from 'react';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Users, 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Package, 
-  ChefHat, 
-  Settings,
-  Settings2,
-  ShieldCheck,
-  Moon,
-  Sun,
-  LogOut,
-  Loader2,
-  MapPin,
-  ChevronRight
-} from 'lucide-react';
-import { useTheme } from '@/context/theme-context';
+import { motion } from 'framer-motion';
+import { ShieldCheck, Loader2 } from 'lucide-react';
 import { useUser } from '@/context/user-context';
+import { NavItem } from './nav-item';
+import { SidebarFooter } from './sidebar-footer';
+import { UserProfileWidget } from './user-profile-widget';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { theme, toggleTheme } = useTheme();
-  const { user, permissions, loading } = useUser();
-
-  const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', perm: 'access:dashboard' },
-    { name: 'POS Terminal', icon: ShoppingCart, href: '/pos', perm: 'access:pos' },
-    { name: 'Inventory', icon: Package, href: '/inventory', perm: 'access:inventory' },
-    { name: 'Kitchen', icon: ChefHat, href: '/kitchen', perm: 'access:kitchen' },
-    { name: 'Menu', icon: Settings2, href: '/settings/menu', perm: 'access:menu' },
-    { name: 'Team', icon: Users, href: '/settings/team', perm: 'access:team' },
-    { name: 'Branches', icon: MapPin, href: '/settings/branches', perm: 'manage:organization' },
-    { name: 'Settings', icon: Settings, href: '/settings', perm: 'manage:settings' },
-    { name: 'SaaS Admin', icon: ShieldCheck, href: '/admin/dashboard', perm: 'system:admin' },
-  ];
-
-  const visibleItems = menuItems.filter(item => {
-    return permissions.includes(item.perm) || permissions.includes('tenant:admin');
-  });
-
-  if (loading) {
-    return <aside className="sidebar opacity-50 flex-center"><Loader2 className="animate-spin text-white/20" /></aside>;
-  }
+  const { user, loading, mounted, navigation } = useUser();
 
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = '/';
   };
+
+  const isLoading = !mounted || loading;
 
   return (
     <aside className="sidebar">
@@ -66,149 +33,27 @@ export function Sidebar() {
         <span className="font-black tracking-tighter uppercase text-white text-xl">FoodHouse</span>
       </div>
 
-      {user && (
-        <div className="px-8 py-10">
-          <div className="flex items-center gap-4 group cursor-pointer p-2 rounded-xl hover:bg-white/5 transition-colors">
-            <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-blue-600 rounded-xl flex-center font-black text-white text-lg shadow-lg">
-                {user.name.charAt(0)}
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-[#070c1b] rounded-full" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-black text-white uppercase tracking-tight leading-none">{user.name}</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">{user.role.name}</span>
-            </div>
-          </div>
-          <motion.div 
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-6 flex items-center gap-2 px-4 py-3 bg-white/5 rounded-xl border border-white/5"
-          >
-             <MapPin className="w-3.5 h-3.5 text-primary" />
-             <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest truncate">{user.branch?.name || 'Grand HQ'}</span>
-          </motion.div>
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center opacity-50">
+          <Loader2 className="animate-spin text-white/20" />
         </div>
+      ) : (
+        <>
+          {user && <UserProfileWidget user={user} />}
+
+          <nav className="sidebar-nav">
+            {navigation.map((item) => (
+              <NavItem 
+                key={item.name} 
+                item={item} 
+                isActive={pathname === item.href} 
+              />
+            ))}
+          </nav>
+
+          <SidebarFooter onLogout={handleLogout} />
+        </>
       )}
-
-      <nav className="sidebar-nav">
-        {visibleItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link 
-              key={item.name} 
-              href={item.href}
-              className={`sidebar-link group ${isActive ? 'active' : ''}`}
-            >
-              <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-primary text-white' : 'group-hover:bg-white/10'}`}>
-                <item.icon size={18} />
-              </div>
-              <span className="flex-1">{item.name}</span>
-              {isActive && (
-                <motion.div layoutId="active-pill" className="w-1.5 h-1.5 rounded-full bg-primary" />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="sidebar-footer">
-        <button onClick={toggleTheme} className="theme-toggle group">
-          <div className="p-2 rounded-lg group-hover:bg-white/10 transition-colors">
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-          </div>
-          <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
-        </button>
-        
-        <button onClick={handleLogout} className="theme-toggle group opacity-50 hover:opacity-100 transition-opacity">
-          <div className="p-2 rounded-lg group-hover:bg-rose-500/10 group-hover:text-rose-500 transition-colors">
-            <LogOut size={18} />
-          </div>
-          <span>Sign Out</span>
-        </button>
-      </div>
-
-      <style jsx>{`
-        .sidebar {
-          width: 300px;
-          height: 100vh;
-          background-color: var(--sidebar-bg);
-          color: var(--sidebar-text);
-          display: flex;
-          flex-direction: column;
-          border-right: 1px solid rgba(255,255,255,0.05);
-          position: sticky;
-          top: 0;
-          z-index: 50;
-        }
-
-        .sidebar-brand {
-          padding: 2.5rem;
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .sidebar-nav {
-          flex: 1;
-          padding: 0 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .sidebar-link {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 0.5rem 1rem;
-          border-radius: var(--radius-sm);
-          font-size: 0.75rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          color: var(--sidebar-text);
-        }
-
-        .sidebar-link:hover {
-          color: var(--sidebar-active);
-          background-color: rgba(255,255,255,0.03);
-        }
-
-        .sidebar-link.active {
-          color: var(--sidebar-active);
-          background-color: rgba(255,255,255,0.05);
-        }
-
-        .sidebar-footer {
-          padding: 2rem 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .theme-toggle {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 0.5rem 1rem;
-          width: 100%;
-          background: none;
-          border: none;
-          color: var(--sidebar-text);
-          font-size: 0.75rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .theme-toggle:hover {
-          color: var(--sidebar-active);
-        }
-      `}</style>
     </aside>
   );
 }

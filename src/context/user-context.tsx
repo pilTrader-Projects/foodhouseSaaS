@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { getAuthorizedNavItems, MenuItem } from '@/config/navigation';
 
 interface User {
   id: string;
@@ -26,9 +27,11 @@ interface User {
 interface UserContextType {
   user: User | null;
   loading: boolean;
+  mounted: boolean; // Unified hydration signal
   authFailed: boolean;
   refreshUser: () => Promise<void>;
   permissions: string[];
+  navigation: MenuItem[];
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -36,7 +39,12 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [authFailed, setAuthFailed] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchUser = useCallback(async () => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
@@ -77,15 +85,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     fetchUser();
   }, [fetchUser]);
 
-  const permissions = user?.role.permissions.map(p => p.name) || [];
+  const permissions = React.useMemo(() => user?.role.permissions.map(p => p.name) || [], [user]);
+  const navigation = React.useMemo(() => getAuthorizedNavItems(permissions), [permissions]);
 
   return (
     <UserContext.Provider value={{ 
       user, 
       loading, 
+      mounted,
       authFailed, 
       refreshUser: fetchUser,
-      permissions 
+      permissions,
+      navigation
     }}>
       {children}
     </UserContext.Provider>
