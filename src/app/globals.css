@@ -9,7 +9,7 @@
   /* Light Theme Tokens (Premium Glass-Fluid) */
   --bg-app: #fdfdfd;
   --bg-surface: #f8fafc;
-  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-card: #ffffff;
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.5);
 
@@ -48,10 +48,10 @@
 
 .dark {
   /* Dark Theme Tokens (Deep Premium) */
-  --bg-app: #020617;
-  --bg-surface: #070c1b;
-  --bg-card: rgba(15, 23, 42, 0.8);
-  --glass-bg: rgba(7, 12, 27, 0.7);
+  --bg-app: #070c1b;
+  --bg-surface: #0a1125;
+  --bg-card: #111a33;
+  --glass-bg: rgba(17, 26, 51, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
 
   --text-main: #f8fafc;

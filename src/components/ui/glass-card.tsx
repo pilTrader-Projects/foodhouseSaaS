@@ -28,8 +28,9 @@ export function GlassCard({
       style={{
         backdropFilter: `blur(${blurAmount})`,
         WebkitBackdropFilter: `blur(${blurAmount})`,
-        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        backgroundColor: 'var(--bg-card)',
+        opacity: 0.95,
+        border: '1px solid var(--glass-border)',
         ...props.style
       }}
     >

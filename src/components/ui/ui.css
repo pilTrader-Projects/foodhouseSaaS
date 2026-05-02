@@ -156,12 +156,13 @@
 }
 
 .bg-white {
-    background: white;
+    background: var(--bg-card);
 }
 
 .bg-slate-50 {
-    background: #f8fafc;
+    background: var(--bg-surface);
 }
+
 
 .rounded-xl {
     border-radius: 1rem;
@@ -371,11 +372,11 @@
 }
 
 .ui-card {
-    background: white;
-    border: 2px solid #f8fafc;
+    background: var(--bg-card);
+    border: 2px solid var(--border-main);
     border-radius: 2rem;
     padding: 2rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .ui-spinner {
@@ -442,9 +443,9 @@
     padding: 2rem;
 }
 
-.modal-content {
+/* .modal-content {
     position: relative;
-    background-color: white;
+    background-color: #00ff00; (Redundant - overrides theme)
     border-radius: 2.5rem;
     padding: 3rem;
     width: 100%;
@@ -452,7 +453,7 @@
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     max-height: 90vh;
     overflow-y: auto;
-}
+} */
 
 .modal-close-btn {
     width: 3rem;
