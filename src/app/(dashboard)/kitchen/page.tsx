@@ -110,35 +110,41 @@ export default function KitchenPage() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
+    <div className="space-y-6 md:space-y-8 animate-fade-in">
+      <div className="layout-card-header">
         <div>
           <h1 className="page-title flex items-center gap-3">
-            <Flame className="w-10 h-10 text-accent" />
+            <Flame className="w-8 h-8 md:w-10 md:h-10 text-accent" />
             <span className="text-gradient">Kitchen</span> Display
           </h1>
-          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Order & Production Control</p>
+          <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Order & Production Control</p>
         </div>
         
-        <div className="flex gap-4">
-          <Button onClick={() => setShowProductionModal(true)} icon={PlayCircle}>Produce Batch</Button>
-          <div className="bg-slate-900 px-6 py-3 rounded-md flex items-center gap-4 text-white">
+        <div className="flex flex-wrap gap-3 md:gap-4 w-full md:w-auto">
+          <Button 
+            onClick={() => setShowProductionModal(true)} 
+            icon={PlayCircle}
+            className="flex-1 md:flex-none justify-center"
+          >
+            Produce Batch
+          </Button>
+          <div className="bg-slate-900 px-4 md:px-6 py-2 md:py-3 rounded-md flex items-center gap-4 text-white flex-1 md:flex-none justify-center md:justify-start">
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active</p>
-              <p className="text-xl font-black">{orders.length}</p>
+              <p className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">Active</p>
+              <p className="text-lg md:text-xl font-black">{orders.length}</p>
             </div>
-            <Tally4 className="w-5 h-5 text-slate-400" />
+            <Tally4 className="w-4 h-4 md:w-5 md:h-5 text-slate-400" />
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 text-rose-600 text-xs font-black uppercase tracking-widest rounded-sm border border-rose-100">
+        <div className="p-4 bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-sm border border-rose-100">
             Error: {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="layout-grid layout-grid-3">
         {orders.map((order) => (
           <Card key={order.id} className="relative group overflow-hidden p-6">
             <div className="flex justify-between items-start mb-6">
@@ -160,15 +166,15 @@ export default function KitchenPage() {
               ))}
             </div>
 
-            <div className="pt-4 border-t border-slate-50">
+            <div className="pt-4 border-t border-slate-50 flex flex-col gap-2">
               {order.status === 'PENDING' && (
-                <Button variant="primary" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'PREPARING')} icon={PlayCircle} style={{ width: '100%' }}>Start Prep</Button>
+                <Button variant="primary" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'PREPARING')} icon={PlayCircle} className="w-full">Start Prep</Button>
               )}
               {order.status === 'PREPARING' && (
-                <Button variant="success" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'READY')} icon={CheckCircle2} style={{ width: '100%' }}>Mark Ready</Button>
+                <Button variant="success" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'READY')} icon={CheckCircle2} className="w-full">Mark Ready</Button>
               )}
               {order.status === 'READY' && (
-                <Button variant="dark" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'COMPLETED')} icon={CheckCircle2} style={{ width: '100%' }}>Clear Order</Button>
+                <Button variant="dark" loading={updatingId === order.id} onClick={() => updateStatus(order.id, 'COMPLETED')} icon={CheckCircle2} className="w-full">Clear Order</Button>
               )}
             </div>
           </Card>

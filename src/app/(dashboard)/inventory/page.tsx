@@ -62,24 +62,24 @@ export default function InventoryDashboard() {
     }
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-6 md:space-y-8 animate-fade-in">
             {/* Header Section */}
-            <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
+            <div className="layout-card-header">
                 <div>
                     <h1 className="page-title flex items-center gap-3">
-                        <Package className="w-10 h-10 text-accent" />
+                        <Package className="w-8 h-8 md:w-10 md:h-10 text-accent" />
                         <span className="text-gradient">Inventory</span> Profile
                     </h1>
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Stock Monitoring & Control</p>
+                    <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Stock Monitoring & Control</p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <Link href="/inventory/receive">
-                        <Button variant="primary" icon={Truck}>Receive Delivery</Button>
+                <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+                    <Link href="/inventory/receive" className="flex-1 md:flex-none">
+                        <Button variant="primary" icon={Truck} className="w-full justify-center">Receive Delivery</Button>
                     </Link>
                     <button 
                         onClick={fetchProfile}
                         disabled={apiLoading}
-                        className="p-4 rounded-md bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-all border border-transparent"
+                        className="p-3 md:p-4 rounded-md bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-all border border-transparent"
                     >
                         <RefreshCw className={`w-5 h-5 ${apiLoading ? 'animate-spin' : ''}`} />
                     </button>
@@ -87,43 +87,43 @@ export default function InventoryDashboard() {
             </div>
 
             {error && (
-                <div className="p-4 bg-rose-50 text-rose-600 text-xs font-black uppercase tracking-widest rounded-sm border border-rose-100">
+                <div className="p-4 bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-sm border border-rose-100">
                     Error: {error}
                 </div>
             )}
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-white border-slate-100 p-6">
+            <div className="layout-grid layout-grid-3">
+                <Card className="bg-white border-slate-100 p-4 md:p-6">
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Items</p>
-                            <h2 className="text-4xl font-black text-slate-900">{inventory.length}</h2>
+                            <h2 className="text-3xl md:text-4xl font-black text-slate-900">{inventory.length}</h2>
                         </div>
-                        <div className="p-3 bg-blue-50 rounded-lg text-blue-600">
-                            <Package className="w-6 h-6" />
+                        <div className="p-2 md:p-3 bg-blue-50 rounded-lg text-blue-600">
+                            <Package className="w-5 h-5 md:w-6 md:h-6" />
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-white border-slate-100 p-6">
+                <Card className="bg-white border-slate-100 p-4 md:p-6">
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Low Stock</p>
-                            <h2 className="text-4xl font-black text-amber-600">{lowStockItems.length}</h2>
+                            <h2 className="text-3xl md:text-4xl font-black text-amber-600">{lowStockItems.length}</h2>
                         </div>
-                        <div className="p-3 bg-amber-50 rounded-lg text-amber-600">
-                            <AlertTriangle className="w-6 h-6" />
+                        <div className="p-2 md:p-3 bg-amber-50 rounded-lg text-amber-600">
+                            <AlertTriangle className="w-5 h-5 md:w-6 md:h-6" />
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-white border-slate-100 p-6">
+                <Card className="bg-white border-slate-100 p-4 md:p-6">
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Out of Stock</p>
-                            <h2 className="text-4xl font-black text-rose-600">{outOfStockItems.length}</h2>
+                            <h2 className="text-3xl md:text-4xl font-black text-rose-600">{outOfStockItems.length}</h2>
                         </div>
-                        <div className="p-3 bg-rose-50 rounded-lg text-rose-600">
-                            <XCircle className="w-6 h-6" />
+                        <div className="p-2 md:p-3 bg-rose-50 rounded-lg text-rose-600">
+                            <XCircle className="w-5 h-5 md:w-6 md:h-6" />
                         </div>
                     </div>
                 </Card>
@@ -131,8 +131,8 @@ export default function InventoryDashboard() {
 
             {/* main Content Panel */}
             <Card title="Live Stock Tracking" subtitle="detailed breakdown of raw materials" className="p-0 overflow-hidden">
-                <div className="p-8 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-                    <div className="relative w-96">
+                <div className="p-4 md:p-8 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                    <div className="relative w-full md:w-96">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input 
                             type="text"

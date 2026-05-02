@@ -27,6 +27,8 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
+import Script from 'next/script'
+
 export default function RootLayout({
   children,
 }: {
@@ -36,17 +38,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              try {
-                var theme = localStorage.getItem('foodhouse_theme') || 'dark';
-                document.documentElement.classList.toggle('dark', theme === 'dark');
-                document.documentElement.setAttribute('data-theme', theme);
-              } catch (e) {}
-            })();
-          `
-        }} />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
+            try {
+              var theme = localStorage.getItem('foodhouse_theme') || 'dark';
+              document.documentElement.classList.toggle('dark', theme === 'dark');
+              document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+          `}
+        </Script>
       </head>
       <body className="antialiased">
         <ThemeProvider>

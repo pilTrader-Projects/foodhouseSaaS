@@ -9,12 +9,22 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
+
   return (
     <div className="dashboard-container">
-      <Sidebar />
+      <div 
+        className={`sidebar-backdrop ${isSidebarOpen ? 'visible' : ''}`} 
+        onClick={closeSidebar}
+      />
+      
+      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       
       <main className="main-content">
-        <PageHeader />
+        <PageHeader onMenuClick={toggleSidebar} />
         
         <section className="content-area">
           {children}

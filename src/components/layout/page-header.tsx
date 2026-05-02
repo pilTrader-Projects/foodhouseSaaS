@@ -2,11 +2,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Menu } from 'lucide-react';
 import { useUser } from '@/context/user-context';
 import Link from 'next/link';
 import { UserAvatar } from '../ui/user-avatar';
 
-export function PageHeader() {
+interface PageHeaderProps {
+  onMenuClick?: () => void;
+}
+
+export function PageHeader({ onMenuClick }: PageHeaderProps) {
   const { user, loading, mounted } = useUser();
 
   const isLoading = !mounted || loading;
@@ -14,9 +19,20 @@ export function PageHeader() {
   return (
     <header className="page-header">
       <div className="flex items-center gap-3">
-        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
-          {(mounted && user?.tenant?.name) ? user.tenant.name : 'Terminal'} <span className="opacity-20 px-2">/</span> Console
+        {onMenuClick && (
+          <button 
+            onClick={onMenuClick}
+            className="lg:hidden p-2 -ml-2 text-main hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Toggle Menu"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        )}
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
+            {(mounted && user?.tenant?.name) ? user.tenant.name : 'Terminal'} <span className="opacity-20 px-2">/</span> Console
+          </div>
         </div>
       </div>
       
