@@ -107,12 +107,7 @@
     padding: 2rem 3rem;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2.5rem;
-}
+
 
 .userProfile {
     display: flex;
