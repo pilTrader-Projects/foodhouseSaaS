@@ -104,7 +104,6 @@ a {
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background-color: var(--bg-surface);
 }
 
 .main-content {
@@ -118,69 +117,61 @@ a {
   overflow-y: auto;
 }
 
-.header {
-  height: 4rem;
+
+
+/* Sidebar Shell */
+.sidebar {
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+  flex-shrink: 0;
+  height: 100vh;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  transition: background-color 0.3s;
+}
+
+.sidebar-brand {
+  padding: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar-footer {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Header Shell */
+.page-header {
+  height: 4.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2.5rem;
   background-color: var(--bg-app);
-  border-bottom: 1px solid var(--border-main);
-}
-
-/* Sidebar Shell */
-.sidebar {
-    width: 300px;
-    min-width: 300px;
-    max-width: 300px;
-    flex-shrink: 0;
-    height: 100vh;
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-text);
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--glass-border);
-    position: sticky;
-    top: 0;
-    left: 0;
-    z-index: 50;
-    transition: background-color 0.3s;
-}
-
-.sidebar-brand {
-    padding: 2.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.sidebar-nav {
-    flex: 1;
-    padding: 0 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.sidebar-footer {
-    padding: 2rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    border-top: 1px solid var(--glass-border);
-}
-
-/* Header Shell */
-.page-header {
-    height: 4.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2.5rem;
-    background-color: var(--bg-app);
-    border-bottom: 1px solid var(--glass-border);
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    transition: background-color 0.3s;
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  transition: background-color 0.3s;
 }

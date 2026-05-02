@@ -327,7 +327,6 @@
     left: 0 !important;
     right: 0 !important;
     z-index: 1000 !important;
-    background-color: var(--bg-app) !important;
 }
 
 .sticky-top {
@@ -343,5 +342,3 @@
 .hover-glow:hover {
     box-shadow: var(--shadow-glow);
 }
-
-/* Layout Shell Components */
