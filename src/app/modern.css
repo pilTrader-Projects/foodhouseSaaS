@@ -345,14 +345,3 @@
 }
 
 /* Layout Shell Components */
-
-.dashboard-header {
-    height: 4.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2.5rem;
-    background-color: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-}

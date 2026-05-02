@@ -172,3 +172,18 @@ a {
     gap: 0.5rem;
     border-top: 1px solid var(--glass-border);
 }
+
+/* Header Shell */
+.dashboard-header {
+    height: 4.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    background-color: var(--bg-app);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    transition: background-color 0.3s;
+}

@@ -12,7 +12,7 @@ export function DashboardHeader() {
   const isLoading = !mounted || loading;
 
   return (
-    <header className="dashboard-header glass-card !rounded-none !border-t-0 !border-x-0 sticky top-0 z-40">
+    <header className="dashboard-header">
       <div className="flex items-center gap-3">
         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
         <div className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
