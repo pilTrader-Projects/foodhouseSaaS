@@ -10,7 +10,8 @@ import {
   Trash2,
   Package,
   ShoppingCart,
-  PlusCircle
+  PlusCircle,
+  LayoutGrid
 } from 'lucide-react';
 import { useUser } from '@/context/user-context';
 import { useApi } from '@/hooks/use-api';
@@ -162,9 +163,9 @@ function MenuManagementContent() {
     <div className="space-y-8 animate-fade-in text-slate-900">
       <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <Settings2 className="w-10 h-10 text-blue-600" />
-            Menu Management
+          <h1 className="page-title flex items-center gap-3">
+            <LayoutGrid className="w-10 h-10 text-accent" />
+            <span className="text-gradient">Menu</span> Architecture
           </h1>
           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Configure Catalog & Production Strategies</p>
         </div>

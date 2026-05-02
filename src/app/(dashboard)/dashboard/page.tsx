@@ -105,7 +105,7 @@ export default function PremiumDashboard() {
         >
           <motion.div variants={item} className="flex justify-between items-end">
             <div>
-              <h1 className="text-4xl font-black text-main leading-tight tracking-tight">
+              <h1 className="page-title">
                 <span className="text-gradient">
                   {user?.role.name === 'Owner' || user?.role.name === 'Admin' ? 'Operational' : 'Branch'}
                 </span> Intelligence

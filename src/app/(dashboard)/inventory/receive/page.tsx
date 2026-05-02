@@ -122,9 +122,9 @@ export default function ReceiveDelivery() {
         <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                        <Package className="w-10 h-10 text-blue-600" />
-                        Receive Delivery
+                    <h1 className="page-title flex items-center gap-3">
+                        <Truck className="w-10 h-10 text-accent" />
+                        <span className="text-gradient">Receive</span> Delivery
                     </h1>
                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Incoming Inventory & Procurement Control</p>
                 </div>

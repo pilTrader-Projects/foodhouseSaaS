@@ -179,3 +179,19 @@ a {
   z-index: 40;
   transition: background-color 0.3s;
 }
+
+.page-title {
+  font-family: var(--font-sans);
+  font-size: 2.25rem; /* 4xl */
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}

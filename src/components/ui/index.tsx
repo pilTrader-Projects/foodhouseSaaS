@@ -90,8 +90,8 @@ export const Card = ({ children, title, subtitle, className = '', style }: { chi
     <div className={`ui-card ${className}`} style={style}>
       {(title || subtitle) && (
         <div className="mb-6 mr-4">
-          {title && <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{title}</h3>}
-          {subtitle && <p className="text-10 font-black text-slate-400 uppercase tracking-widest mt-1">{subtitle}</p>}
+          {title && <h3 className="text-xl font-black text-main uppercase tracking-tight">{title}</h3>}
+          {subtitle && <p className="text-10 font-black text-muted uppercase tracking-widest mt-1">{subtitle}</p>}
         </div>
       )}
       {children}

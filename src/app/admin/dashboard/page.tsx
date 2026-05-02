@@ -188,10 +188,12 @@ export default function AdminDashboard() {
 
             <main className={styles.main}>
                 <header className="page-header">
-                    <h1>
-                        {activeTab === 'overview' && 'Platform Executive Overview'}
-                        {activeTab === 'tenants' && 'Tenant Directory & Management'}
-                        {activeTab === 'settings' && 'Global Platform Settings'}
+                    <h1 className="page-title">
+                        <span className="text-gradient">
+                            {activeTab === 'overview' && 'Platform Executive Overview'}
+                            {activeTab === 'tenants' && 'Tenant Directory & Management'}
+                            {activeTab === 'settings' && 'Global Platform Settings'}
+                        </span>
                     </h1>
                     <div className={styles.userProfile}>
                         <span>System Administrator</span>

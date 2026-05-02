@@ -57,7 +57,9 @@ function TeamManagementContent() {
     <div className="max-w-6xl mx-auto space-y-10 animate-fade-in">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="font-serif text-4xl font-black text-slate-900 tracking-tight">Organization Core</h1>
+          <h1 className="page-title">
+            <span className="text-gradient">Organization</span> Core
+          </h1>
           <p className="text-xs font-black uppercase text-slate-400 tracking-widest mt-2">Personnel and Position Management</p>
         </div>
         <div className="flex bg-slate-100 p-1" style={{ borderRadius: '4px' }}>

@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Tally4,
   LayoutDashboard,
+  Flame,
   Loader2
 } from 'lucide-react';
 import { useUser } from '@/context/user-context';
@@ -112,9 +113,9 @@ export default function KitchenPage() {
     <div className="space-y-8 animate-fade-in">
       <div className="flex justify-between items-center bg-white p-8 rounded-sm border border-slate-100 shadow-sm">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <LayoutDashboard className="w-10 h-10 text-blue-600" />
-            Kitchen Display
+          <h1 className="page-title flex items-center gap-3">
+            <Flame className="w-10 h-10 text-accent" />
+            <span className="text-gradient">Kitchen</span> Display
           </h1>
           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Order & Production Control</p>
         </div>

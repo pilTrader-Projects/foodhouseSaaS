@@ -49,7 +49,9 @@ function BranchesContent() {
     <div className="max-w-6xl mx-auto space-y-10 animate-fade-in">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="font-serif text-4xl font-black text-slate-900 tracking-tight">Outlets & Branches</h1>
+          <h1 className="page-title">
+            <span className="text-gradient">Outlets</span> & Branches
+          </h1>
           <p className="text-xs font-black uppercase text-slate-400 tracking-widest mt-2">Manage your physical locations and service points</p>
         </div>
         <button 
