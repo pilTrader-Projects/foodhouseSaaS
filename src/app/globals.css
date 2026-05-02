@@ -130,3 +130,41 @@ a {
   background-color: var(--bg-app);
   border-bottom: 1px solid var(--border-main);
 }
+
+/* Sidebar Shell */
+.sidebar {
+    width: 300px;
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: background-color 0.3s;
+}
+
+.sidebar-brand {
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebar-footer {
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-top: 1px solid var(--glass-border);
+}
