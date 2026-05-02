@@ -27,6 +27,7 @@ interface User {
 interface UserContextType {
   user: User | null;
   loading: boolean;
+  mounted: boolean; // Unified hydration signal
   authFailed: boolean;
   refreshUser: () => Promise<void>;
   permissions: string[];
@@ -38,7 +39,12 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [authFailed, setAuthFailed] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchUser = useCallback(async () => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
@@ -86,6 +92,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     <UserContext.Provider value={{ 
       user, 
       loading, 
+      mounted,
       authFailed, 
       refreshUser: fetchUser,
       permissions,

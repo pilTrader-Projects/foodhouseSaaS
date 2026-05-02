@@ -299,8 +299,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
@@ -308,6 +313,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -336,4 +342,53 @@
 
 .hover-glow:hover {
     box-shadow: var(--shadow-glow);
+}
+
+/* Layout Shell Components */
+.sidebar {
+    width: 300px;
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: background-color 0.3s;
+}
+
+.sidebar-brand {
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebar-footer {
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.dashboard-header {
+    height: 4.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }

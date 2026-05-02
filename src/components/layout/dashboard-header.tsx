@@ -7,12 +7,9 @@ import Link from 'next/link';
 import { UserAvatar } from '../ui/user-avatar';
 
 export function DashboardHeader() {
-  const { user } = useUser();
-  const [mounted, setMounted] = React.useState(false);
+  const { user, loading, mounted } = useUser();
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isLoading = !mounted || loading;
 
   return (
     <header className="dashboard-header glass-card !rounded-none !border-t-0 !border-x-0 sticky top-0 z-40">
@@ -43,18 +40,6 @@ export function DashboardHeader() {
         </Link>
       </div>
 
-      <style jsx>{`
-        .dashboard-header {
-          height: 4.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 2.5rem;
-          background: var(--glass-bg);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-        }
-      `}</style>
     </header>
   );
 }

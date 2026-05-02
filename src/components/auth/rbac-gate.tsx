@@ -21,21 +21,23 @@ export function RBACGate({
   fallback, 
   redirectOnFail 
 }: RBACGateProps) {
-  const { user, permissions, loading, authFailed } = useUser();
+  const { user, permissions, loading, mounted, authFailed } = useUser();
   const router = useRouter();
+
+  const isLoading = !mounted || loading;
 
   // Handle Redirection logic
   useEffect(() => {
-    if (!loading) {
+    if (!isLoading) {
        const hasPerm = permissions.includes(permission) || permissions.includes('tenant:admin');
        
        if (authFailed || (!hasPerm && user)) {
           if (redirectOnFail) router.push(redirectOnFail);
        }
     }
-  }, [loading, authFailed, user, permissions, permission, redirectOnFail, router]);
+  }, [isLoading, authFailed, user, permissions, permission, redirectOnFail, router]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-[200px] flex items-center justify-center">
         <Loader2 className="animate-spin text-slate-300" />

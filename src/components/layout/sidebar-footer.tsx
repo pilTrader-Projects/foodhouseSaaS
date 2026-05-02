@@ -35,15 +35,6 @@ export function SidebarFooter({ onLogout }: SidebarFooterProps) {
         <span className="text-xs font-black uppercase tracking-widest">Sign Out</span>
       </button>
       
-      <style jsx>{`
-        .sidebar-footer {
-          padding: 2rem 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          border-top: 1px solid rgba(255,255,255,0.05);
-        }
-      `}</style>
     </div>
   );
 }
