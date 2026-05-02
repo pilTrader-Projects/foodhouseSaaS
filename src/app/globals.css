@@ -31,6 +31,10 @@
   --gradient-primary: linear-gradient(135deg, #006AFF 0%, #8B5CF6 100%);
   --gradient-glow: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 70%);
 
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #64748b;
+  --sidebar-active: #006AFF;
+
   --radius-xs: 8px;
   --radius-sm: 14px;
   --radius-md: 20px;

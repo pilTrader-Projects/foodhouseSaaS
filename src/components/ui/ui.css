@@ -253,19 +253,19 @@
 }
 
 .text-slate-400 {
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .text-slate-800 {
-    color: #1e293b;
+    color: var(--text-main);
 }
 
 .text-slate-900 {
-    color: #0f172a;
+    color: var(--text-main);
 }
 
 .text-blue-600 {
-    color: #2563eb;
+    color: var(--text-accent);
 }
 
 /* --- Premium Components --- */
@@ -280,8 +280,8 @@
 }
 
 .badge-default {
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--bg-surface);
+    color: var(--text-muted);
 }
 
 .badge-success {
