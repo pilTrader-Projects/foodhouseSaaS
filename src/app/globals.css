@@ -224,7 +224,7 @@ a {
   border-bottom: 1px solid var(--glass-border);
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 60;
   transition: background-color 0.3s, padding 0.3s;
 }
 

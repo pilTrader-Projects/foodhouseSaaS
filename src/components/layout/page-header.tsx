@@ -2,16 +2,17 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useUser } from '@/context/user-context';
 import Link from 'next/link';
 import { UserAvatar } from '../ui/user-avatar';
 
 interface PageHeaderProps {
   onMenuClick?: () => void;
+  isSidebarOpen?: boolean;
 }
 
-export function PageHeader({ onMenuClick }: PageHeaderProps) {
+export function PageHeader({ onMenuClick, isSidebarOpen }: PageHeaderProps) {
   const { user, loading, mounted } = useUser();
 
   const isLoading = !mounted || loading;
@@ -23,9 +24,9 @@ export function PageHeader({ onMenuClick }: PageHeaderProps) {
           <button 
             onClick={onMenuClick}
             className="lg:hidden p-2 -ml-2 text-main hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Toggle Menu"
+            aria-label={isSidebarOpen ? "Close Menu" : "Open Menu"}
           >
-            <Menu className="w-6 h-6" />
+            {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         )}
         <div className="flex items-center gap-3">

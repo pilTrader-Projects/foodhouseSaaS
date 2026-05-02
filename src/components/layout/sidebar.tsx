@@ -38,16 +38,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </motion.div>
           <span className="font-black tracking-tighter uppercase text-xl">FoodHouse</span>
         </div>
-        
-        {onClose && (
-          <button 
-            onClick={onClose}
-            className="lg:hidden p-2 text-sidebar-text hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Close Sidebar"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        )}
       </div>
 
       {isLoading ? (

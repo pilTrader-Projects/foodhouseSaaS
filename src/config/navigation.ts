@@ -5,7 +5,7 @@ import {
   Package, 
   ChefHat, 
   Settings,
-  Settings2,
+  UtensilsCrossed,
   ShieldCheck,
   MapPin
 } from 'lucide-react';
@@ -22,7 +22,7 @@ export const ALL_MENU_ITEMS: MenuItem[] = [
   { name: 'POS Terminal', icon: ShoppingCart, href: '/pos', permission: 'access:pos' },
   { name: 'Inventory', icon: Package, href: '/inventory', permission: 'access:inventory' },
   { name: 'Kitchen', icon: ChefHat, href: '/kitchen', permission: 'access:kitchen' },
-  { name: 'Menu', icon: Settings2, href: '/settings/menu', permission: 'access:menu' },
+  { name: 'Menu', icon: UtensilsCrossed, href: '/settings/menu', permission: 'access:menu' },
   { name: 'Team', icon: Users, href: '/settings/team', permission: 'access:team' },
   { name: 'Branches', icon: MapPin, href: '/settings/branches', permission: 'manage:organization' },
   { name: 'Settings', icon: Settings, href: '/settings', permission: 'manage:settings' },

@@ -24,7 +24,7 @@ export default function DashboardLayout({
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       
       <main className="main-content">
-        <PageHeader onMenuClick={toggleSidebar} />
+        <PageHeader onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} />
         
         <section className="content-area">
           {children}
